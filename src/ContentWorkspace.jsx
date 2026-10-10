@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import { calendarContent, campaigns, connectedChannels, contentRecords, dashboardMockService } from './dashboardMockData.js'
-import { Badge, Button, CreativeArt, EmptyState, Field, Icon, Modal, PageIntro, PlatformMark, SocialPreview, Spinner } from './dashboardUI.jsx'
+import { Badge, Button, ChannelLogo, CreativeArt, EmptyState, Field, Icon, Modal, PageIntro, SocialPreview, Spinner } from './dashboardUI.jsx'
 
 const CONTENT_STEPS = ['Brief & assets', 'Generate', 'Refine', 'Preview & schedule', 'Confirm']
 const FORMATS = [
@@ -75,7 +75,7 @@ function BriefStep({ prompt, setPrompt, format, setFormat, platforms, setPlatfor
       </section>
       <aside className="db-create-settings">
         <section className="db-card"><h3>Format</h3><div className="db-format-picker">{FORMATS.map(([name, body, icon]) => <button className={format === name ? 'active' : ''} onClick={() => setFormat(name)} key={name}><span><Icon name={icon} size={18} /></span><b>{name}</b><small>{body}</small>{format === name && <i><Icon name="check" size={12} /></i>}</button>)}</div></section>
-        <section className="db-card"><h3>Publish to</h3><div className="db-channel-picker">{connectedChannels.map((channel) => <button disabled={!channel.connected} className={platforms.includes(channel.name) ? 'active' : ''} onClick={() => setPlatforms((current) => current.includes(channel.name) ? current.filter((item) => item !== channel.name) : [...current, channel.name])} key={channel.id}><PlatformMark platform={channel.name} /><span><b>{channel.name}</b><small>{channel.connected ? channel.handle : 'Connect first'}</small></span>{platforms.includes(channel.name) && <Icon name="check" size={14} />}</button>)}</div></section>
+        <section className="db-card"><h3>Publish to</h3><div className="db-channel-picker">{connectedChannels.map((channel) => <button disabled={!channel.connected} className={platforms.includes(channel.name) ? 'active' : ''} onClick={() => setPlatforms((current) => current.includes(channel.name) ? current.filter((item) => item !== channel.name) : [...current, channel.name])} key={channel.id}><ChannelLogo platform={channel.name} /><span><b>{channel.name}</b><small>{channel.connected ? channel.handle : 'Connect first'}</small></span>{platforms.includes(channel.name) && <i className="db-channel-check"><Icon name="check" size={12} /></i>}</button>)}</div></section>
         <Button className="full" icon="spark" disabled={!prompt.trim() || !platforms.length} onClick={onGenerate}>Generate content</Button>
         <p className="db-safe-note"><Icon name="info" size={14} /> Nothing publishes without your approval.</p>
       </aside>
@@ -83,15 +83,15 @@ function BriefStep({ prompt, setPrompt, format, setFormat, platforms, setPlatfor
   )
 }
 
-export function ContentCreate({ notify, onGo }) {
-  const [step, setStep] = useState(0)
-  const [prompt, setPrompt] = useState('Announce our new creative planning workspace with an energetic, design-led post. Focus on turning one good idea into consistent content.')
-  const [format, setFormat] = useState('Post')
-  const [platforms, setPlatforms] = useState(['Instagram', 'Facebook'])
+export function ContentCreate({ notify, onGo, draft = null }) {
+  const [step, setStep] = useState(draft ? 2 : 0)
+  const [prompt, setPrompt] = useState(draft?.caption || draft?.title || 'Announce our new creative planning workspace with an energetic, design-led post. Focus on turning one good idea into consistent content.')
+  const [format, setFormat] = useState(draft?.format || 'Post')
+  const [platforms, setPlatforms] = useState(draft?.platforms || ['Instagram', 'Facebook'])
   const [assets, setAssets] = useState([])
   const [variants, setVariants] = useState([])
-  const [selected, setSelected] = useState(null)
-  const [caption, setCaption] = useState('')
+  const [selected, setSelected] = useState(draft ? { id: `edit-${draft.id}`, palette: draft.palette || 'lime', theme: (draft.title || 'POST').toUpperCase(), caption: draft.caption || draft.title || '', hashtags: [] } : null)
+  const [caption, setCaption] = useState(draft?.caption || draft?.title || '')
   const [hashtags, setHashtags] = useState([])
   const [tone, setTone] = useState('Bold & warm')
   const [generating, setGenerating] = useState(false)
@@ -99,8 +99,8 @@ export function ContentCreate({ notify, onGo }) {
   const [fixing, setFixing] = useState(false)
   const [editingDesign, setEditingDesign] = useState(false)
   const [scheduleMode, setScheduleMode] = useState('schedule')
-  const [date, setDate] = useState('2026-09-29')
-  const [time, setTime] = useState('18:00')
+  const [date, setDate] = useState(draft?.date || '2026-09-29')
+  const [time, setTime] = useState(draft?.time && /^\d{2}:\d{2}$/.test(draft.time) ? draft.time : '18:00')
   const [done, setDone] = useState(false)
 
   const generate = async () => {
@@ -113,10 +113,11 @@ export function ContentCreate({ notify, onGo }) {
   const saveDraft = async () => { await dashboardMockService.save(); notify('Draft saved to the content library.') }
   const commit = async () => { setGenerating(true); await dashboardMockService.save(); setGenerating(false); setDone(true); notify(scheduleMode === 'now' ? 'Post sent to your selected channels.' : 'Post added to the content calendar.') }
   const previewVariant = selected || variants[0] || { palette: 'lime', theme: 'MOVE / WITH PURPOSE' }
+  const previewImage = assets[0]?.url || selected?.image || draft?.image
 
   return (
     <div className="db-page db-content-create">
-      <PageIntro eyebrow="Content studio" icon="create" title={step === 0 ? 'Create something worth stopping for.' : 'Create, refine, and share.'} description="From a loose brief to channel-ready creative, without losing your point of view." actions={step > 1 && !done ? <Button variant="secondary" icon="file" onClick={saveDraft}>Save draft</Button> : null} />
+      <PageIntro eyebrow={draft ? 'Edit post' : 'Content studio'} icon="create" title={draft ? `Edit “${draft.title}”.` : step === 0 ? 'Create something worth stopping for.' : 'Create, refine, and share.'} description={draft ? 'Update the caption, creative, and schedule, then send it back to the library.' : 'From a loose brief to channel-ready creative, without losing your point of view.'} actions={step > 1 && !done ? <Button variant="secondary" icon="file" onClick={saveDraft}>Save draft</Button> : null} />
       <ContentStepper step={step} />
 
       {step === 0 && <BriefStep prompt={prompt} setPrompt={setPrompt} format={format} setFormat={setFormat} platforms={platforms} setPlatforms={setPlatforms} assets={assets} setAssets={setAssets} onGenerate={generate} fixing={fixing} setFixing={setFixing} />}
@@ -124,7 +125,7 @@ export function ContentCreate({ notify, onGo }) {
       {step === 1 && <section className="db-generation-stage">
         {generating ? <Spinner label="Designing three directions…" progress={72} /> : <>
           <div className="db-center-heading"><Badge tone="blue">3 distinct directions</Badge><h2>Choose an idea to refine.</h2><p>Each route uses the same brief with a different visual and editorial angle.</p></div>
-          <div className="db-variant-grid">{variants.map((variant) => <article className="db-card db-variant-card" key={variant.id}><CreativeArt palette={variant.palette} theme={variant.theme} /><div><Badge tone={variant.palette}>{variant.angle}</Badge><p>{variant.caption}</p><div className="db-inline-tags">{variant.hashtags.map((tag) => <span key={tag}>#{tag}</span>)}</div><Button className="full" icon="arrow" onClick={() => choose(variant)}>Refine this direction</Button></div></article>)}</div>
+          <div className="db-variant-grid">{variants.map((variant) => <article className="db-card db-variant-card" key={variant.id}><img className="db-variant-photo" src={variant.image} alt="" /><div><Badge tone="blue">{variant.angle}</Badge><p>{variant.caption}</p><div className="db-inline-tags">{variant.hashtags.map((tag) => <span key={tag}>#{tag}</span>)}</div><div className="db-library-logos">{platforms.map((platform) => <ChannelLogo platform={platform} key={platform} />)}</div><Button className="full" icon="arrow" onClick={() => choose(variant)}>Refine this direction</Button></div></article>)}</div>
           <div className="db-flow-actions"><Button variant="ghost" icon="back" onClick={() => setStep(0)}>Back to brief</Button><Button variant="secondary" icon="refresh" onClick={generate}>Regenerate all</Button></div>
         </>}
       </section>}
@@ -135,28 +136,30 @@ export function ContentCreate({ notify, onGo }) {
           <Field label="Caption"><textarea rows="7" value={caption} maxLength="2200" onChange={(event) => setCaption(event.target.value)} /><small className="db-count">{caption.length} / 2,200</small></Field>
           <div className="db-tone-row"><Field label="Tone"><select value={tone} onChange={(event) => setTone(event.target.value)}>{TONES.map((item) => <option key={item}>{item}</option>)}</select></Field><Button variant="soft" icon="spark" disabled={rewriting} onClick={rewrite}>{rewriting ? 'Rewriting…' : 'Rewrite with AI'}</Button></div>
           <Field label="Hashtag suggestions"><div className="db-hashtag-editor">{['BuildInPublic', 'CreativeMomentum', 'Marketeer', 'SocialStrategy', 'ContentDesign'].map((tag) => <button className={hashtags.includes(tag) ? 'active' : ''} onClick={() => setHashtags((current) => current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag])} key={tag}>#{tag}{hashtags.includes(tag) && ' ×'}</button>)}</div></Field>
-          <div className="db-creative-edit-row"><CreativeArt palette={previewVariant.palette} theme={previewVariant.theme} compact /><div><h3>Generated creative</h3><p>Edit its message, type, colors, alignment, or create a fresh background.</p><Button variant="secondary" icon="edit" onClick={() => setEditingDesign(true)}>Open creative editor</Button></div></div>
-          <div className="db-flow-actions"><Button variant="ghost" icon="back" onClick={() => setStep(1)}>Back</Button><Button icon="arrow" onClick={() => setStep(3)}>Preview & schedule</Button></div>
+          <div className="db-creative-edit-row">{previewImage ? <img className="db-edit-shot" src={previewImage} alt="" /> : <CreativeArt palette={previewVariant.palette} theme={previewVariant.theme} compact />}<div><h3>Post creative</h3><p>The image stays with this post. Open the editor if you want a new direction.</p><Button variant="secondary" icon="edit" onClick={() => setEditingDesign(true)}>Open creative editor</Button></div></div>
+          <div className="db-flow-actions"><Button variant="ghost" icon="back" onClick={() => setStep(draft ? 0 : 1)}>Back</Button><Button icon="arrow" onClick={() => setStep(3)}>Preview & schedule</Button></div>
         </section>
-        <aside className="db-sticky-preview"><span className="db-eyebrow">Live preview · {format}</span><SocialPreview caption={caption} hashtags={hashtags} platforms={platforms} palette={previewVariant.palette} theme={previewVariant.theme} format={format} imageUrl={assets[0]?.url} /><p><Icon name="spark" size={14} /> Crops and safe areas adapt per channel.</p></aside>
+        <aside className="db-sticky-preview"><span className="db-eyebrow">Live preview · {format}</span><SocialPreview caption={caption} hashtags={hashtags} platforms={platforms} palette={previewVariant.palette} theme={previewVariant.theme} format={format} imageUrl={previewImage} /><p><Icon name="spark" size={14} /> Crops and safe areas adapt per channel.</p></aside>
       </div>}
 
       {step === 3 && <div className="db-schedule-layout">
-        <aside className="db-card db-final-preview"><span className="db-eyebrow">Final preview</span><SocialPreview caption={caption} hashtags={hashtags} platforms={platforms} palette={previewVariant.palette} theme={previewVariant.theme} format={format} imageUrl={assets[0]?.url} /></aside>
+        <aside className="db-card db-final-preview"><span className="db-eyebrow">Final preview</span><SocialPreview caption={caption} hashtags={hashtags} platforms={platforms} palette={previewVariant.palette} theme={previewVariant.theme} format={format} imageUrl={previewImage} /></aside>
         <section className="db-card db-schedule-panel"><span className="db-eyebrow"><Icon name="calendar" size={14} /> Publishing</span><h2>Choose your moment.</h2><p>Publish immediately or add it to the calendar for the right time.</p>
           <div className="db-choice-grid two"><button className={scheduleMode === 'now' ? 'active' : ''} onClick={() => setScheduleMode('now')}><span><Icon name="send" size={18} /></span><b>Publish now</b><small>Send it to every selected channel</small>{scheduleMode === 'now' && <i><Icon name="check" size={13} /></i>}</button><button className={scheduleMode === 'schedule' ? 'active' : ''} onClick={() => setScheduleMode('schedule')}><span><Icon name="calendar" size={18} /></span><b>Schedule for later</b><small>Your audience is most active at 6 PM</small>{scheduleMode === 'schedule' && <i><Icon name="check" size={13} /></i>}</button></div>
           {scheduleMode === 'schedule' && <><div className="db-form-grid two"><Field label="Date"><input type="date" value={date} min="2026-09-26" onChange={(event) => setDate(event.target.value)} /></Field><Field label="Time"><input type="time" value={time} onChange={(event) => setTime(event.target.value)} /></Field></div><div className="db-recommended-times"><b>Recommended:</b>{['10:00', '14:00', '18:00', '21:00'].map((slot) => <button className={time === slot ? 'active' : ''} onClick={() => setTime(slot)} key={slot}>{slot}</button>)}</div></>}
-          <div className="db-publish-summary"><div><span>Destinations</span><p>{platforms.map((platform) => <PlatformMark platform={platform} key={platform} />)}</p></div><div><span>Format</span><b>{format}</b></div><div><span>Timing</span><b>{scheduleMode === 'now' ? 'Now' : `${date} · ${time}`}</b></div></div>
+          <div className="db-publish-summary"><div><span>Destinations</span><p>{platforms.map((platform) => <ChannelLogo platform={platform} key={platform} />)}</p></div><div><span>Format</span><b>{format}</b></div><div><span>Timing</span><b>{scheduleMode === 'now' ? 'Now' : `${date} · ${time}`}</b></div></div>
           <div className="db-flow-actions"><Button variant="ghost" icon="back" onClick={() => setStep(2)}>Back to refine</Button><Button icon="arrow" onClick={() => setStep(4)}>Review confirmation</Button></div>
         </section>
       </div>}
 
-      {step === 4 && <section className="db-card db-confirm-card">{done ? <><span className="db-success-orb"><Icon name="check" size={30} /></span><Badge>All set</Badge><h2>{scheduleMode === 'now' ? 'Your post is on its way.' : 'Your post is scheduled.'}</h2><p>{scheduleMode === 'now' ? `Publishing to ${platforms.join(', ')} now.` : `${date} at ${time} · ${platforms.join(', ')}`}</p><div><Button variant="secondary" icon="plus" onClick={() => window.location.reload()}>Create another</Button><Button icon="content" onClick={() => onGo('content')}>Open content library</Button></div></> : <><span className="db-confirm-icon"><Icon name="send" size={25} /></span><h2>Ready to {scheduleMode === 'now' ? 'publish' : 'schedule'}?</h2><p>{scheduleMode === 'now' ? `This sends the post to ${platforms.length} connected channels now.` : `This schedules the post for ${date} at ${time}.`} You can still go back and make changes.</p><div className="db-confirm-details"><span><b>{format}</b> format</span><span><b>{platforms.length}</b> destinations</span><span><b>{hashtags.length}</b> hashtags</span></div><div><Button variant="ghost" icon="back" onClick={() => setStep(3)}>Back</Button><Button icon="check" disabled={generating} onClick={commit}>{generating ? 'Saving…' : `Confirm & ${scheduleMode === 'now' ? 'publish' : 'schedule'}`}</Button></div></>}</section>}
+      {step === 4 && (done ? <section className="db-card db-confirm-card"><span className="db-success-orb"><Icon name="check" size={30} /></span><Badge>All set</Badge><h2>{scheduleMode === 'now' ? 'Your post is on its way.' : 'Your post is scheduled.'}</h2><p>{scheduleMode === 'now' ? `Publishing to ${platforms.join(', ')} now.` : `${date} at ${time} · ${platforms.join(', ')}`}</p><div><Button variant="secondary" icon="plus" onClick={() => window.location.reload()}>Create another</Button><Button icon="content" onClick={() => onGo('content')}>Open content library</Button></div></section> : <div className="db-confirm-layout"><aside className="db-card db-final-preview"><span className="db-eyebrow">The post</span><SocialPreview caption={caption} hashtags={hashtags} platforms={platforms} palette={previewVariant.palette} theme={previewVariant.theme} format={format} imageUrl={previewImage} /></aside><section className="db-card db-confirm-card"><span className="db-confirm-icon"><Icon name="send" size={25} /></span><h2>Ready to {scheduleMode === 'now' ? 'publish' : 'schedule'}?</h2><p>{scheduleMode === 'now' ? `This sends the post to ${platforms.length} connected channels now.` : `This schedules the post for ${date} at ${time}.`} You can still go back and make changes.</p><div className="db-confirm-details"><span><b>{format}</b> format</span><span><b>{platforms.length}</b> destinations</span><span><b>{hashtags.length}</b> hashtags</span></div><div className="db-library-logos db-confirm-logos">{platforms.map((platform) => <ChannelLogo platform={platform} key={platform} />)}</div><div><Button variant="ghost" icon="back" onClick={() => setStep(3)}>Back</Button><Button icon="check" disabled={generating} onClick={commit}>{generating ? 'Saving…' : `Confirm & ${scheduleMode === 'now' ? 'publish' : 'schedule'}`}</Button></div></section></div>)}
 
       {editingDesign && <DesignEditor variant={previewVariant} onClose={() => setEditingDesign(false)} onSave={(updated) => { setSelected(updated); setVariants((current) => current.map((item) => item.id === updated.id ? updated : item)); setEditingDesign(false); notify('Creative edits applied.') }} />}
     </div>
   )
 }
+
+const statusTone = (status) => status === 'published' ? 'lime' : status === 'scheduled' ? 'blue' : status === 'failed' ? 'red' : 'gray'
 
 export function ContentLibrary({ notify, onGo }) {
   const [records, setRecords] = useState(contentRecords)
@@ -167,12 +170,50 @@ export function ContentLibrary({ notify, onGo }) {
   const visible = records.filter((item) => (filter === 'all' || item.status === filter) && `${item.title} ${item.caption}`.toLowerCase().includes(query.toLowerCase()))
   const remove = (id) => { setRecords((current) => current.filter((item) => item.id !== id)); setDetail(null); notify('Post removed from the demo library.') }
   const publish = (id) => { setRecords((current) => current.map((item) => item.id === id ? { ...item, status: 'published' } : item)); setDetail((item) => item ? { ...item, status: 'published' } : item); notify('Post marked as published.') }
+  const edit = (item) => { setDetail(null); onGo('create', item) }
   return (
     <div className="db-page">
       <PageIntro eyebrow="Content library" icon="content" title="Every idea, in one place." description="Review drafts, scheduled posts, and published work across every connected channel." actions={<Button icon="plus" onClick={() => onGo('create')}>Create post</Button>} />
       <div className="db-toolbar db-card"><div className="db-filter-pills">{filters.map((item) => <button className={filter === item ? 'active' : ''} onClick={() => setFilter(item)} key={item}>{item}<span>{item === 'all' ? records.length : records.filter((record) => record.status === item).length}</span></button>)}</div><label className="db-toolbar-search"><Icon name="search" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search content…" /></label><Button variant="ghost" icon="refresh" onClick={() => notify('Content library refreshed.')}>Refresh</Button></div>
-      {visible.length ? <div className="db-content-grid">{visible.map((item) => <article className="db-card db-content-card" key={item.id}><button className="db-content-art" onClick={() => setDetail(item)}><CreativeArt palette={item.palette} theme={item.title.toUpperCase().replace(' ', ' / ')} compact /><Badge tone={item.status === 'published' ? 'lime' : item.status === 'scheduled' ? 'blue' : item.status === 'failed' ? 'red' : 'gray'}>{item.status}</Badge></button><div className="db-content-card-body"><div className="db-content-meta"><span>{item.format}</span><span>·</span><span>{item.source}</span></div><h2>{item.title}</h2><p>{item.caption}</p><div className="db-card-platforms">{item.platforms.map((platform) => <PlatformMark platform={platform} key={platform} />)}{item.date && <span><Icon name="clock" size={14} /> {item.date} · {item.time}</span>}</div></div><footer><Button variant="ghost" icon="eye" onClick={() => setDetail(item)}>View post</Button><button aria-label="More options"><Icon name="more" size={18} /></button></footer></article>)}</div> : <EmptyState icon="content" title="No posts match this view" body="Try another status or search phrase." />}
-      {detail && <Modal title={detail.title} onClose={() => setDetail(null)} wide footer={<><Button variant="ghost" icon="trash" onClick={() => remove(detail.id)}>Delete</Button>{detail.status !== 'published' && <Button icon="send" onClick={() => publish(detail.id)}>Publish now</Button>}</>}><div className="db-post-detail"><SocialPreview caption={detail.caption} platforms={detail.platforms} palette={detail.palette} theme={detail.title.toUpperCase().replace(' ', ' / ')} format={detail.format} /><div><Badge tone={detail.status === 'published' ? 'lime' : detail.status === 'scheduled' ? 'blue' : 'gray'}>{detail.status}</Badge><h3>Post details</h3><dl><div><dt>Format</dt><dd>{detail.format}</dd></div><div><dt>Created with</dt><dd>{detail.source}</dd></div><div><dt>Publishing</dt><dd>{detail.date ? `${detail.date} · ${detail.time}` : 'Not scheduled'}</dd></div><div><dt>Channels</dt><dd>{detail.platforms.join(', ')}</dd></div></dl><Field label="Caption"><textarea rows="6" value={detail.caption} onChange={(event) => setDetail({ ...detail, caption: event.target.value })} /></Field><Button variant="secondary" icon="edit" onClick={() => { setRecords((current) => current.map((item) => item.id === detail.id ? detail : item)); notify('Post changes saved.') }}>Save changes</Button></div></div></Modal>}
+      {visible.length ? <div className="db-content-grid">{visible.map((item) => <article className="db-card db-content-card" key={item.id}>
+        <button className="db-content-art" onClick={() => setDetail(item)}>
+          <img className="db-library-shot" src={item.image} alt="" />
+          <Badge tone={statusTone(item.status)}>{item.status}</Badge>
+        </button>
+        <div className="db-content-card-body">
+          <div className="db-content-meta"><span>{item.format}</span><span>·</span><span>{item.source}</span></div>
+          <h2>{item.title}</h2>
+          <p>{item.caption}</p>
+          <div className="db-card-platforms">{item.platforms.map((platform) => <img className="db-channel-logo" src={channelLogo(platform)} alt={platform} key={platform} />)}{item.date && <span><Icon name="clock" size={14} /> {item.date} · {item.time}</span>}</div>
+        </div>
+        <footer>
+          <Button variant="ghost" icon="eye" onClick={() => setDetail(item)}>View</Button>
+          <Button variant="ghost" icon="edit" onClick={() => edit(item)}>Edit</Button>
+        </footer>
+      </article>)}</div> : <EmptyState icon="content" title="No posts match this view" body="Try another status or search phrase." />}
+      {detail && <Modal title={detail.title} onClose={() => setDetail(null)} wide footer={<><Button variant="ghost" icon="trash" onClick={() => remove(detail.id)}>Delete</Button><Button variant="secondary" icon="edit" onClick={() => edit(detail)}>Edit post</Button>{detail.status !== 'published' && <Button icon="send" onClick={() => publish(detail.id)}>Publish now</Button>}</>}>
+        <div className="db-post-detail">
+          <article className="db-library-preview">
+            <header>
+              <span className="db-preview-avatar">MS</span>
+              <div><b>Marketeer Studio</b><small>{detail.format} · {detail.platforms.join(' · ')}</small></div>
+              <div className="db-library-logos">{detail.platforms.map((platform) => <img className="db-channel-logo" src={channelLogo(platform)} alt={platform} key={platform} />)}</div>
+            </header>
+            <img className="db-library-preview-shot" src={detail.image} alt="" />
+            <p><b>marketeer.studio</b> {detail.caption}</p>
+          </article>
+          <div>
+            <Badge tone={statusTone(detail.status)}>{detail.status}</Badge>
+            <h3>Post details</h3>
+            <dl>
+              <div><dt>Format</dt><dd>{detail.format}</dd></div>
+              <div><dt>Created with</dt><dd>{detail.source}</dd></div>
+              <div><dt>Publishing</dt><dd>{detail.date ? `${detail.date} · ${detail.time}` : 'Not scheduled'}</dd></div>
+              <div><dt>Channels</dt><dd className="db-detail-channels">{detail.platforms.map((platform) => <span key={platform}><img className="db-channel-logo" src={channelLogo(platform)} alt="" />{platform}</span>)}</dd></div>
+            </dl>
+          </div>
+        </div>
+      </Modal>}
     </div>
   )
 }
@@ -227,7 +268,7 @@ export function ContentCalendar({ notify, onGo }) {
           </div>
         })}</div>
       </section>
-      {selected && <Modal title={selected.title || selected.name} onClose={() => setSelected(null)} footer={<><Button variant="ghost" onClick={() => setSelected(null)}>Close</Button>{campaignOpen ? <Button icon="arrow" onClick={() => { setSelected(null); onGo('campaigns') }}>View campaign</Button> : <Button icon="edit" onClick={() => notify('This scheduled post is ready to edit from Content.')}>Edit post</Button>}</>}>
+      {selected && <Modal title={selected.title || selected.name} onClose={() => setSelected(null)} footer={<><Button variant="ghost" onClick={() => setSelected(null)}>Close</Button>{campaignOpen ? <Button icon="arrow" onClick={() => { setSelected(null); onGo('campaigns') }}>View campaign</Button> : <Button icon="edit" onClick={() => { setSelected(null); onGo('create', selected) }}>Edit post</Button>}</>}>
         <div className="db-calendar-popover">
           {selected.image ? <img className="db-cal-modal-shot" src={selected.image} alt="" /> : <CreativeArt palette={selected.palette} theme={(selected.title || selected.name).toUpperCase().replace(' ', ' / ')} compact />}
           <Badge tone={campaignOpen ? 'blue' : selected.status === 'published' ? 'lime' : selected.status === 'failed' ? 'orange' : 'blue'}>{campaignOpen ? selected.delivery : selected.status}</Badge>

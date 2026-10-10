@@ -19,16 +19,16 @@ export const metaConnection = {
 }
 
 export const contentVariants = [
-  { id: 'variant-1', angle: 'Energy in motion', theme: 'MOVE / WITH PURPOSE', caption: 'The best ideas rarely arrive while standing still. Here is your reminder to make the first move, learn in public, and build momentum one brave step at a time.', hashtags: ['BuildInPublic', 'CreativeMomentum', 'Marketeer'], palette: 'lime' },
-  { id: 'variant-2', angle: 'Quiet confidence', theme: 'LESS / BUT BETTER', caption: 'Less noise. More intention. We are building campaigns that feel considered, human, and impossible to scroll past.', hashtags: ['BrandDesign', 'MarketingIdeas', 'MadeWithMarketeer'], palette: 'blue' },
-  { id: 'variant-3', angle: 'Behind the work', theme: 'IDEAS / IN PROGRESS', caption: 'A small look behind the curtain: rough ideas, honest iteration, and the tiny decisions that turn a first draft into work worth sharing.', hashtags: ['BehindTheScenes', 'CreativeProcess', 'SocialContent'], palette: 'orange' },
+  { id: 'variant-1', angle: 'Energy in motion', theme: 'MOVE / WITH PURPOSE', caption: 'The best ideas rarely arrive while standing still. Here is your reminder to make the first move, learn in public, and build momentum one brave step at a time.', hashtags: ['BuildInPublic', 'CreativeMomentum', 'Marketeer'], palette: 'lime', image: '/social-posts/post-purpose.jpg' },
+  { id: 'variant-2', angle: 'Quiet confidence', theme: 'LESS / BUT BETTER', caption: 'Less noise. More intention. We are building campaigns that feel considered, human, and impossible to scroll past.', hashtags: ['BrandDesign', 'MarketingIdeas', 'MadeWithMarketeer'], palette: 'blue', image: '/social-posts/post-lumen.jpg' },
+  { id: 'variant-3', angle: 'Behind the work', theme: 'IDEAS / IN PROGRESS', caption: 'A small look behind the curtain: rough ideas, honest iteration, and the tiny decisions that turn a first draft into work worth sharing.', hashtags: ['BehindTheScenes', 'CreativeProcess', 'SocialContent'], palette: 'orange', image: '/social-posts/post-form.jpg' },
 ]
 
 export const contentRecords = [
   { id: 1, title: 'Friday founder note', caption: 'Three lessons from a week of building in public.', status: 'scheduled', format: 'Post', platforms: ['Instagram', 'Facebook'], date: '2026-09-28', time: '6:00 PM', palette: 'pink', source: 'AI', image: '/social-posts/post-atelier.jpg' },
   { id: 2, title: 'Move with purpose', caption: 'The best ideas rarely arrive while standing still.', status: 'published', format: 'Reel', platforms: ['Instagram', 'Facebook'], date: '2026-09-24', time: '12:30 PM', palette: 'lime', source: 'AI', image: '/social-posts/post-purpose.jpg' },
   { id: 3, title: 'Behind the blend', caption: 'What goes into a better morning, from bean to first sip.', status: 'scheduled', format: 'Reel', platforms: ['Instagram'], date: '2026-09-30', time: '8:30 PM', palette: 'orange', source: 'AI', image: '/social-posts/post-table.jpg' },
-  { id: 4, title: 'Autumn product edit', caption: 'The pieces we keep reaching for as the weather turns.', status: 'draft', format: 'Carousel', platforms: ['Instagram', 'Facebook'], date: null, time: null, palette: 'blue', source: 'Manual' },
+  { id: 4, title: 'Autumn product edit', caption: 'The pieces we keep reaching for as the weather turns.', status: 'draft', format: 'Carousel', platforms: ['Instagram', 'Facebook'], date: null, time: null, palette: 'blue', source: 'Manual', image: '/social-posts/post-coast.jpg' },
   { id: 5, title: 'Customer spotlight', caption: 'Meet the team who turned one clear idea into a growing community.', status: 'published', format: 'Post', platforms: ['Facebook', 'Instagram'], date: '2026-09-21', time: '10:00 AM', palette: 'violet', source: 'AI', image: '/social-posts/post-spotlight.jpg' },
   { id: 6, title: 'Weekend offer', caption: 'A little something for the people who have been with us since day one.', status: 'failed', format: 'Story', platforms: ['Instagram'], date: '2026-09-20', time: '5:30 PM', palette: 'red', source: 'Manual', image: '/social-posts/post-offer.jpg' },
 ]

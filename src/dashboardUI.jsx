@@ -51,6 +51,12 @@ export function Badge({ children, tone = 'lime' }) {
   return <span className={`db-badge ${tone}`}><i />{children}</span>
 }
 
+export function ChannelLogo({ platform, className = '' }) {
+  const key = String(platform).toLowerCase().includes('facebook') ? 'facebook' : 'instagram'
+  const label = key === 'facebook' ? 'Facebook' : 'Instagram'
+  return <img className={`db-channel-logo ${className}`} src={`/social_logos/${key}.png`} alt={label} />
+}
+
 export function PlatformMark({ platform }) {
   const key = platform.toLowerCase().includes('instagram') ? 'instagram' : 'facebook'
   const label = key === 'instagram' ? 'Instagram' : 'Facebook'
@@ -89,9 +95,17 @@ export function CreativeArt({ palette = 'lime', theme = 'MOVE / WITH PURPOSE', c
 export function SocialPreview({ caption, hashtags = [], platforms = ['Instagram'], palette = 'lime', theme, imageUrl, format = 'Post' }) {
   return (
     <article className={`db-social-preview ${format.toLowerCase()}`}>
-      <header><span className="db-preview-avatar">AC</span><div><b>Marketeer Studio</b><small>Sponsored · now</small></div><Icon name="more" size={18} /></header>
-      <CreativeArt palette={palette} theme={theme} imageUrl={imageUrl} />
-      <div className="db-preview-actions"><span>♡</span><span>○</span><span>⌁</span><small>{platforms.map((platform) => <PlatformMark platform={platform} key={platform} />)}</small></div>
+      <header>
+        <span className="db-preview-avatar">MS</span>
+        <div><b>marketeer.studio</b><small>{format}</small></div>
+        <span className="db-library-logos">{platforms.map((platform) => <ChannelLogo platform={platform} key={platform} />)}</span>
+      </header>
+      {imageUrl ? <img className="db-preview-shot" src={imageUrl} alt="" /> : <CreativeArt palette={palette} theme={theme} />}
+      <div className="db-preview-actions" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 4.6-7 9-7 9Z" /></svg>
+        <svg viewBox="0 0 24 24"><path d="M6 17.5 4.5 20.5 7 19.2A8.5 8.5 0 1 0 6 17.5Z" /></svg>
+        <svg viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" /></svg>
+      </div>
       <p><b>marketeer.studio</b> {caption || 'Your caption will appear here.'}</p>
       {!!hashtags.length && <p className="tags">{hashtags.map((tag) => `#${tag}`).join(' ')}</p>}
     </article>

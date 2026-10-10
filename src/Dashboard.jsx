@@ -112,6 +112,7 @@ function Dashboard({ data = {}, onNavigate, theme, onToggleTheme }) {
     return window.matchMedia('(min-width: 981px)').matches
   })
   const [toast, setToast] = useState(null)
+  const [editingPost, setEditingPost] = useState(null)
   const [channels, setChannels] = useState(connectedChannels)
   const [metaConnected, setMetaConnected] = useState(metaConnection.connected)
   // Search is hidden until its endpoint is connected.
@@ -119,8 +120,9 @@ function Dashboard({ data = {}, onNavigate, theme, onToggleTheme }) {
   const name = data.name || 'Alex Morgan'
   const initials = name.split(' ').slice(0, 2).map((part) => part[0]).join('').toUpperCase()
   const notify = (message, type = 'success') => setToast({ message, type, id: Date.now() })
-  const go = (next) => {
+  const go = (next, post = null) => {
     if (!VALID_SECTIONS.includes(next)) return
+    setEditingPost(next === 'create' ? post : null)
     setSection(next)
     if (window.matchMedia('(max-width: 980px)').matches) setSidebarOpen(false)
     const url = new URL(window.location.href)
@@ -159,7 +161,7 @@ function Dashboard({ data = {}, onNavigate, theme, onToggleTheme }) {
         {section === 'overview' && <Overview firstName={name.split(' ')[0]} onGo={go} />}
         {section === 'knowledge' && <KnowledgeBaseView notify={notify} />}
         {section === 'vacancies' && <VacanciesView notify={notify} onGo={go} />}
-        {section === 'create' && <ContentCreate notify={notify} onGo={go} />}
+        {section === 'create' && <ContentCreate key={editingPost?.id || 'new'} draft={editingPost} notify={notify} onGo={go} />}
         {section === 'content' && <ContentLibrary notify={notify} onGo={go} />}
         {section === 'calendar' && <ContentCalendar notify={notify} onGo={go} />}
         {section === 'adstudio' && <AdsStudio {...sharedAds} onGo={go} />}

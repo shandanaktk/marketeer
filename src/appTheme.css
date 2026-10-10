@@ -116,7 +116,11 @@ html[data-theme='light'] .ob-rule-toggle.on>span{background:#0a2463}
 html[data-theme='light'] .ob-rule-toggle.on>span i{background:#fffaff}
 html[data-theme] .ob-auth-heading p,html[data-theme] .ob-screen-heading>p,html[data-theme] .ob-field-label,html[data-theme] .ob-divider,html[data-theme] .ob-demo-access,html[data-theme] .ob-demo-access small,html[data-theme] .ob-legal,html[data-theme] .ob-choice-card small,html[data-theme] .ob-goal-card>small,html[data-theme] .ob-side-note small{color:var(--app-muted)}
 html[data-theme] .ob-divider>span{color:var(--app-muted)}
-.db-creative-art,.db-social-preview,.db-ad-preview-card{--app-contrast-rgb:255,250,255;--app-ink:#fffaff;--db-copy-faint:#d7c9cf}
+.db-creative-art,.db-ad-preview-card{--app-contrast-rgb:255,250,255;--app-ink:#fffaff;--db-copy-faint:#d7c9cf}
+html[data-theme='light'] .db-social-preview,html[data-theme='light'] .db-sticky-preview{color:#1e1b18;background:#fff;border-color:#d7e4ee;--db-copy:#1e1b18;--db-copy-soft:#3a342f;--db-copy-faint:#6a615c;--app-ink:#1e1b18}
+html[data-theme='light'] .db-content-create .db-choice-grid>button>span,html[data-theme='light'] .db-content-create .db-choice-grid>button>i,html[data-theme='light'] .db-content-create .db-recommended-times button.active,html[data-theme='light'] .db-content-create .db-confirm-icon{color:#fffaff;background:#1e1b18}
+html[data-theme='light'] .db-social-preview>p{color:#1e1b18}
+html[data-theme='light'] .db-filter-pills button.active{color:#fffaff;background:#1e1b18;border-color:#1e1b18}
 .db-creative-art>b{line-height:.95}.db-creative-art>b em{font-weight:750;color:#fffaff}
 .db-creative-art::before{background:radial-gradient(circle at 78% 16%,rgba(255,250,255,.5),transparent 22%),linear-gradient(155deg,#3e92cc 0%,#0a2463 78%)}
 .db-creative-art.blue::before{background:radial-gradient(circle at 76% 18%,rgba(142,200,239,.75),transparent 20%),linear-gradient(155deg,#0a2463,#1e1b18 82%)}
