@@ -28,7 +28,8 @@ html[data-theme] .db-topbar{background:var(--app-panel);border-color:var(--app-l
 html[data-theme] .db-card{background:var(--app-panel);border-color:var(--app-line);box-shadow:0 3px 16px #18201005;backdrop-filter:none;border-radius:15px}
 html[data-theme='light'] .mk-site{--mk-paper:#e4f1fb;--mk-surface:#f6f7f9;--mk-border:#d7e4ee}
 html[data-theme='light'] .db-modal{background:#f6f7f9;color:#1e1b18;border-color:#d7e4ee;box-shadow:none}
-html[data-theme] .db-main-content{animation-fill-mode:backwards}
+html[data-theme] .db-main-content{width:100%;max-width:none;animation-fill-mode:backwards}
+html[data-theme] .db-flow-stepper,html[data-theme] .db-job-steps{width:100%;max-width:none}
 html[data-theme] .db-modal-layer > .db-modal{box-shadow:none}
 html[data-theme] .db-modal-layer > .db-modal-scrim{background:transparent;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 html[data-theme='dark'] .db-meta-health{color:#3cba6e;border-color:rgba(60,186,110,.4);background:rgba(60,186,110,.14)}
