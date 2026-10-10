@@ -36,7 +36,7 @@ function Gallery({ navigate }) {
 }
 
 function Connections({ navigate }) {
-  const columns = [['instagram', 'linkedin', 'meta', 'youtube', 'facebook'], ['tiktok', 'facebook', 'threads', 'pinterest', 'instagram'], ['meta', 'youtube', 'instagram', 'linkedin', 'tiktok']]
+  const columns = [['instagram', 'facebook', 'instagram', 'facebook', 'instagram'], ['facebook', 'instagram', 'facebook', 'instagram', 'facebook'], ['instagram', 'facebook', 'instagram', 'facebook', 'instagram']]
   return <section className="mk-connections" id="connect"><div className="mk-connect-inner"><div className="mk-connect-copy" data-enter><h2>Bring your<br />whole world.</h2><p>Your content. Your campaigns. Your people.<br />A little less scattered. A lot more connected.</p><p>Connect your social accounts and give every brand a home. Plan together, review together, and keep your work moving in the same direction.</p><button className="mk-button" onClick={() => navigate('signup')}>Build your workspace <Arrow /></button></div><div className="mk-logo-wall" aria-label="Social platform ecosystem">{columns.map((col, i) => <div className={`mk-logo-column mk-logo-column-${i}`} key={i}><div>{[0, 1].map(set => <div className="mk-logo-set" key={set} aria-hidden={set === 1}>{col.map((name, index) => <div className={`mk-logo-tile mk-tile-${name}`} key={`${name}-${index}`}><SocialMark platform={name} /></div>)}</div>)}</div></div>)}</div></div></section>
 }
 

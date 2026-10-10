@@ -51,9 +51,12 @@ export function Badge({ children, tone = 'lime' }) {
 }
 
 export function PlatformMark({ platform }) {
-  const key = platform.toLowerCase()
-  const marks = { facebook: 'f', instagram: '◎', tiktok: '♪', linkedin: 'in' }
-  return <span className={`db-platform ${key}`} title={platform}>{marks[key] || platform.slice(0, 1)}</span>
+  const key = platform.toLowerCase().includes('instagram') ? 'instagram' : 'facebook'
+  const label = key === 'instagram' ? 'Instagram' : 'Facebook'
+  const icon = key === 'instagram'
+    ? <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8" /><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" strokeWidth="1.8" /><circle cx="16.7" cy="7.3" r="1.05" fill="currentColor" /></svg>
+    : <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14.5 8.4V6.7c0-.8.5-1.2 1.3-1.2H17.4V3h-2.3C12.5 3 11 4.5 11 6.8v1.6H8.8v2.8H11V21h3.5v-9.8h2.4l.4-2.8h-2.8Z" /></svg>
+  return <span className={`db-platform ${key}`} title={label} aria-label={label}>{icon}</span>
 }
 
 export function PageIntro({ eyebrow, title, description, actions, icon }) {

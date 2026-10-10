@@ -31,7 +31,7 @@ export const calendarPosts = [
   { day: 8, text: 'Meet the makers', file: 'project-6.webp', platform: 'facebook' },
   { day: 10, text: 'The weekend edit', file: 'project-5.webp', platform: 'instagram' },
   { day: 13, text: 'Made to be shared', file: 'project-4.webp', platform: 'facebook' },
-  { day: 16, text: 'Behind the scenes', file: 'work-3.webp', platform: 'tiktok' },
+  { day: 16, text: 'Behind the scenes', file: 'work-3.webp', platform: 'facebook' },
   { day: 19, text: 'Something good', file: 'work-6.webp', platform: 'instagram' },
 ]
 export const campaignStats = [['Impressions', '48,620', '+18.4%'], ['Link clicks', '1,284', '+12.6%'], ['Leads', '86', '+24.2%'], ['Cost per lead', '$4.28', '−8.3%']]

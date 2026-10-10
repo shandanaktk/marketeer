@@ -30,9 +30,8 @@ const goals = [
 const voices = ['Professional', 'Playful', 'Bold', 'Friendly', 'Luxury']
 
 const platforms = [
-  { id: 'meta', name: 'Facebook & Instagram', detail: 'Pages, ad accounts & Instagram', icon: '∞', color: '#6d8cff' },
-  { id: 'tiktok', name: 'TikTok', detail: 'TikTok Ads & Business account', icon: '♪', color: '#ff668b' },
-  { id: 'google', name: 'Google', detail: 'Google Ads & Business Profile', icon: 'G', color: '#d9ff57', optional: true },
+  { id: 'facebook', name: 'Facebook', detail: 'Pages and feed via the Meta Graph API', icon: 'f', color: '#1877f2' },
+  { id: 'instagram', name: 'Instagram', detail: 'Posts, stories and reels via the Meta Graph API', icon: '◎', color: '#c13584' },
 ]
 
 function ArrowIcon({ back = false }) {
@@ -381,7 +380,7 @@ function AutomationStep({ data, setData, onBack, onContinue }) {
         <section>
           <div className="ob-field-label">Publishing channels <small>Select all that apply</small></div>
           <div className="ob-rule-platforms">
-            {['Instagram', 'Facebook', 'LinkedIn', 'TikTok'].map((platform) => <button type="button" className={data.postingPlatforms.includes(platform) ? 'selected' : ''} onClick={() => togglePlatform(platform)} key={platform}><span>{platform.slice(0, 1)}</span><b>{platform}</b><i><CheckIcon /></i></button>)}
+            {['Instagram', 'Facebook'].map((platform) => <button type="button" className={data.postingPlatforms.includes(platform) ? 'selected' : ''} onClick={() => togglePlatform(platform)} key={platform}><span>{platform.slice(0, 1)}</span><b>{platform}</b><i><CheckIcon /></i></button>)}
           </div>
           <div className="ob-two-fields">
             <Field label="Publishing frequency"><span className="ob-select-wrap"><select value={data.postingFrequency} onChange={(event) => setData({ ...data, postingFrequency: event.target.value })}><option>3 posts per week</option><option>4 posts per week</option><option>5 posts per week</option><option>Daily</option></select></span></Field>
@@ -476,7 +475,7 @@ function CompleteStep({ data, onBack, onDashboard }) {
           {(data.role === 'Agency' || data.role === 'Freelancer') && <li><i><CheckIcon /></i><p><span>Workspace</span><b>{data.workspaceName || 'Personal workspace'} · {data.invites.length + 1} member{data.invites.length ? 's' : ''}</b></p></li>}
         </ul>
       </div>
-      <p className="ob-complete-copy">Your dashboard is ready. This is where you’ll create ads, generate content, and publish across Meta, Instagram, and TikTok—all powered by AI.</p>
+      <p className="ob-complete-copy">Your dashboard is ready. This is where you’ll create ads, generate content, and publish across Facebook and Instagram—all powered by AI.</p>
       <footer className="ob-form-actions">
         <button className="ob-back" type="button" onClick={onBack}><ArrowIcon back /> Back</button>
         <button className="ob-primary ob-dashboard-button" type="button" onClick={onDashboard}><span>Go to dashboard</span><i><ArrowIcon /></i></button>
@@ -514,7 +513,7 @@ function OnboardingFlow({ initialView, onNavigate, theme, onToggleTheme }) {
     voice: 'Bold',
     customVoice: '',
     description: '',
-    postingPlatforms: ['Instagram', 'Facebook', 'LinkedIn'],
+    postingPlatforms: ['Instagram', 'Facebook'],
     postingFrequency: '4 posts per week',
     timezone: 'Europe/Amsterdam',
     metaBudget: '45',

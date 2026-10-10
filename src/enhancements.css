@@ -58,7 +58,8 @@ html[data-theme='light'] .hero .eyebrow { color: rgba(255,255,255,.68); }
   transition: .25s ease;
 }
 .theme-button:hover { transform: translateY(-2px); background: rgba(15,16,13,.75); }
-.theme-button > span { display: grid; width: 18px; height: 18px; place-items: center; font-size: 13px; }
+.theme-button > span { display: grid; width: 18px; height: 18px; place-items: center; line-height: 0; }
+.theme-button > span svg { display: block; }
 .theme-button > small { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 .global-theme-button { position: fixed; z-index: 260; right: 22px; bottom: 20px; }
 

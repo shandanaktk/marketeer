@@ -20,6 +20,7 @@ export function SmallIcon({ name = 'grid', size = 17 }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name] || paths.grid} /></svg>
 }
 export function SocialMark({ platform, className = '' }) {
-  if (['facebook', 'instagram', 'tiktok', 'meta'].includes(platform)) return <img className={`mk-social-mark ${className}`} src={`/social_logos/${platform}.png`} alt={platform === 'meta' ? 'Meta' : platform[0].toUpperCase() + platform.slice(1)} />
-  return <span className={`mk-social-mark mk-social-${platform} ${className}`} aria-label={platform}>{platform === 'linkedin' ? 'in' : platform === 'pinterest' ? 'P' : platform === 'youtube' ? '▶' : platform === 'threads' ? '@' : '𝕏'}</span>
+  const name = platform === 'meta' ? 'meta' : platform === 'instagram' ? 'instagram' : 'facebook'
+  const label = name === 'meta' ? 'Meta' : name === 'instagram' ? 'Instagram' : 'Facebook'
+  return <img className={`mk-social-mark ${className}`} src={`/social_logos/${name}.png`} alt={label} />
 }

@@ -3,10 +3,8 @@
 // intentionally does not embed placeholder records in its components.
 
 export const connectedChannels = [
-  { id: 'instagram', name: 'Instagram', handle: '@marketeer.studio', connected: true, color: 'pink', detail: 'Posts, stories and reels' },
-  { id: 'facebook', name: 'Facebook', handle: 'Marketeer Studio', connected: true, color: 'blue', detail: 'Page, feed and reels' },
-  { id: 'tiktok', name: 'TikTok', handle: '@marketeer', connected: true, color: 'dark', detail: 'Short-form video' },
-  { id: 'linkedin', name: 'LinkedIn', handle: 'Marketeer', connected: false, color: 'sky', detail: 'Company Page and profile' },
+  { id: 'instagram', name: 'Instagram', handle: '@marketeer.studio', connected: true, color: 'pink', detail: 'Posts, stories and reels via Meta' },
+  { id: 'facebook', name: 'Facebook', handle: 'Marketeer Studio', connected: true, color: 'blue', detail: 'Page, feed and reels via Meta' },
 ]
 
 export const metaConnection = {
@@ -27,18 +25,18 @@ export const contentVariants = [
 ]
 
 export const contentRecords = [
-  { id: 1, title: 'Friday founder note', caption: 'Three lessons from a week of building in public.', status: 'scheduled', format: 'Post', platforms: ['Instagram', 'LinkedIn'], date: '2026-09-28', time: '6:00 PM', palette: 'pink', source: 'AI' },
-  { id: 2, title: 'Move with purpose', caption: 'The best ideas rarely arrive while standing still.', status: 'published', format: 'Reel', platforms: ['Instagram', 'TikTok'], date: '2026-09-24', time: '12:30 PM', palette: 'lime', source: 'AI' },
-  { id: 3, title: 'Behind the blend', caption: 'What goes into a better morning, from bean to first sip.', status: 'scheduled', format: 'Reel', platforms: ['TikTok'], date: '2026-09-30', time: '8:30 PM', palette: 'orange', source: 'AI' },
+  { id: 1, title: 'Friday founder note', caption: 'Three lessons from a week of building in public.', status: 'scheduled', format: 'Post', platforms: ['Instagram', 'Facebook'], date: '2026-09-28', time: '6:00 PM', palette: 'pink', source: 'AI' },
+  { id: 2, title: 'Move with purpose', caption: 'The best ideas rarely arrive while standing still.', status: 'published', format: 'Reel', platforms: ['Instagram', 'Facebook'], date: '2026-09-24', time: '12:30 PM', palette: 'lime', source: 'AI' },
+  { id: 3, title: 'Behind the blend', caption: 'What goes into a better morning, from bean to first sip.', status: 'scheduled', format: 'Reel', platforms: ['Instagram'], date: '2026-09-30', time: '8:30 PM', palette: 'orange', source: 'AI' },
   { id: 4, title: 'Autumn product edit', caption: 'The pieces we keep reaching for as the weather turns.', status: 'draft', format: 'Carousel', platforms: ['Instagram', 'Facebook'], date: null, time: null, palette: 'blue', source: 'Manual' },
-  { id: 5, title: 'Customer spotlight', caption: 'Meet the team who turned one clear idea into a growing community.', status: 'published', format: 'Post', platforms: ['Facebook', 'LinkedIn'], date: '2026-09-21', time: '10:00 AM', palette: 'violet', source: 'AI' },
+  { id: 5, title: 'Customer spotlight', caption: 'Meet the team who turned one clear idea into a growing community.', status: 'published', format: 'Post', platforms: ['Facebook', 'Instagram'], date: '2026-09-21', time: '10:00 AM', palette: 'violet', source: 'AI' },
   { id: 6, title: 'Weekend offer', caption: 'A little something for the people who have been with us since day one.', status: 'failed', format: 'Story', platforms: ['Instagram'], date: '2026-09-20', time: '5:30 PM', palette: 'red', source: 'Manual' },
 ]
 
 export const calendarContent = [
   ...contentRecords.filter((item) => item.date),
   { id: 7, title: 'Quick tip carousel', status: 'scheduled', format: 'Carousel', platforms: ['Instagram'], date: '2026-10-02', time: '11:00 AM', palette: 'blue' },
-  { id: 8, title: 'Monthly recap', status: 'scheduled', format: 'Post', platforms: ['LinkedIn'], date: '2026-10-05', time: '9:00 AM', palette: 'violet' },
+  { id: 8, title: 'Monthly recap', status: 'scheduled', format: 'Post', platforms: ['Facebook'], date: '2026-10-05', time: '9:00 AM', palette: 'violet' },
 ]
 
 export const campaigns = [

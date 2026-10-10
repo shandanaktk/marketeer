@@ -7,7 +7,7 @@ export const knowledgeBaseSeed = {
     { id: 'service-2', name: 'Executive search', detail: 'Focused search for senior technology and product leadership.' },
   ],
   messaging: { pillars: 'Human expertise, transparent process, ambitious careers', proof: '92% probation pass rate · 21-day average time to shortlist', required: 'Equal-opportunity language', restricted: 'Guaranteed placement, perfect candidate, rockstar' },
-  posting: { platforms: ['Instagram', 'Facebook', 'LinkedIn'], frequency: '4 posts per week', timezone: 'Europe/Amsterdam', autoPublish: true },
+  posting: { platforms: ['Instagram', 'Facebook'], frequency: '4 posts per week', timezone: 'Europe/Amsterdam', autoPublish: true },
   metaRules: { dailyBudget: 45, duration: 21, reviewMode: true, category: 'Employment', leadForm: 'Higher intent', optimize: true },
 }
 

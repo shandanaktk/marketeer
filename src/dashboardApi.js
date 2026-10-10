@@ -101,9 +101,7 @@ export function approveAdDraft(payload) {
 export async function connectSocialPlatform(platform) {
   const endpoint = platform === 'instagram'
     ? '/api/v1/meta/instagram/auth/init'
-    : platform === 'tiktok'
-      ? '/api/v1/tiktok/auth/init'
-      : '/api/v1/meta/content/auth/init'
+    : '/api/v1/meta/content/auth/init'
   const result = await post(MAIN_API, endpoint, { platform })
   if (result.authorization_url) window.location.assign(result.authorization_url)
   return result

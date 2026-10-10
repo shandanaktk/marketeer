@@ -15,7 +15,7 @@ function Composer({ announce }) {
       <div className="mk-editor-top"><button onClick={() => setCaption('')}>⌫ Clear</button><span>↗ &nbsp; ×</span></div>
       <span className="mk-editor-label">◇ New collection</span>
       <div className="mk-composer-row">
-        <div className="mk-channel-rail" aria-label="Preview platform">{['facebook', 'instagram', 'linkedin', 'pinterest', 'tiktok', 'threads'].map((name) => <button className={platform === name ? 'selected' : ''} key={name} onClick={() => setPlatform(name)} aria-label={`Preview on ${name}`} aria-pressed={platform === name}><SocialMark platform={name} /></button>)}</div>
+        <div className="mk-channel-rail" aria-label="Preview platform">{['facebook', 'instagram'].map((name) => <button className={platform === name ? 'selected' : ''} key={name} onClick={() => setPlatform(name)} aria-label={`Preview on ${name}`} aria-pressed={platform === name}><SocialMark platform={name} /></button>)}</div>
         <div className="mk-editor-box">
           <label className="mk-sr" htmlFor="demo-caption">Edit demo post caption</label>
           <textarea id="demo-caption" value={caption} onChange={e => setCaption(e.target.value)} />

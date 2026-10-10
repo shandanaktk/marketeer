@@ -9,11 +9,8 @@ const showcaseTabs = [
 ]
 
 const socialMarks = [
-  { mark: 'in', name: 'LinkedIn', detail: 'Company updates' },
   { mark: '◎', name: 'Instagram', detail: 'Posts · Reels · Stories' },
   { mark: 'f', name: 'Facebook', detail: 'Organic + paid' },
-  { mark: '♪', name: 'TikTok', detail: 'Short-form video' },
-  { mark: 'M', name: 'Meta Ads', detail: 'Recruitment campaigns' },
 ]
 
 export function BrandLoader({ onDone }) {
