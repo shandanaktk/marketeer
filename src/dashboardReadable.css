@@ -1,0 +1,19 @@
+/* Accessibility floor for secondary copy. Decorative marks are exempt. */
+.db-dashboard small,
+.db-dashboard th,
+.db-dashboard .db-eyebrow,
+.db-dashboard .db-badge,
+.db-dashboard .db-creative-art > span,
+.db-dashboard .db-creative-art > small,
+.db-dashboard .db-created-objects span,
+.db-dashboard .db-created-objects b,
+.db-dashboard .db-table-name small,
+.db-dashboard .db-card-platforms > span,
+.db-dashboard .db-month-grid button b,
+.db-dashboard .db-month-grid button small,
+.db-dashboard .db-date-tile small,
+.db-dashboard .db-view-switch button,
+.db-dashboard .db-status-select,
+.db-dashboard .db-folder-pills button {
+  font-size: 11px;
+}

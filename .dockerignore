@@ -1,0 +1,7 @@
+node_modules
+dist
+.git
+qa
+src_reference
+.env*
+scripts
