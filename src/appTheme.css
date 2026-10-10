@@ -27,7 +27,15 @@ html[data-theme] .db-sidebar{background:var(--app-panel);box-shadow:none;border-
 html[data-theme] .db-topbar{background:var(--app-panel);border-color:var(--app-line)}
 html[data-theme] .db-card{background:var(--app-panel);border-color:var(--app-line);box-shadow:0 3px 16px #18201005;backdrop-filter:none;border-radius:15px}
 html[data-theme='light'] .mk-site{--mk-paper:#e4f1fb;--mk-surface:#f6f7f9;--mk-border:#d7e4ee}
-html[data-theme='light'] .db-modal{background:#f6f7f9;color:#1e1b18;border-color:#d7e4ee;box-shadow:0 24px 70px rgba(30,27,24,.16)}
+html[data-theme='light'] .db-modal{background:#f6f7f9;color:#1e1b18;border-color:#d7e4ee;box-shadow:none}
+html[data-theme] .db-main-content{animation-fill-mode:backwards}
+html[data-theme] .db-modal-layer > .db-modal{box-shadow:none}
+html[data-theme] .db-modal-layer > .db-modal-scrim{background:transparent;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+html[data-theme='dark'] .db-meta-health{color:#3cba6e;border-color:rgba(60,186,110,.4);background:rgba(60,186,110,.14)}
+html[data-theme='light'] .db-meta-health{color:#146b3a;border-color:rgba(20,107,58,.28);background:rgba(20,107,58,.1)}
+html[data-theme] .db-meta-health i{background:currentColor;box-shadow:none}
+html[data-theme='dark'] .db-metric-grid small.good{color:#3cba6e}
+html[data-theme='light'] .db-metric-grid small.good{color:#146b3a}
 html[data-theme='light'] .db-modal>header,html[data-theme='light'] .db-modal>footer{border-color:#d7e4ee}
 html[data-theme='light'] .db-modal>header button{background:#eef1f4}
 html[data-theme='light'] .db-modal>header h2,html[data-theme='light'] .db-modal>header button{color:#1e1b18}
@@ -119,6 +127,11 @@ html[data-theme] .ob-divider>span{color:var(--app-muted)}
 .db-creative-art,.db-ad-preview-card{--app-contrast-rgb:255,250,255;--app-ink:#fffaff;--db-copy-faint:#d7c9cf}
 html[data-theme='light'] .db-social-preview,html[data-theme='light'] .db-sticky-preview{color:#1e1b18;background:#fff;border-color:#d7e4ee;--db-copy:#1e1b18;--db-copy-soft:#3a342f;--db-copy-faint:#6a615c;--app-ink:#1e1b18}
 html[data-theme='light'] .db-content-create .db-choice-grid>button>span,html[data-theme='light'] .db-content-create .db-choice-grid>button>i,html[data-theme='light'] .db-content-create .db-recommended-times button.active,html[data-theme='light'] .db-content-create .db-confirm-icon{color:#fffaff;background:#1e1b18}
+html[data-theme] .db-content-create .db-flow-stepper li.active>span,html[data-theme] .db-ad-studio .db-flow-stepper li.active>span,html[data-theme] .db-campaigns .db-flow-stepper li.active>span,html[data-theme] .db-content-create .db-card-title>div>span,html[data-theme] .db-ad-studio .db-card-title>div>span,html[data-theme] .db-campaigns .db-card-title>div>span{color:#fffaff;background:#3e92cc;border-color:#3e92cc}
+html[data-theme='light'] .db-badge:not(.red):not(.orange):not(.gray){color:#3e92cc}
+html[data-theme='light'] .db-badge.gray{color:#6a615c}
+html[data-theme='light'] .db-nav-group>button>i{background:#3e92cc}
+html[data-theme] .db-progress i{background:#3e92cc}
 html[data-theme='light'] .db-social-preview>p{color:#1e1b18}
 html[data-theme='light'] .db-filter-pills button.active{color:#fffaff;background:#1e1b18;border-color:#1e1b18}
 .db-creative-art>b{line-height:.95}.db-creative-art>b em{font-weight:750;color:#fffaff}

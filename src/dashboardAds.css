@@ -10,3 +10,30 @@
 .db-creative-variants { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; }.db-creative-variants > article { border: 1px solid var(--db-stroke); border-radius: 12px; overflow: hidden; background: var(--db-panel-soft); }.db-creative-variants > article.selected { border-color: rgba(62,146,204,.24); }.db-creative-variants > article > button { position: relative; display: block; width: 100%; padding: 0; border: 0; background: transparent; }.db-creative-variants > article > button > i { position: absolute; top: 8px; right: 8px; display: grid; width: 21px; height: 21px; place-items: center; border: 1px solid rgba(var(--app-contrast-rgb),.35); border-radius: 50%; color: #111; background: var(--db-lime); }.db-creative-variants > article > div { padding: 9px; }.db-creative-variants > article > div > b { display: block; overflow: hidden; margin-bottom: 5px; font-size: 11.5px; white-space: nowrap; text-overflow: ellipsis; }.db-creative-variants > article > div > span { display: flex; justify-content: space-between; margin-top: 7px; }.db-creative-variants > article > div > span button { padding: 0; border: 0; color: #9eb0ff; font-size: 10px; background: transparent; }
 .db-question-list { margin-top: 13px; }.db-question-list > span { display: block; margin-bottom: 7px; color: var(--db-copy-soft); font-size: 12px; font-weight: 650; }.db-question-list > div { display: flex; gap: 5px; margin-bottom: 6px; }.db-question-list input { height: 36px; padding: 0 9px; font-size: 11.5px; }.db-question-list > div button { display: grid; width: 35px; place-items: center; border: 0; border-radius: 8px; color: #f08aa3; background: rgba(216,49,91,.07); }.db-question-list > .db-button { justify-content: flex-start; min-height: 30px; padding: 0; }.db-choice-grid.compact > button { min-height: 70px; }.db-launch-settings .db-toggle-row { margin-top: 9px; }.db-launch-settings .db-button.full { margin-top: 12px; }
 .db-launch-complete { display: grid; width: min(100%,720px); min-height: 500px; margin: 0 auto; place-content: center; padding: 35px; text-align: center; }.db-launch-complete > span { display: grid; width: 72px; height: 72px; margin: 0 auto 15px; place-items: center; border-radius: 50%; color: #111; background: #72dc88; }.db-launch-complete > .db-badge { margin: 0 auto 10px; }.db-launch-complete h2 { margin-bottom: 7px; font-size: 29px; }.db-launch-complete > p { color: var(--db-copy-faint); font-size: 13px; }.db-created-objects { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; margin: 20px 0; }.db-created-objects > div { padding: 11px; border: 1px solid var(--db-stroke); border-radius: 10px; background: var(--db-panel-soft); }.db-created-objects span,.db-created-objects b { display: block; }.db-created-objects span { margin-bottom: 5px; color: var(--db-copy-faint); font-size: 10px; }.db-created-objects b { font-family: monospace; font-size: 10.5px; }.db-launch-complete > div:last-child { display: flex; justify-content: center; gap: 8px; }
+
+.db-ad-studio .db-flow-stepper { width: 100%; margin: 18px 0; padding: 14px 18px; border: 1px solid var(--db-stroke); border-radius: 16px; background: var(--app-panel); }
+.db-meta-logo { width: 42px; height: 42px; flex: 0 0 auto; object-fit: contain; border-radius: 12px; background: #fff; }
+.db-promote-shot,.db-creative-shot,.db-ad-shot { display: block; object-fit: contain; background: #eef1f4; }
+.db-promote-shot { width: 72px; height: 72px; border-radius: 10px; }
+.db-creative-shot { width: 100%; height: 168px; }
+.db-ad-shot { width: 100%; height: 280px; }
+.db-ad-studio .db-ad-preview-card { width: 100%; background: var(--app-panel); color: var(--app-ink); border-color: var(--app-line); }
+.db-ad-studio .db-ad-preview-card > p,.db-ad-studio .db-ad-preview-card footer b { color: var(--app-ink); }
+.db-ad-studio .db-ad-preview-card footer { background: transparent; }
+.db-ad-studio .db-ad-preview-card footer button { border: 0; color: #fffaff; background: #3e92cc; border-radius: 8px; font-weight: 700; }
+.db-ad-studio .db-creative-variants > article > div > span button { color: #3e92cc; }
+.db-ad-studio .db-creative-variants article:not(.selected) > button > i { display: none; }
+html[data-theme='light'] .db-ad-studio .db-ad-preview-card { --app-ink: #1e1b18; --app-contrast-rgb: 30, 27, 24; --db-copy-soft: #3a342f; --db-copy-faint: #6a615c; background: #fff; color: #1e1b18; border-color: #d7e4ee; }
+html[data-theme='light'] .db-ad-studio .db-choice-grid > button > span,
+html[data-theme='light'] .db-ad-studio .db-choice-grid > button > i { color: #fffaff; background: #1e1b18; }
+html[data-theme='dark'] .db-promote-shot,
+html[data-theme='dark'] .db-creative-shot,
+html[data-theme='dark'] .db-ad-shot { background: #1a1816; }
+html[data-theme='dark'] .db-ad-studio .db-choice-grid > button > span,
+html[data-theme='dark'] .db-ad-studio .db-choice-grid > button > i,
+html[data-theme='dark'] .db-ad-studio .db-card-title > div > span,
+html[data-theme='dark'] .db-ad-studio .db-copy-variants article.selected .db-select-check,
+html[data-theme='dark'] .db-ad-studio .db-creative-variants article.selected > button > i,
+html[data-theme='dark'] .db-ad-studio .db-job-steps span.active i,
+html[data-theme='dark'] .db-ad-studio .db-flow-stepper li.active > span,
+html[data-theme='dark'] .db-ad-studio .db-preview-avatar { color: #fffaff; background: #3e92cc; border-color: #3e92cc; }

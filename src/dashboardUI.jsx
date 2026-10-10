@@ -112,12 +112,13 @@ export function SocialPreview({ caption, hashtags = [], platforms = ['Instagram'
   )
 }
 
-export function AdPreview({ headline, primary, cta = 'SIGN_UP', palette = 'lime', theme = 'MOVE / WITH PURPOSE' }) {
+export function AdPreview({ headline, primary, cta = 'SIGN_UP', palette = 'lime', theme = 'MOVE / WITH PURPOSE', imageUrl }) {
   return (
     <article className="db-ad-preview-card">
-      <header><span className="db-preview-avatar meta">f</span><div><b>Marketeer Studio</b><small>Sponsored · public</small></div><Icon name="more" size={18} /></header>
-      <p>{primary}</p><CreativeArt palette={palette} theme={theme} />
-      <footer><div><small>MARKETEER.CO</small><b>{headline}</b></div><button>{cta.replaceAll('_', ' ')}</button></footer>
+      <header><span className="db-preview-avatar">MS</span><div><b>Marketeer Studio</b><small>Sponsored</small></div><ChannelLogo platform="Facebook" /></header>
+      <p>{primary}</p>
+      {imageUrl ? <img className="db-ad-shot" src={imageUrl} alt="" /> : <CreativeArt palette={palette} theme={theme} />}
+      <footer><div><small>MARKETEER.CO</small><b>{headline}</b></div><button type="button">{String(cta).replaceAll('_', ' ')}</button></footer>
     </article>
   )
 }
@@ -141,5 +142,5 @@ export function Modal({ title, onClose, children, wide = false, footer }) {
 }
 
 export function Spinner({ label = 'Working on it…', progress }) {
-  return <div className="db-spinner-state"><span><Icon name="spark" size={27} /></span><h2>{label}</h2><p>Marketeer is using your brand context and selections.</p><div className="db-progress"><i style={{ width: `${progress || 68}%` }} /></div></div>
+  return <div className="db-spinner-state"><img className="db-mascot db-loader-mark" src="/mascot/marketeer-m.png" alt="" /><h2>{label}</h2><p>Marketeer is using your brand context and selections.</p><div className="db-progress"><i style={{ width: `${progress || 68}%` }} /></div></div>
 }
