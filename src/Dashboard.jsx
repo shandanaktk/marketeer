@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { AdsLibraryView, AdsStudio, CampaignsView, LeadsView, OptimizeView } from './AdsWorkspace.jsx'
 import { ContentCalendar, ContentCreate, ContentLibrary } from './ContentWorkspace.jsx'
 import { campaigns, calendarContent, connectedChannels, dashboardMockService, leadRecords, metaConnection, overviewMetrics } from './dashboardMockData.js'
-import { Badge, Button, CreativeArt, Field, Icon, PageIntro, PlatformMark, Toggle } from './dashboardUI.jsx'
+import { Badge, Button, Field, Icon, PageIntro, PlatformMark, Toggle } from './dashboardUI.jsx'
 import { KnowledgeBaseView, ReportingView, VacanciesView } from './SrsWorkspace.jsx'
 import { ThemeButton } from './theme.jsx'
 import AccountMenu from './AccountMenu.jsx'
@@ -22,17 +22,50 @@ function Toast({ toast, onClose }) {
   return <div className={`db-toast ${toast.type || ''}`}><span><Icon name={toast.type === 'error' ? 'close' : 'check'} size={15} /></span><p>{toast.message}</p><button onClick={onClose} aria-label="Dismiss"><Icon name="close" size={14} /></button></div>
 }
 
+function sparkGeometry(values) {
+  const width = 160
+  const height = 52
+  const low = Math.min(...values)
+  const high = Math.max(...values)
+  const span = high - low || 1
+  const points = values.map((value, index) => [
+    (index / (values.length - 1)) * width,
+    8 + (1 - (value - low) / span) * (height - 16),
+  ])
+  let line = `M${points[0][0]},${points[0][1]}`
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const prev = points[index - 1] || points[index]
+    const current = points[index]
+    const next = points[index + 1]
+    const after = points[index + 2] || next
+    const c1 = [current[0] + (next[0] - prev[0]) / 6, current[1] + (next[1] - prev[1]) / 6]
+    const c2 = [next[0] - (after[0] - current[0]) / 6, next[1] - (after[1] - current[1]) / 6]
+    line += ` C${c1[0]},${c1[1]} ${c2[0]},${c2[1]} ${next[0]},${next[1]}`
+  }
+  return { width, height, line, area: `${line} L${width},${height} L0,${height} Z`, end: points[points.length - 1] }
+}
+
+function Sparkline({ id, values }) {
+  const { width, height, line, area, end } = sparkGeometry(values)
+  return <div className="db-sparkline"><svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#3e92cc" stopOpacity="0.22" /><stop offset="100%" stopColor="#3e92cc" stopOpacity="0" /></linearGradient></defs><path className="db-spark-fill" d={area} fill={`url(#${id})`} /><path className="db-spark-line" d={line} /></svg><i style={{ top: `${(end[1] / height) * 100}%` }} /></div>
+}
+
+function GreetingMark() {
+  return <div className="db-overview-orbit db-walker" aria-hidden="true"><img className="db-mascot" src="/mascot/marketeer-m.png" alt="" /></div>
+}
+
 function Overview({ firstName, onGo }) {
   const today = new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())
   const activeCampaigns = campaigns.filter((item) => item.status === 'active' || item.status === 'learning').slice(0, 3)
   const upcoming = calendarContent.filter((item) => item.status === 'scheduled').slice(0, 4)
+  const channelLogo = (name) => `/social_logos/${String(name).toLowerCase().includes('facebook') ? 'facebook' : 'instagram'}.png`
   return <div className="db-page db-overview">
-    <section className="db-overview-hero"><div><span className="db-eyebrow"><Icon name="spark" size={14} /> {today}</span><h1>Good evening, {firstName}.<br /><em>Let’s make something matter.</em></h1><p>Your paid and organic work is moving in the right direction. Here is where to focus next.</p><div><Button icon="create" onClick={() => onGo('create')}>Create content</Button><Button variant="secondary" icon="ads" onClick={() => onGo('adstudio')}>Build a campaign</Button></div></div><div className="db-overview-orbit"><i /><i /><span><Icon name="spark" size={30} /></span><small>Everything is ready</small></div></section>
-    <section className="db-metric-grid four overview">{overviewMetrics.map((metric) => <article className={`db-card ${metric.tone}`} key={metric.label}><span className="db-metric-icon"><Icon name={metric.icon} size={18} /></span><small>Last 30 days</small><p>{metric.label}</p><strong>{metric.value}</strong><em>{metric.delta}</em><div className="db-sparkline">{[32, 41, 37, 56, 49, 68, 62, 78, 73, 91].map((height, index) => <i style={{ height: `${height}%` }} key={index} />)}</div></article>)}</section>
+    <section className="db-overview-hero"><div><span className="db-eyebrow"><Icon name="spark" size={14} /> {today}</span><h1>Good evening, {firstName}.<br /><em>Let’s make something matter.</em></h1><p>Your paid and organic work is moving in the right direction. Here is where to focus next.</p><div><Button icon="create" onClick={() => onGo('create')}>Create content</Button><Button variant="secondary" icon="ads" onClick={() => onGo('adstudio')}>Build a campaign</Button></div></div><GreetingMark /></section>
+    <section className="db-metric-grid four overview">{overviewMetrics.map((metric) => <article className={`db-card ${metric.tone}`} key={metric.label}><span className="db-metric-icon"><Icon name={metric.icon} size={18} /></span><small>Last 30 days</small><p>{metric.label}</p><strong>{metric.value}</strong><em>{metric.delta}</em><Sparkline id={`spark-${metric.label.replace(/\s+/g, '-')}`} values={metric.series} /></article>)}</section>
     <div className="db-overview-layout"><section className="db-card db-action-card"><span className="db-eyebrow">Create something</span><h2>Where should we begin?</h2><div><button onClick={() => onGo('adstudio')}><span className="lime"><Icon name="ads" size={22} /></span><div><b>Build a Meta lead campaign</b><small>Strategy, creative, audience, lead form, and launch</small></div><Icon name="arrow" size={18} /></button><button onClick={() => onGo('create')}><span className="blue"><Icon name="create" size={22} /></span><div><b>Create social content</b><small>Prompt, generate, refine, and schedule everywhere</small></div><Icon name="arrow" size={18} /></button></div><div className="db-overview-insight"><Icon name="spark" size={17} /><p><b>Opportunity:</b> Your audience responds best between 5–7 PM. Two open calendar slots match that window this week.</p><Button variant="ghost" onClick={() => onGo('calendar')}>View calendar</Button></div></section>
-      <section className="db-card db-live-campaigns"><header><div><span className="db-eyebrow">Live campaigns</span><h2>Performance pulse</h2></div><Button variant="ghost" icon="arrow" onClick={() => onGo('campaigns')}>View all</Button></header>{activeCampaigns.map((campaign) => <button onClick={() => onGo('campaigns')} key={campaign.id}><CreativeArt palette={campaign.palette} theme={campaign.name.toUpperCase().replace(' ', ' / ')} compact /><div><Badge tone={campaign.status === 'active' ? 'lime' : 'blue'}>{campaign.delivery}</Badge><b>{campaign.name}</b><small>{campaign.objective} · ${campaign.budget}/day</small></div><span><b>{campaign.leads}</b><small>leads</small></span><span><b>${campaign.cpl}</b><small>CPL</small></span></button>)}</section>
-      <section className="db-card db-upcoming"><header><div><span className="db-eyebrow">Up next</span><h2>Content queue</h2></div><Button variant="ghost" icon="arrow" onClick={() => onGo('calendar')}>Calendar</Button></header>{upcoming.map((item) => <button onClick={() => onGo('content')} key={item.id}><span className={`db-date-tile ${item.palette}`}><b>{new Date(`${item.date}T12:00:00`).getDate()}</b><small>{new Date(`${item.date}T12:00:00`).toLocaleString('en-US', { month: 'short' })}</small></span><div><b>{item.title}</b><small>{item.time} · {item.format}</small><span>{item.platforms.map((platform) => <PlatformMark platform={platform} key={platform} />)}</span></div><Icon name="arrow" size={16} /></button>)}</section>
-      <section className="db-card db-lead-pulse"><header><div><span className="db-eyebrow">Lead activity</span><h2>Fresh conversations</h2></div><Badge tone="blue">{leadRecords.filter((lead) => lead.status === 'new').length} new</Badge></header>{leadRecords.slice(0, 3).map((lead) => <button onClick={() => onGo('leads')} key={lead.id}><span>{lead.name.split(' ').map((part) => part[0]).join('')}</span><div><b>{lead.name}</b><small>{lead.campaign} · {lead.received}</small></div><Icon name="arrow" size={15} /></button>)}<Button variant="soft" className="full" onClick={() => onGo('leads')}>Open lead center</Button></section>
+      <section className="db-card db-live-campaigns"><header><div><span className="db-eyebrow">Live campaigns</span><h2>Performance pulse</h2></div><Button variant="ghost" icon="arrow" onClick={() => onGo('campaigns')}>View all</Button></header>{activeCampaigns.map((campaign) => <button onClick={() => onGo('campaigns')} key={campaign.id}><img className="db-shot" src={campaign.image} alt="" /><div><Badge tone={campaign.status === 'active' ? 'lime' : 'blue'}>{campaign.delivery}</Badge><b>{campaign.name}</b><small>{campaign.objective} · ${campaign.budget}/day</small></div><span><b>{campaign.leads}</b><small>leads</small></span><span><b>${campaign.cpl}</b><small>CPL</small></span></button>)}</section>
+      <section className="db-card db-lead-pulse"><header><div><span className="db-eyebrow">Lead activity</span><h2>Fresh conversations</h2></div><Badge tone="blue">{leadRecords.filter((lead) => lead.status === 'new').length} new</Badge></header>{leadRecords.slice(0, 3).map((lead) => <button onClick={() => onGo('leads')} key={lead.id}><img className="db-lead-photo" src={lead.avatar} alt="" /><div><b>{lead.name}</b><small>{lead.campaign} · {lead.received}</small></div><img className="db-queue-logo" src={channelLogo(lead.source)} alt="" /><Icon name="arrow" size={15} /></button>)}<Button variant="soft" className="full" onClick={() => onGo('leads')}>Open lead center</Button></section>
+      <section className="db-card db-upcoming"><header><div><span className="db-eyebrow">Up next</span><h2>Content queue</h2></div><Button variant="ghost" icon="arrow" onClick={() => onGo('calendar')}>Calendar</Button></header>{upcoming.map((item) => { const when = new Date(`${item.date}T12:00:00`); return <button onClick={() => onGo('content')} key={item.id}><img className="db-shot" src={item.image} alt="" /><div><b>{item.title}</b><small>{when.toLocaleString('en-US', { month: 'short', day: 'numeric' })} · {item.time} · {item.format}</small><span>{item.platforms.map((platform) => <img className="db-queue-logo" src={channelLogo(platform)} alt={platform} key={platform} />)}</span></div><Icon name="arrow" size={16} /></button> })}</section>
     </div>
   </div>
 }
@@ -72,7 +105,12 @@ const LABELS = Object.fromEntries(NAV_GROUPS.flatMap((group) => group.items.map(
 function Dashboard({ data = {}, onNavigate, theme, onToggleTheme }) {
   const initial = new URLSearchParams(window.location.search).get('tab')
   const [section, setSection] = useState(VALID_SECTIONS.includes(initial) ? initial : 'overview')
-  const [mobileNav, setMobileNav] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const saved = window.localStorage.getItem('marketeer-sidebar')
+    if (saved === 'closed') return false
+    if (saved === 'open') return true
+    return window.matchMedia('(min-width: 981px)').matches
+  })
   const [toast, setToast] = useState(null)
   const [channels, setChannels] = useState(connectedChannels)
   const [metaConnected, setMetaConnected] = useState(metaConnection.connected)
@@ -83,7 +121,8 @@ function Dashboard({ data = {}, onNavigate, theme, onToggleTheme }) {
   const notify = (message, type = 'success') => setToast({ message, type, id: Date.now() })
   const go = (next) => {
     if (!VALID_SECTIONS.includes(next)) return
-    setSection(next); setMobileNav(false)
+    setSection(next)
+    if (window.matchMedia('(max-width: 980px)').matches) setSidebarOpen(false)
     const url = new URL(window.location.href)
     url.searchParams.set('view', 'dashboard')
     if (next === 'overview') url.searchParams.delete('tab'); else url.searchParams.set('tab', next)
@@ -100,15 +139,16 @@ function Dashboard({ data = {}, onNavigate, theme, onToggleTheme }) {
   }
   const sharedAds = { connected: metaConnected, onManage: () => go('connections'), notify }
 
-  return <main className="db-dashboard">
+  const setSidebar = (open) => { setSidebarOpen(open); window.localStorage.setItem('marketeer-sidebar', open ? 'open' : 'closed') }
+  return <main className={`db-dashboard ${sidebarOpen ? '' : 'sidebar-closed'}`}>
     <div className="db-ambient" aria-hidden="true"><span /><span /><span /></div>
-    <aside className={`db-sidebar ${mobileNav ? 'open' : ''}`}>
-      <div className="db-sidebar-brand"><button onClick={() => onNavigate?.('home')} aria-label="Marketeer home">Marketeer<span>.</span></button><button className="db-mobile-close" onClick={() => setMobileNav(false)} aria-label="Close menu"><Icon name="close" size={19} /></button></div>
-      <nav>{NAV_GROUPS.map((group) => <div className="db-nav-group" key={group.label}><small>{group.label}</small>{group.items.map(([id, label, icon]) => <button className={section === id ? 'active' : ''} onClick={() => go(id)} key={id}><span><Icon name={icon} size={18} /></span><b>{label}</b>{id === 'leads' && <i>{leadRecords.filter((lead) => lead.status === 'new').length}</i>}{id === 'connections' && <em className={metaConnected ? 'connected' : ''} />}</button>)}</div>)}</nav>
+    <aside className={`db-sidebar ${sidebarOpen ? 'open' : ''}`}>
+      <div className="db-sidebar-brand"><button onClick={() => onNavigate?.('home')} aria-label="Marketeer home"><em className="db-brand-full">Marketeer</em><span>.</span><em className="db-brand-mark" aria-hidden="true">m</em></button><button className="db-mobile-close" onClick={() => setSidebar(false)} aria-label="Close sidebar"><Icon name="close" size={19} /></button></div>
+      <nav>{NAV_GROUPS.map((group) => <div className="db-nav-group" key={group.label}><small>{group.label}</small>{group.items.map(([id, label, icon]) => <button className={section === id ? 'active' : ''} onClick={() => go(id)} key={id} aria-label={label} title={label}><span><Icon name={icon} size={18} /></span><b>{label}</b>{id === 'leads' && <i>{leadRecords.filter((lead) => lead.status === 'new').length}</i>}{id === 'connections' && <em className={metaConnected ? 'connected' : ''} />}</button>)}</div>)}</nav>
       <div className="db-sidebar-bottom"><div className="db-usage"><span><Icon name="spark" size={14} /> AI creations</span><b>18 <small>/ 30 this month</small></b><i><em /></i><button onClick={() => notify('Plan management will open here once billing is connected.')}>Upgrade plan <Icon name="arrow" size={13} /></button></div><div className="db-profile"><span>{initials}<i /></span><div><b>{name}</b><small>demo@marketeer.ai</small></div></div></div>
     </aside>
-    {mobileNav && <button className="db-nav-scrim" onClick={() => setMobileNav(false)} aria-label="Close navigation" />}
-    <div className="db-main-shell"><header className="db-topbar"><div className="db-topbar-left"><button className="db-menu-button" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Icon name="menu" size={20} /></button><div className="db-breadcrumb"><span>{section === 'overview' ? 'Command center' : ['create', 'content', 'calendar'].includes(section) ? 'Content' : ['adstudio', 'campaigns', 'reporting', 'leads', 'optimize', 'assets'].includes(section) ? 'Meta ads' : 'Workspace'}</span><i>/</i><b>{LABELS[section]}</b></div></div><div className="db-top-actions">
+    {sidebarOpen && <button className="db-nav-scrim" onClick={() => setSidebar(false)} aria-label="Close navigation" />}
+    <div className="db-main-shell"><header className="db-topbar"><div className="db-topbar-left"><button className="db-menu-button" aria-expanded={sidebarOpen} onClick={() => setSidebar(!sidebarOpen)} aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}><Icon name="sidebar" size={18} /></button><div className="db-breadcrumb"><span>{section === 'overview' ? 'Command center' : ['create', 'content', 'calendar'].includes(section) ? 'Content' : ['adstudio', 'campaigns', 'reporting', 'leads', 'optimize', 'assets'].includes(section) ? 'Meta ads' : 'Workspace'}</span><i>/</i><b>{LABELS[section]}</b></div></div><div className="db-top-actions">
         {/* Search temporarily hidden; retain for future endpoint integration.
         <label className="db-search"><Icon name="search" size={16} /><input value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={onSearch} placeholder="Search workspace…" /></label>
         */}

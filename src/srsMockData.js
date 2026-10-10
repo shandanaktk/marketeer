@@ -1,14 +1,64 @@
 // Demo-only records for the SRS-specific workspace modules.
 // Replace imports from this file with API adapters when backend endpoints land.
 export const knowledgeBaseSeed = {
-  brand: { name: 'Northstar Talent', website: 'https://northstartalent.example', description: 'A people-first recruitment partner for ambitious product and technology teams.', voice: 'Clear, optimistic, and human', audience: 'Product, design, engineering, and go-to-market professionals across Europe.' },
+  brand: {
+    name: 'Northstar Talent',
+    website: 'https://northstartalent.example',
+    tagline: 'Careers with a human point of view.',
+    industry: 'Recruitment',
+    location: 'Amsterdam, Netherlands',
+    description: 'A people-first recruitment partner for ambitious product and technology teams.',
+    story: 'Northstar started inside a product studio that was tired of transactional hiring. The team still sits with clients through the search, not just at the handoff.',
+    mission: 'Help ambitious teams hire people who will still be proud of the work a year later.',
+  },
+  audience: {
+    primary: 'Product, design, engineering, and go-to-market professionals across Europe.',
+    secondary: 'Founders and talent leads at product companies with 20–200 people.',
+    pains: 'Slow shortlists, vague role briefs, and candidates who disappear after the first call.',
+    markets: 'Netherlands, United Kingdom, and remote EU',
+  },
+  voice: {
+    tone: 'Clear, optimistic, and human',
+    personality: 'Warm, precise, confident',
+    languages: 'English, Dutch',
+    sample: 'The right role should feel obvious once you see the work, the team, and the pace. We write it that way.',
+  },
   offerings: [
-    { id: 'service-1', name: 'Embedded recruitment', detail: 'Flexible talent support that operates as part of the client team.' },
-    { id: 'service-2', name: 'Executive search', detail: 'Focused search for senior technology and product leadership.' },
+    { id: 'service-1', name: 'Embedded recruitment', detail: 'Flexible talent support that operates as part of the client team.', who: 'Growing product teams' },
+    { id: 'service-2', name: 'Executive search', detail: 'Focused search for senior technology and product leadership.', who: 'Founders hiring their first leadership layer' },
   ],
-  messaging: { pillars: 'Human expertise, transparent process, ambitious careers', proof: '92% probation pass rate · 21-day average time to shortlist', required: 'Equal-opportunity language', restricted: 'Guaranteed placement, perfect candidate, rockstar' },
-  posting: { platforms: ['Instagram', 'Facebook'], frequency: '4 posts per week', timezone: 'Europe/Amsterdam', autoPublish: true },
-  metaRules: { dailyBudget: 45, duration: 21, reviewMode: true, category: 'Employment', leadForm: 'Higher intent', optimize: true },
+  messaging: {
+    pillars: 'Human expertise, transparent process, ambitious careers',
+    proof: '92% probation pass rate · 21-day average time to shortlist',
+    required: 'Equal-opportunity language',
+    restricted: 'Guaranteed placement, perfect candidate, rockstar',
+    differentiator: 'Recruiters who have shipped product, not only filled seats.',
+    cta: 'See open roles',
+  },
+  visual: {
+    colors: ['#1E1B18', '#3E92CC', '#FFFAFF'],
+    imageStyle: 'Editorial photography, natural light, real teams at work',
+    typeStyle: 'Clean sans serif, generous space, short headlines',
+  },
+  posting: {
+    platforms: ['Instagram', 'Facebook'],
+    frequency: '4 posts per week',
+    timezone: 'Europe/Amsterdam',
+    bestTimes: 'Tuesday to Thursday, 5–7 PM',
+    hashtags: '#northstar #hiring #productteams',
+    mix: 'Team stories, role highlights, and practical hiring advice',
+    autoPublish: true,
+  },
+  metaRules: {
+    dailyBudget: 45,
+    duration: 21,
+    reviewMode: true,
+    category: 'Employment',
+    leadForm: 'Higher intent',
+    optimize: true,
+    countries: 'Netherlands, United Kingdom',
+    objective: 'Lead generation',
+  },
 }
 
 export const vacancySeed = [

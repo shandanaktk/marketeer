@@ -27,8 +27,63 @@ function Marquee() {
   return <div className="mk-marquee" aria-label="For creators, brands, agencies, and go-getters"><div className="mk-marquee-track" aria-hidden="true">{[0, 1, 2, 3].map(i => <div className="mk-marquee-group" key={i}>{['Creators', 'Brands', 'Agencies', 'Go-getters'].map(word => <span key={word}>{word}<i>✣</i></span>)}</div>)}</div></div>
 }
 
+const feedPosts = [
+  { platform: 'instagram', name: 'atelier.north', place: 'Copenhagen', avatar: '/reference/avatar-victoria.webp', image: '/social-posts/post-atelier.jpg', likes: '2,418', comments: '86', time: '2 hours ago', caption: 'Quiet forms, made to last.', tag: '#newcollection', verified: true },
+  { platform: 'facebook', name: 'Maison Sol', time: '2h', avatar: '/reference/avatar-shelby.webp', image: '/social-posts/post-maison.jpg', caption: 'A softer light. The evening fragrance, now in the studio.', reactions: '1.2K', comments: '84' },
+  { platform: 'instagram', name: 'lumen.studio', place: 'Lisbon', avatar: '/reference/avatar-thomas.webp', image: '/social-posts/post-lumen.jpg', likes: '3,902', comments: '41', time: '5 hours ago', caption: 'Rooms that hold the afternoon.', tag: '#lumenstudio' },
+  { platform: 'facebook', name: 'Coastline', time: '5h', avatar: '/reference/avatar-ilja.webp', image: '/social-posts/post-coast.jpg', caption: 'One chair. One view. The kind of evening you plan the year around.', reactions: '4.8K', comments: '216' },
+  { platform: 'instagram', name: 'form.studio', place: 'Milan', avatar: '/reference/avatar-ross.webp', image: '/social-posts/post-form.jpg', likes: '8,114', comments: '132', time: '1 day ago', caption: 'Tailored for the long way home.', tag: '#formstudio', verified: true },
+  { platform: 'facebook', name: 'Table Twelve', time: '1d', avatar: '/reference/avatar-benjamin.webp', image: '/social-posts/post-table.jpg', caption: 'Tonight’s table, set before the room fills.', reactions: '986', comments: '54' },
+]
+
+function FeedIcon({ name }) {
+  const common = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true }
+  if (name === 'heart') return <svg {...common}><path d="M12 20s-7-4.35-9.2-8.2C1.2 9.2 2.4 6 5.5 5.2 7.4 4.7 9.2 5.4 12 8c2.8-2.6 4.6-3.3 6.5-2.8 3.1.8 4.3 4 2.7 6.6C19 15.65 12 20 12 20z" /></svg>
+  if (name === 'comment') return <svg {...common}><path d="M6 6.5h12a1 1 0 0 1 1 1V15a1 1 0 0 1-1 1H9.2L6 18.5V6.5z" /></svg>
+  if (name === 'send') return <svg {...common}><path d="M4.5 12 19 5.5 14 19l-2.2-5.2L4.5 12z" /></svg>
+  if (name === 'bookmark') return <svg {...common}><path d="M7 4.5h10v15l-5-3-5 3v-15z" /></svg>
+  if (name === 'like') return <svg {...common}><path d="M8 11v8H4.5v-8zM8 18.5h8.2a1.8 1.8 0 0 0 1.8-1.5l.8-4.6a1.7 1.7 0 0 0-1.7-2H13l.5-2.8A1.7 1.7 0 0 0 11.9 6L8 10.2" /></svg>
+  if (name === 'share') return <svg {...common}><circle cx="7" cy="12" r="2.2" /><circle cx="17" cy="7" r="2.2" /><circle cx="17" cy="17" r="2.2" /><path d="m9 11 6-3M9 13l6 3" /></svg>
+  return <svg {...common}><circle cx="12" cy="12" r="8" /><path d="M4 12h16M12 4c2.2 2.2 3.2 5 3.2 8s-1 5.8-3.2 8c-2.2-2.2-3.2-5-3.2-8s1-5.8 3.2-8z" /></svg>
+}
+
+function IgIcon({ name }) {
+  const common = { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true }
+  if (name === 'heart') return <svg {...common}><path d="M12 20.2s-6.7-4.2-8.8-8.1C1.6 9.6 2.7 6.2 5.8 5.5c1.8-.4 3.4.3 4.7 2 .4.5.8.9 1.5.9s1.1-.4 1.5-.9c1.3-1.7 2.9-2.4 4.7-2 3.1.7 4.2 4.1 2.6 6.6-2.1 3.9-8.8 8.1-8.8 8.1z" /></svg>
+  if (name === 'comment') return <svg {...common}><path d="M12 20.5a8.5 8.5 0 1 0-3.7-.8L4.5 21l1.4-3.5A8.5 8.5 0 0 0 12 20.5z" /></svg>
+  if (name === 'send') return <svg {...common}><path d="M21.5 3.5 10.8 14.2" /><path d="M21.5 3.5 14.8 20.2l-4-6-6-4 16.7-6.7z" /></svg>
+  if (name === 'bookmark') return <svg {...common}><path d="M7 4.2h10a1 1 0 0 1 1 1V20l-6-3.4L6 20V5.2a1 1 0 0 1 1-1z" /></svg>
+  if (name === 'verified') return <svg className="mk-ig-verified" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#0095f6" /><path d="m7.5 12.2 3 3 6-6.4" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6" fill="currentColor" /><circle cx="12" cy="12" r="1.6" fill="currentColor" /><circle cx="19" cy="12" r="1.6" fill="currentColor" /></svg>
+}
+
+function FeedCard({ post }) {
+  const instagram = post.platform === 'instagram'
+  return <article className={`mk-feed-card mk-feed-${post.platform}`}>
+    <header>
+      {instagram ? <span className="mk-ig-avatar"><img src={post.avatar} alt="" /></span> : <img src={post.avatar} alt="" />}
+      <p><b>{post.name}{instagram && post.verified ? <IgIcon name="verified" /> : null}</b><small>{instagram ? post.place : `${post.time} · Public`}</small></p>
+      {instagram ? <IgIcon name="more" /> : <FeedIcon name="globe" />}
+    </header>
+    <img className="mk-feed-photo" src={post.image} alt="" />
+    <div className="mk-feed-foot">
+      {instagram
+        ? <div className="mk-feed-actions mk-ig-actions"><span><IgIcon name="heart" /><IgIcon name="comment" /><IgIcon name="send" /></span><IgIcon name="bookmark" /></div>
+        : <div className="mk-feed-actions mk-feed-fb-actions"><span><FeedIcon name="like" /> Like</span><span><FeedIcon name="comment" /> Comment</span><span><FeedIcon name="share" /> Share</span></div>}
+      <p className="mk-feed-caption">{instagram ? <><b>{post.name}</b> {post.caption} <span>{post.tag}</span></> : post.caption}</p>
+      <small>{instagram ? `${post.likes} likes · ${post.comments} comments` : <><span className="mk-feed-pills" aria-hidden="true"><i /><i /><i /></span>{post.reactions} · {post.comments} comments</>}</small>
+    </div>
+  </article>
+}
+
 function Statement({ navigate }) {
-  return <section className="mk-statement" id="content"><div className="mk-statement-copy" data-enter><h2>A social presence<br />that doesn’t<br /><em>take over your life.</em></h2><p>Content that sounds like you. Campaigns that know your goals. Everything in one place, with you in control.</p><strong>Less tab-hopping. More making things happen.</strong><button className="mk-button mk-button-cream" onClick={() => navigate('signup')}>Meet your new studio <Arrow /></button></div><div className="mk-giant-word" aria-hidden="true"><span>MARKETEER</span><span>MARKETEER</span></div></section>
+  return <section className="mk-statement" id="content">
+    <div className="mk-statement-copy" data-enter><h2>A social presence<br />that doesn’t<br /><em>take over your life.</em></h2><p>Content that sounds like you. Campaigns that know your goals. Everything in one place, with you in control.</p><strong>Less tab-hopping. More making things happen.</strong><button className="mk-button mk-button-cream" onClick={() => navigate('signup')}>Meet your new studio <Arrow /></button></div>
+    <div className="mk-post-rail" aria-label="Instagram and Facebook post previews">
+      <div className="mk-post-rail-track">{[0, 1].map(copy => <div className="mk-post-rail-set" key={copy} aria-hidden={copy === 1 || undefined}>{feedPosts.map(post => <FeedCard key={`${copy}-${post.name}`} post={post} />)}</div>)}</div>
+    </div>
+    <div className="mk-giant-word" aria-hidden="true"><span>MARKETEER</span><span>MARKETEER</span></div>
+  </section>
 }
 
 function Gallery({ navigate }) {

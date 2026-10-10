@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Dashboard from './Dashboard.jsx'
 import { ThemeButton } from './theme.jsx'
 
@@ -29,10 +29,42 @@ const goals = [
 
 const voices = ['Professional', 'Playful', 'Bold', 'Friendly', 'Luxury']
 
-const platforms = [
-  { id: 'facebook', name: 'Facebook', detail: 'Pages and feed via the Meta Graph API', icon: 'f', color: '#1877f2' },
-  { id: 'instagram', name: 'Instagram', detail: 'Posts, stories and reels via the Meta Graph API', icon: '◎', color: '#c13584' },
+const palette = [
+  '#0A2463', '#1E4B8F', '#3E92CC', '#8EC8EF', '#D8315B', '#F28B9F',
+  '#1E1B18', '#6A615C', '#C8A791', '#E47E3D', '#F8E6C4', '#898F65',
+  '#102A43', '#2F7EB5', '#0F766E', '#C2410C', '#7C3AED', '#FFFAFF',
 ]
+
+const platforms = [
+  { id: 'facebook', name: 'Facebook', detail: 'Pages, feed, and lead ads through the Meta Graph API', color: '#1877f2' },
+  { id: 'instagram', name: 'Instagram', detail: 'Feed posts, stories, and reels through the Meta Graph API', color: '#c13584' },
+]
+
+function MenuField({ value, placeholder = 'Select', options, onChange, label }) {
+  const [open, setOpen] = useState(false)
+  const root = useRef(null)
+  useEffect(() => {
+    const close = (event) => { if (root.current && !root.current.contains(event.target)) setOpen(false) }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [])
+  const current = options.find((option) => (option.value ?? option) === value)
+  const currentLabel = current ? (current.label ?? current) : ''
+  return (
+    <div className={`ob-menu ${open ? 'open' : ''}`} ref={root}>
+      <button type="button" className="ob-menu-trigger" aria-haspopup="listbox" aria-expanded={open} aria-label={label} onClick={() => setOpen((state) => !state)}>
+        <span className={currentLabel ? '' : 'is-placeholder'}>{currentLabel || placeholder}</span>
+        <i aria-hidden="true" />
+      </button>
+      {open && <ul className={options.length > 5 ? 'is-grid' : ''} role="listbox" aria-label={label}>{options.map((option) => {
+        const optionValue = option.value ?? option
+        const optionLabel = option.label ?? option
+        const selected = optionValue === value
+        return <li key={optionValue}><button type="button" role="option" aria-selected={selected} className={selected ? 'selected' : ''} onClick={() => { onChange(optionValue); setOpen(false) }}><span>{optionLabel}</span>{selected && <CheckIcon />}</button></li>
+      })}</ul>}
+    </div>
+  )
+}
 
 function ArrowIcon({ back = false }) {
   return (
@@ -56,6 +88,25 @@ function EyeIcon({ closed }) {
       <path d="M3 12s3.2-5 9-5 9 5 9 5-3.2 5-9 5-9-5-9-5Z" />
       <circle cx="12" cy="12" r="2.4" />
       {closed && <path d="m4 4 16 16" />}
+    </svg>
+  )
+}
+
+function GoogleLogo() {
+  return (
+    <svg className="google-mark" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+      <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+      <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+    </svg>
+  )
+}
+
+function AppleLogo() {
+  return (
+    <svg className="apple-mark" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M16.37 12.72c-.03-2.72 2.22-4.02 2.32-4.09-1.27-1.85-3.24-2.1-3.93-2.13-1.67-.17-3.26.98-4.11.98-.85 0-2.16-.96-3.55-.93-1.83.03-3.51 1.06-4.45 2.7-1.9 3.29-.49 8.16 1.36 10.83.9 1.31 1.98 2.77 3.39 2.72 1.36-.06 1.88-.88 3.53-.88 1.64 0 2.11.88 3.55.85 1.46-.02 2.39-1.33 3.29-2.64.1-.15 1.79-2.48 1.83-2.53-.04-.02-3.49-1.34-3.53-5.31zM14.3 5.3c.75-.91 1.25-2.17 1.11-3.43-1.08.04-2.38.72-3.15 1.62-.69.8-1.3 2.08-1.14 3.31 1.2.09 2.43-.61 3.18-1.5z" />
     </svg>
   )
 }
@@ -144,8 +195,8 @@ function AuthScreen({ mode, account, setAccount, onNavigate, onContinue }) {
           </div>
 
           <div className="ob-social-row">
-            <button type="button" onClick={onContinue}><b className="google-mark">G</b> Google</button>
-            <button type="button" onClick={onContinue}><b className="apple-mark">●</b> Apple</button>
+            <button type="button" onClick={onContinue}><GoogleLogo /> Google</button>
+            <button type="button" onClick={onContinue}><AppleLogo /> Apple</button>
           </div>
           <div className="ob-divider"><span>or use email</span></div>
 
@@ -234,8 +285,8 @@ function BasicsStep({ data, setData, onBack, onContinue }) {
       </div>
       <div className="ob-inline-divider"><span>or continue with</span></div>
       <div className="ob-social-row compact">
-        <button type="button" onClick={() => setData({ ...data, provider: 'Google' })} className={data.provider === 'Google' ? 'selected' : ''}><b className="google-mark">G</b> Google {data.provider === 'Google' && <CheckIcon />}</button>
-        <button type="button" onClick={() => setData({ ...data, provider: 'Apple' })} className={data.provider === 'Apple' ? 'selected' : ''}><b className="apple-mark">●</b> Apple {data.provider === 'Apple' && <CheckIcon />}</button>
+        <button type="button" onClick={() => setData({ ...data, provider: 'Google' })} className={data.provider === 'Google' ? 'selected' : ''}><GoogleLogo /> Google {data.provider === 'Google' && <CheckIcon />}</button>
+        <button type="button" onClick={() => setData({ ...data, provider: 'Apple' })} className={data.provider === 'Apple' ? 'selected' : ''}><AppleLogo /> Apple {data.provider === 'Apple' && <CheckIcon />}</button>
       </div>
       <fieldset className="ob-choice-set">
         <legend>What best describes you?</legend>
@@ -271,14 +322,10 @@ function BusinessStep({ data, setData, onBack, onContinue }) {
         <Field label="Business name">
           <input value={data.businessName} onChange={(event) => setData({ ...data, businessName: event.target.value })} placeholder="e.g. Marketeer" autoFocus />
         </Field>
-        <Field label="Industry">
-          <span className="ob-select-wrap">
-            <select value={data.industry} onChange={(event) => setData({ ...data, industry: event.target.value })}>
-              <option value="" disabled>Select your industry</option>
-              {industries.map((industry) => <option key={industry}>{industry}</option>)}
-            </select>
-          </span>
-        </Field>
+        <div className="ob-field">
+          <span className="ob-field-label">Industry</span>
+          <MenuField label="Industry" placeholder="Select your industry" value={data.industry} options={industries} onChange={(industry) => setData({ ...data, industry })} />
+        </div>
         <Field label="Website URL" hint="Optional">
           <span className="ob-url-wrap"><i>https://</i><input value={data.website} onChange={(event) => setData({ ...data, website: event.target.value.replace(/^https?:\/\//, '') })} placeholder="yourbusiness.com" inputMode="url" /></span>
         </Field>
@@ -314,11 +361,31 @@ function GoalsStep({ data, setData, onBack, onContinue }) {
 
 function BrandStep({ data, setData, onBack, onContinue }) {
   const uploadRef = useRef(null)
+  const paletteRef = useRef(null)
   const [logoName, setLogoName] = useState('')
+  const [paletteFor, setPaletteFor] = useState(null)
   const updateColor = (index, value) => {
     const colors = [...data.colors]
     colors[index] = value
     setData({ ...data, colors })
+  }
+  useEffect(() => {
+    if (paletteFor === null) return undefined
+    const close = (event) => {
+      if (paletteRef.current?.contains(event.target)) return
+      setPaletteFor(null)
+    }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [paletteFor])
+  const choosePaletteColor = (color) => {
+    const next = color.toUpperCase()
+    if (paletteFor === 'add') {
+      if (data.colors.length >= 6 || data.colors.some((item) => item.toUpperCase() === next)) return
+      setData({ ...data, colors: [...data.colors, next] })
+      return
+    }
+    if (typeof paletteFor === 'number') updateColor(paletteFor, next)
   }
   const handleLogo = (event) => {
     const file = event.target.files?.[0]
@@ -338,12 +405,33 @@ function BrandStep({ data, setData, onBack, onContinue }) {
             <p><b>{logoName || 'Upload your logo'}</b><small>{logoName ? 'Click to replace' : 'or drag and drop here'}</small></p><i>↑</i>
           </button>
           <div className="ob-color-block">
-            <div className="ob-field-label">Brand colors <small>Click a swatch to edit</small></div>
-            <div className="ob-swatches">
+            <div className="ob-field-label">Brand colors <small>Pick from the palette or type a hex</small></div>
+            <div className="ob-color-strip">
               {data.colors.map((color, index) => (
-                <label key={`${color}-${index}`} style={{ '--swatch': color }}><input type="color" value={color} onChange={(event) => updateColor(index, event.target.value)} /><span><CheckIcon /></span><small>{color.toUpperCase()}</small></label>
+                <div className="ob-color-chip" key={index}>
+                  <button type="button" className={`ob-color-swatch ${paletteFor === index ? 'is-editing' : ''}`} style={{ background: color }} aria-label={`Edit brand color ${index + 1}`} onClick={() => setPaletteFor(index)} />
+                  <input className="ob-color-hex" aria-label={`Hex for brand color ${index + 1}`} value={color} maxLength={7} onChange={(event) => updateColor(index, event.target.value.startsWith('#') ? event.target.value : `#${event.target.value}`)} />
+                  {data.colors.length > 2 && <button type="button" aria-label={`Remove color ${color}`} onClick={() => setData({ ...data, colors: data.colors.filter((_, item) => item !== index) })}>×</button>}
+                </div>
               ))}
+              {data.colors.length < 6 && <button className={`ob-color-add ${paletteFor === 'add' ? 'is-open' : ''}`} type="button" onClick={() => setPaletteFor(paletteFor === 'add' ? null : 'add')}><b>+</b><small>Custom</small></button>}
             </div>
+            {paletteFor !== null && (
+              <div className="ob-palette" ref={paletteRef}>
+                <p>{paletteFor === 'add' ? 'Add a brand color' : 'Replace this color'}</p>
+                <div className="ob-palette-grid">
+                  {palette.map((color) => {
+                    const used = data.colors.some((item) => item.toUpperCase() === color)
+                    const current = paletteFor !== 'add' && data.colors[paletteFor]?.toUpperCase() === color
+                    return <button type="button" key={color} className={current ? 'is-current' : used ? 'is-used' : ''} style={{ background: color }} aria-label={color} onClick={() => choosePaletteColor(color)} />
+                  })}
+                </div>
+                <label className="ob-palette-any">
+                  Any color
+                  <input type="color" aria-label="Pick any color" value={/^#[0-9a-fA-F]{6}$/.test(paletteFor === 'add' ? '#3e92cc' : data.colors[paletteFor] || '') ? (paletteFor === 'add' ? '#3e92cc' : data.colors[paletteFor]) : '#3e92cc'} onChange={(event) => choosePaletteColor(event.target.value)} />
+                </label>
+              </div>
+            )}
           </div>
         </div>
         <div className="ob-brand-right">
@@ -378,20 +466,21 @@ function AutomationStep({ data, setData, onBack, onContinue }) {
       <ScreenHeading index={5} eyebrow="Automation rules" title={<>Set the rhythm.<br /><em>We’ll run it.</em></>} subtitle="Choose the publishing cadence and recruitment ad defaults Marketeer should apply automatically." />
       <div className="ob-automation-layout">
         <section>
-          <div className="ob-field-label">Publishing channels <small>Select all that apply</small></div>
+          <header className="ob-rule-head"><b>Organic publishing</b><small>Select every channel Marketeer should post to</small></header>
           <div className="ob-rule-platforms">
-            {['Instagram', 'Facebook'].map((platform) => <button type="button" className={data.postingPlatforms.includes(platform) ? 'selected' : ''} onClick={() => togglePlatform(platform)} key={platform}><span>{platform.slice(0, 1)}</span><b>{platform}</b><i><CheckIcon /></i></button>)}
+            {[{ name: 'Instagram', detail: 'Feed, stories, and reels' }, { name: 'Facebook', detail: 'Pages, feed, and lead ads' }].map((platform) => <button type="button" className={data.postingPlatforms.includes(platform.name) ? 'selected' : ''} onClick={() => togglePlatform(platform.name)} key={platform.name}><img src={`/social_logos/${platform.name.toLowerCase()}.png`} alt="" /><span><b>{platform.name}</b><small>{platform.detail}</small></span><i><CheckIcon /></i></button>)}
           </div>
+          <p className="ob-rhythm-note"><b>{data.postingPlatforms.length || 'No'} channel{data.postingPlatforms.length === 1 ? '' : 's'}</b> · {data.postingFrequency} · {data.timezone.replace('_', ' ')}</p>
           <div className="ob-two-fields">
-            <Field label="Publishing frequency"><span className="ob-select-wrap"><select value={data.postingFrequency} onChange={(event) => setData({ ...data, postingFrequency: event.target.value })}><option>3 posts per week</option><option>4 posts per week</option><option>5 posts per week</option><option>Daily</option></select></span></Field>
-            <Field label="Timezone"><span className="ob-select-wrap"><select value={data.timezone} onChange={(event) => setData({ ...data, timezone: event.target.value })}><option>Europe/Amsterdam</option><option>Europe/London</option><option>America/New_York</option><option>Asia/Karachi</option></select></span></Field>
+            <div className="ob-field"><span className="ob-field-label">Publishing frequency</span><MenuField label="Publishing frequency" value={data.postingFrequency} options={['3 posts per week', '4 posts per week', '5 posts per week', 'Daily']} onChange={(postingFrequency) => setData({ ...data, postingFrequency })} /></div>
+            <div className="ob-field"><span className="ob-field-label">Timezone</span><MenuField label="Timezone" value={data.timezone} options={['Europe/Amsterdam', 'Europe/London', 'America/New_York', 'Asia/Karachi']} onChange={(timezone) => setData({ ...data, timezone })} /></div>
           </div>
         </section>
         <section className="ob-meta-rules">
-          <div className="ob-field-label">Meta recruitment defaults <small>Employment category applied</small></div>
+          <header className="ob-rule-head"><b>Meta recruitment ads</b><small>Employment defaults stay locked for compliance</small></header>
           <div className="ob-two-fields">
             <Field label="Daily budget"><span className="ob-budget-input"><i>$</i><input type="number" min="5" value={data.metaBudget} onChange={(event) => setData({ ...data, metaBudget: event.target.value })} /></span></Field>
-            <Field label="Campaign duration"><span className="ob-select-wrap"><select value={data.metaDuration} onChange={(event) => setData({ ...data, metaDuration: event.target.value })}><option value="14">14 days</option><option value="21">21 days</option><option value="30">30 days</option></select></span></Field>
+            <div className="ob-field"><span className="ob-field-label">Campaign duration</span><MenuField label="Campaign duration" value={data.metaDuration} options={[{ value: '14', label: '14 days' }, { value: '21', label: '21 days' }, { value: '30', label: '30 days' }]} onChange={(metaDuration) => setData({ ...data, metaDuration })} /></div>
           </div>
           <button type="button" className={`ob-rule-toggle ${data.reviewMode ? 'on' : ''}`} onClick={() => setData({ ...data, reviewMode: !data.reviewMode })}><span><i /></span><p><b>Review campaigns before launch</b><small>Hold generated campaigns for edits and approval.</small></p></button>
           <div className="ob-employment-lock"><span>!</span><p><b>Employment targeting stays compliant.</b> Age, gender, and detailed-targeting limitations are locked automatically.</p></div>
@@ -415,7 +504,7 @@ function ConnectStep({ data, setData, onBack, onContinue }) {
           const connected = data.connected.includes(platform.id)
           return (
             <article className={connected ? 'ob-connect-card connected' : 'ob-connect-card'} key={platform.id}>
-              <span className="ob-platform-icon" style={{ '--platform-color': platform.color }}>{platform.icon}</span>
+              <span className="ob-platform-icon"><img src={`/social_logos/${platform.id}.png`} alt="" /></span>
               <div><h3>{platform.name}{platform.optional && <small>Optional</small>}</h3><p>{platform.detail}</p></div>
               <button type="button" onClick={() => toggle(platform.id)}>{connected ? <><CheckIcon /> Connected</> : <>Connect <ArrowIcon /></>}</button>
             </article>
@@ -459,20 +548,27 @@ function WorkspaceStep({ data, setData, onBack, onContinue }) {
 }
 
 function CompleteStep({ data, onBack, onDashboard }) {
-  const connectedNames = platforms.filter((platform) => data.connected.includes(platform.id)).map((platform) => platform.name)
   const displayName = data.name.trim().split(' ')[0] || 'there'
+  const channels = data.postingPlatforms.map((name) => ({ name, src: `/social_logos/${name.toLowerCase()}.png` }))
   return (
     <section className="ob-step ob-complete-step">
       <div className="ob-confetti" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /></div>
       <div className="ob-success-mark"><CheckIcon /></div>
       <ScreenHeading index={8} eyebrow="Setup complete" title={<>You’re all set,<br /><em>{displayName}!</em> 🎉</>} subtitle="Your creative command center is ready to go." />
       <div className="ob-summary-card">
-        <div className="ob-summary-title"><span>✦</span><p><small>YOUR MARKETEER</small><b>Launch summary</b></p><em>Ready</em></div>
+        <div className="ob-summary-band">
+          <div>
+            <p><b>{data.businessName || 'Your brand'}</b><span>{[data.industry, data.voice || data.customVoice].filter(Boolean).join(' · ') || 'Brand profile'}</span></p>
+            <div className="ob-summary-swatches">{data.colors.map((color, index) => <span key={`${color}-${index}`} style={{ background: color }} />)}</div>
+          </div>
+          <em>Ready</em>
+        </div>
         <ul>
-          <li><i><CheckIcon /></i><p><span>Business profile</span><b>{data.businessName || 'Ready to complete anytime'}</b></p></li>
-          <li><i><CheckIcon /></i><p><span>Brand identity</span><b>Logo, colors & {data.voice || data.customVoice || 'brand voice'} saved</b></p><div className="ob-summary-swatches">{data.colors.slice(0, 3).map((color) => <span key={color} style={{ background: color }} />)}</div></li>
-          <li><i><CheckIcon /></i><p><span>Connected accounts</span><b>{connectedNames.length ? connectedNames.join(', ') : 'None yet—connect anytime from Settings'}</b></p></li>
-          {(data.role === 'Agency' || data.role === 'Freelancer') && <li><i><CheckIcon /></i><p><span>Workspace</span><b>{data.workspaceName || 'Personal workspace'} · {data.invites.length + 1} member{data.invites.length ? 's' : ''}</b></p></li>}
+          <li><span>Rhythm</span><b>{data.postingFrequency}</b></li>
+          <li><span>Timezone</span><b>{data.timezone.replace('_', ' ')}</b></li>
+          <li><span>Meta ads</span><b>${data.metaBudget}/day · {data.metaDuration} days{data.reviewMode ? ' · review on' : ''}</b></li>
+          <li><span>Channels</span>{channels.length > 0 ? <div className="ob-summary-logos">{channels.map((channel) => <img key={channel.name} src={channel.src} alt={channel.name} />)}</div> : <b>Add these in Settings</b>}</li>
+          {(data.role === 'Agency' || data.role === 'Freelancer') && <li><span>Workspace</span><b>{data.workspaceName || 'Personal workspace'} · {data.invites.length + 1} member{data.invites.length ? 's' : ''}</b></li>}
         </ul>
       </div>
       <p className="ob-complete-copy">Your dashboard is ready. This is where you’ll create ads, generate content, and publish across Facebook and Instagram—all powered by AI.</p>

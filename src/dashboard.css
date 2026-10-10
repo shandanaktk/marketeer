@@ -1,5 +1,6 @@
 .db-dashboard {
   --db-sidebar: 258px;
+  --db-sidebar-size: 258px;
   --db-bg: #1e1b18;
   --db-panel: rgba(24, 25, 23, .9);
   --db-panel-soft: rgba(var(--app-contrast-rgb), .035);
@@ -34,11 +35,35 @@
 .db-ambient > span:nth-child(3) { top: 38%; left: 45%; width: 430px; height: 350px; opacity: .06; background: var(--db-lime); }
 
 /* App shell */
-.db-sidebar { position: fixed; z-index: 40; inset: 0 auto 0 0; display: flex; width: var(--db-sidebar); flex-direction: column; padding: 22px 14px 15px; border-right: 1px solid var(--db-stroke); background: rgba(7, 8, 7, .9); box-shadow: 28px 0 80px rgba(0,0,0,.2); backdrop-filter: blur(28px); }
+.db-sidebar { position: fixed; z-index: 40; inset: 0 auto 0 0; display: flex; width: var(--db-sidebar-size); flex-direction: column; padding: 22px 14px 15px; overflow: hidden; border-right: 1px solid var(--db-stroke); background: rgba(7, 8, 7, .9); box-shadow: 28px 0 80px rgba(0,0,0,.2); backdrop-filter: blur(28px); transition: width .28s cubic-bezier(.22,1,.36,1), transform .28s cubic-bezier(.22,1,.36,1); }
+.db-dashboard.sidebar-closed { --db-sidebar: 78px; --db-sidebar-size: 78px; }
+.db-dashboard.sidebar-closed .db-sidebar { padding-inline: 10px; }
+.db-dashboard.sidebar-closed .db-brand-full,
+.db-dashboard.sidebar-closed .db-sidebar-brand > button:first-child > span,
+.db-dashboard.sidebar-closed .db-nav-group > small,
+.db-dashboard.sidebar-closed .db-nav-group > button > b,
+.db-dashboard.sidebar-closed .db-usage > b,
+.db-dashboard.sidebar-closed .db-usage > i,
+.db-dashboard.sidebar-closed .db-usage > button,
+.db-dashboard.sidebar-closed .db-profile > div { display: none; }
+.db-dashboard.sidebar-closed .db-sidebar-brand { justify-content: center; padding: 0; }
+.db-dashboard.sidebar-closed .db-brand-mark { display: inline; }
+.db-dashboard.sidebar-closed .db-nav-group { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--db-stroke); }
+.db-dashboard.sidebar-closed .db-nav-group:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.db-dashboard.sidebar-closed .db-nav-group > button { justify-content: center; gap: 0; margin-top: 4px; padding: 6px; }
+.db-dashboard.sidebar-closed .db-nav-group > button:hover { transform: none; }
+.db-dashboard.sidebar-closed .db-nav-group > button > i,
+.db-dashboard.sidebar-closed .db-nav-group > button > em { position: absolute; top: 4px; right: 4px; margin-left: 0; }
+.db-dashboard.sidebar-closed .db-nav-group > button > i { min-width: 15px; height: 15px; font-size: 9px; }
+.db-dashboard.sidebar-closed .db-usage { display: grid; place-items: center; padding: 8px; }
+.db-dashboard.sidebar-closed .db-usage > span { justify-content: center; font-size: 0; }
+.db-dashboard.sidebar-closed .db-profile { justify-content: center; padding-inline: 0; }
 .db-sidebar-brand { display: flex; height: 42px; align-items: flex-start; justify-content: space-between; padding: 0 10px; }
 .db-sidebar-brand > button:first-child { padding: 0; border: 0; cursor: pointer; color: var(--app-ink); font-family: 'Aeonik', Georgia, serif; font-size: 31px; font-style: italic; font-weight: 600; letter-spacing: -.055em; line-height: 1; background: transparent; }
+.db-sidebar-brand > button:first-child em { font-style: inherit; font-weight: inherit; }
 .db-sidebar-brand > button:first-child span { color: var(--db-lime); }
-.db-mobile-close { display: none; width: 34px; height: 34px; place-items: center; padding: 0; border: 1px solid var(--db-stroke); border-radius: 9px; background: var(--db-panel-soft); }
+.db-brand-mark { display: none; }
+.db-mobile-close { display: none; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; padding: 0; border: 1px solid var(--db-stroke); border-radius: 9px; background: var(--db-panel-soft); cursor: pointer; }
 .db-workspace { display: flex; width: 100%; align-items: center; gap: 9px; margin: 15px 0 14px; padding: 9px; border: 1px solid var(--db-stroke); border-radius: 13px; text-align: left; background: var(--db-panel-soft); }
 .db-workspace > span { display: grid; width: 32px; height: 32px; flex: 0 0 auto; place-items: center; border-radius: 9px; color: #111; font-family: 'Aeonik', serif; font-size: 15px; font-style: italic; font-weight: 700; background: linear-gradient(145deg,#8ec8ef,var(--db-lime)); }
 .db-workspace > div { min-width: 0; flex: 1; }
@@ -66,10 +91,10 @@
 .db-profile > span { position: relative; display: grid; width: 33px; height: 33px; flex: 0 0 auto; place-items: center; border-radius: 50%; color: #111; font-size: 12px; font-weight: 800; background: linear-gradient(145deg,#8ec8ef,#0a2463); }
 .db-profile > span i { position: absolute; right: 0; bottom: 0; width: 8px; height: 8px; border: 2px solid #080908; border-radius: 50%; background: var(--db-lime); }
 .db-profile > div { min-width: 0; flex: 1; }.db-profile b,.db-profile small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }.db-profile b { font-size: 13px; }.db-profile small { margin-top: 2px; color: var(--db-copy-faint); font-size: 12px; }
-.db-main-shell { min-height: 100svh; margin-left: var(--db-sidebar); }
+.db-main-shell { min-height: 100svh; margin-left: var(--db-sidebar); transition: margin-left .28s cubic-bezier(.22,1,.36,1); }
 .db-topbar { position: sticky; z-index: 30; top: 0; display: flex; height: 68px; align-items: center; justify-content: space-between; padding: 0 clamp(20px,3.2vw,48px); border-bottom: 1px solid var(--db-stroke); background: rgba(8,9,8,.74); backdrop-filter: blur(26px); }
 .db-topbar-left,.db-top-actions,.db-breadcrumb { display: flex; align-items: center; }.db-topbar-left { gap: 10px; }.db-breadcrumb { gap: 8px; color: var(--db-copy-faint); font-size: 13px; }.db-breadcrumb i { opacity: .5; font-style: normal; }.db-breadcrumb b { color: var(--db-copy-soft); font-weight: 600; }
-.db-menu-button { display: none; width: 35px; height: 35px; place-items: center; padding: 0; border: 1px solid var(--db-stroke); border-radius: 9px; background: var(--db-panel-soft); }
+.db-menu-button { display: grid; width: 36px; height: 36px; flex: 0 0 auto; place-items: center; padding: 0; border: 1px solid var(--db-stroke); border-radius: 10px; background: var(--db-panel-soft); cursor: pointer; }
 .db-top-actions { gap: 9px; align-items: center; }
 .db-top-actions .db-theme-button { display: inline-flex; width: 36px; min-width: 36px; height: 36px; min-height: 36px; align-items: center; justify-content: center; align-self: center; padding: 0; line-height: 0; }
 .db-top-actions .db-theme-button small { display: none; }

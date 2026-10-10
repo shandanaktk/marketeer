@@ -6,31 +6,153 @@ function SectionHeading({ icon, title, copy }) {
   return <div className="db-section-heading"><span><Icon name={icon} size={18} /></span><div><h2>{title}</h2><p>{copy}</p></div></div>
 }
 
+const KNOWLEDGE_KEY = 'marketeer-knowledge-base'
+const KNOWLEDGE_TABS = [
+  ['brand', 'Identity'],
+  ['audience', 'Audience'],
+  ['voice', 'Voice'],
+  ['offerings', 'Offerings'],
+  ['messaging', 'Messaging'],
+  ['visual', 'Look'],
+  ['posting', 'Publishing'],
+  ['metaRules', 'Ads'],
+]
+
+function mergeKnowledge(extra) {
+  const next = structuredClone(knowledgeBaseSeed)
+  if (!extra || typeof extra !== 'object') return next
+  for (const key of Object.keys(next)) {
+    if (Array.isArray(next[key])) next[key] = Array.isArray(extra[key]) ? extra[key] : next[key]
+    else next[key] = { ...next[key], ...(extra[key] && typeof extra[key] === 'object' ? extra[key] : {}) }
+  }
+  return next
+}
+
+function loadKnowledge() {
+  try {
+    const raw = window.localStorage.getItem(KNOWLEDGE_KEY)
+    return raw ? mergeKnowledge(JSON.parse(raw)) : structuredClone(knowledgeBaseSeed)
+  } catch {
+    return structuredClone(knowledgeBaseSeed)
+  }
+}
+
+function knowledgeScore(data) {
+  const values = [
+    data.brand.name, data.brand.website, data.brand.tagline, data.brand.industry, data.brand.location, data.brand.description, data.brand.story, data.brand.mission,
+    data.audience.primary, data.audience.secondary, data.audience.pains, data.audience.markets,
+    data.voice.tone, data.voice.personality, data.voice.languages, data.voice.sample,
+    data.messaging.pillars, data.messaging.proof, data.messaging.required, data.messaging.restricted, data.messaging.differentiator, data.messaging.cta,
+    data.visual.imageStyle, data.visual.typeStyle, data.visual.colors.join(''),
+    data.posting.frequency, data.posting.timezone, data.posting.bestTimes, data.posting.hashtags, data.posting.mix, data.posting.platforms.join(''),
+    data.metaRules.countries, data.metaRules.objective, String(data.metaRules.dailyBudget || ''),
+    ...data.offerings.flatMap((item) => [item.name, item.detail]),
+  ]
+  const filled = values.filter((item) => String(item || '').trim()).length
+  return { filled, total: values.length }
+}
+
+function savedWhen(iso) {
+  if (!iso) return 'Saved with your workspace'
+  const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000)
+  if (minutes < 1) return 'Saved just now'
+  if (minutes < 60) return `Saved ${minutes} min ago`
+  return `Saved ${new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`
+}
+
+function KnowledgePreview({ data, savedAt }) {
+  const facts = [
+    ['Voice', data.voice.tone],
+    ['Personality', data.voice.personality],
+    ['Languages', data.voice.languages],
+    ['Audience', data.audience.primary],
+    ['Also reaches', data.audience.secondary],
+    ['Markets', data.audience.markets],
+  ].filter(([, value]) => value)
+  return <div className="db-kb-preview">
+    <article className="db-card db-kb-cover">
+      <div>
+        <span className="db-eyebrow"><Icon name="spark" size={14} /> {savedWhen(savedAt)}</span>
+        <h2>{data.brand.name || 'Your brand'}</h2>
+        {data.brand.tagline && <p className="db-kb-tagline">{data.brand.tagline}</p>}
+        <div className="db-kb-meta">{[data.brand.industry, data.brand.location, data.brand.website].filter(Boolean).map((item) => <span key={item}>{item}</span>)}</div>
+      </div>
+      {data.visual.colors.length > 0 && <div className="db-kb-swatches">{data.visual.colors.map((color) => <i style={{ background: color }} key={color} title={color} />)}</div>}
+      {data.brand.description && <p>{data.brand.description}</p>}
+    </article>
+    {(data.brand.mission || data.brand.story) && <div className="db-kb-split">
+      {data.brand.mission && <article className="db-card"><small>Mission</small><p>{data.brand.mission}</p></article>}
+      {data.brand.story && <article className="db-card"><small>Origin</small><p>{data.brand.story}</p></article>}
+    </div>}
+    {facts.length > 0 && <div className="db-kb-facts">{facts.map(([label, value]) => <article className="db-card" key={label}><small>{label}</small><b>{value}</b></article>)}</div>}
+    {data.audience.pains && <article className="db-card db-kb-note"><small>What they are tired of</small><p>{data.audience.pains}</p></article>}
+    {data.voice.sample && <article className="db-card db-kb-quote"><small>How it should sound</small><p>{data.voice.sample}</p></article>}
+    {data.offerings.length > 0 && <section className="db-kb-block"><header><h3>What you offer</h3></header><div className="db-kb-offers">{data.offerings.map((item) => <article className="db-card" key={item.id}><b>{item.name}</b>{item.who && <em>{item.who}</em>}<p>{item.detail}</p></article>)}</div></section>}
+    <section className="db-kb-block"><header><h3>What every piece should say</h3></header><div className="db-kb-messages">{[
+      ['Pillars', data.messaging.pillars],
+      ['Proof', data.messaging.proof],
+      ['Always include', data.messaging.required],
+      ['Never say', data.messaging.restricted],
+      ['Difference', data.messaging.differentiator],
+      ['Call to action', data.messaging.cta],
+    ].filter(([, value]) => value).map(([label, value]) => <article className="db-card" key={label}><small>{label}</small><p>{value}</p></article>)}</div></section>
+    <div className="db-kb-split">
+      <article className="db-card db-kb-publish">
+        <small>Publishing</small>
+        <div className="db-kb-logos">{data.posting.platforms.map((platform) => <img src={`/social_logos/${platform.toLowerCase()}.png`} alt={platform} key={platform} />)}</div>
+        <ul>{[data.posting.frequency, data.posting.timezone, data.posting.bestTimes, data.posting.mix, data.posting.hashtags, data.posting.autoPublish ? 'Publishes automatically after approval' : 'Holds every post for a manual publish'].filter(Boolean).map((item) => <li key={item}>{item}</li>)}</ul>
+      </article>
+      <article className="db-card db-kb-publish">
+        <small>Meta ads</small>
+        <strong>${data.metaRules.dailyBudget}/day · {data.metaRules.duration} days</strong>
+        <ul>{[data.metaRules.objective, data.metaRules.countries, data.metaRules.leadForm, data.metaRules.category, data.visual.imageStyle, data.visual.typeStyle, data.metaRules.reviewMode ? 'Review before launch' : '', data.metaRules.optimize ? 'Budget pacing on' : ''].filter(Boolean).map((item) => <li key={item}>{item}</li>)}</ul>
+      </article>
+    </div>
+  </div>
+}
+
 export function KnowledgeBaseView({ notify }) {
   const [tab, setTab] = useState('brand')
-  const [data, setData] = useState(knowledgeBaseSeed)
+  const [saved, setSaved] = useState(loadKnowledge)
+  const [draft, setDraft] = useState(saved)
+  const [mode, setMode] = useState('preview')
+  const [savedAt, setSavedAt] = useState(() => window.localStorage.getItem(`${KNOWLEDGE_KEY}-at`))
   const [newOffering, setNewOffering] = useState('')
-  const update = (group, key, value) => setData((current) => ({ ...current, [group]: { ...current[group], [key]: value } }))
+  const data = mode === 'preview' ? saved : draft
+  const score = knowledgeScore(saved)
+  const update = (group, key, value) => setDraft((current) => ({ ...current, [group]: { ...current[group], [key]: value } }))
   const addOffering = () => {
     if (!newOffering.trim()) return
-    setData((current) => ({ ...current, offerings: [...current.offerings, { id: `service-${Date.now()}`, name: newOffering.trim(), detail: 'Add a short description for stronger AI context.' }] }))
+    setDraft((current) => ({ ...current, offerings: [...current.offerings, { id: `service-${Date.now()}`, name: newOffering.trim(), detail: '', who: '' }] }))
     setNewOffering('')
   }
-  const tabs = [['brand', 'Brand'], ['offerings', 'Products & services'], ['messaging', 'Messaging'], ['posting', 'Posting'], ['metaRules', 'Meta rules']]
+  const save = () => {
+    if (!draft.brand.name.trim()) { notify('Add a brand name before saving.', 'error'); setTab('brand'); return }
+    const stamp = new Date().toISOString()
+    setSaved(draft)
+    setSavedAt(stamp)
+    setMode('preview')
+    window.localStorage.setItem(KNOWLEDGE_KEY, JSON.stringify(draft))
+    window.localStorage.setItem(`${KNOWLEDGE_KEY}-at`, stamp)
+    notify('Knowledge Base saved. This is the profile generations will use.')
+  }
 
   return <div className="db-page db-srs-page">
-    <PageIntro eyebrow="Knowledge Base" icon="spark" title="Give every generation the same source of truth." description="Brand, offering, messaging, publishing, and ad rules are shared by both automation pipelines." actions={<Button icon="check" onClick={() => notify('Knowledge Base saved in demo mode.')}>Save Knowledge Base</Button>} />
-    <div className="db-context-status db-card"><span><Icon name="spark" size={18} /></span><div><b>AI context is healthy</b><p>5 of 5 sections complete · Last indexed 4 minutes ago</p></div><Badge>Ready for generation</Badge></div>
-    <div className="db-srs-layout">
-      <nav className="db-card db-srs-tabs" aria-label="Knowledge Base sections">{tabs.map(([id, label], index) => <button className={tab === id ? 'active' : ''} onClick={() => setTab(id)} key={id}><span>{String(index + 1).padStart(2, '0')}</span>{label}<Icon name="arrow" size={14} /></button>)}</nav>
+    <PageIntro eyebrow="Knowledge Base" icon="spark" title={mode === 'preview' ? 'The profile behind every generation.' : 'Tell Marketeer who you are.'} description={mode === 'preview' ? 'This saved profile is what content, campaigns, and ads are written from.' : 'The more specific this is, the less generic the work becomes.'} actions={mode === 'preview' ? <Button icon="edit" onClick={() => { setDraft(saved); setMode('edit') }}>Edit knowledge</Button> : <><Button variant="secondary" onClick={() => { setDraft(saved); setMode('preview') }}>Cancel</Button><Button icon="check" onClick={save}>Save knowledge</Button></>} />
+    <div className="db-context-status db-card"><span><Icon name="spark" size={18} /></span><div><b>{mode === 'preview' ? 'Saved profile' : 'Editing profile'}</b><p>{score.filled} of {score.total} details filled · {savedWhen(savedAt)}</p></div><Badge>{mode === 'preview' ? 'Ready for generation' : 'Unsaved edits'}</Badge></div>
+    {mode === 'preview' ? <KnowledgePreview data={data} savedAt={savedAt} /> : <div className="db-srs-layout">
+      <nav className="db-card db-srs-tabs" aria-label="Knowledge Base sections">{KNOWLEDGE_TABS.map(([id, label], index) => <button className={tab === id ? 'active' : ''} onClick={() => setTab(id)} key={id}><span>{String(index + 1).padStart(2, '0')}</span>{label}<Icon name="arrow" size={14} /></button>)}</nav>
       <section className="db-card db-srs-editor">
-        {tab === 'brand' && <><SectionHeading icon="target" title="Brand profile" copy="Core facts and positioning used in every generated post, visual, and campaign." /><div className="db-form-grid two"><Field label="Brand name"><input value={data.brand.name} onChange={(event) => update('brand', 'name', event.target.value)} /></Field><Field label="Website"><input value={data.brand.website} onChange={(event) => update('brand', 'website', event.target.value)} /></Field><Field label="Brand voice"><input value={data.brand.voice} onChange={(event) => update('brand', 'voice', event.target.value)} /></Field><Field label="Primary audience"><input value={data.brand.audience} onChange={(event) => update('brand', 'audience', event.target.value)} /></Field><Field label="Business description" className="span-two"><textarea rows="6" value={data.brand.description} onChange={(event) => update('brand', 'description', event.target.value)} /></Field></div></>}
-        {tab === 'offerings' && <><SectionHeading icon="folder" title="Products & services" copy="Give the AI enough context to choose accurate topics, benefits, and calls to action." /><div className="db-offering-list">{data.offerings.map((item) => <article key={item.id}><span><Icon name="spark" size={16} /></span><div><input value={item.name} onChange={(event) => setData((current) => ({ ...current, offerings: current.offerings.map((entry) => entry.id === item.id ? { ...entry, name: event.target.value } : entry) }))} /><textarea rows="2" value={item.detail} onChange={(event) => setData((current) => ({ ...current, offerings: current.offerings.map((entry) => entry.id === item.id ? { ...entry, detail: event.target.value } : entry) }))} /></div><button onClick={() => setData((current) => ({ ...current, offerings: current.offerings.filter((entry) => entry.id !== item.id) }))} aria-label={`Remove ${item.name}`}><Icon name="trash" size={16} /></button></article>)}</div><div className="db-inline-add"><input value={newOffering} onChange={(event) => setNewOffering(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && addOffering()} placeholder="Add another product or service" /><Button icon="plus" onClick={addOffering}>Add</Button></div></>}
-        {tab === 'messaging' && <><SectionHeading icon="content" title="Messaging guardrails" copy="Define what Marketeer should emphasize, prove, include, and avoid." /><div className="db-form-grid two"><Field label="Messaging pillars" className="span-two"><textarea rows="4" value={data.messaging.pillars} onChange={(event) => update('messaging', 'pillars', event.target.value)} /></Field><Field label="Proof points"><textarea rows="4" value={data.messaging.proof} onChange={(event) => update('messaging', 'proof', event.target.value)} /></Field><Field label="Always include"><textarea rows="4" value={data.messaging.required} onChange={(event) => update('messaging', 'required', event.target.value)} /></Field><Field label="Restricted claims" className="span-two"><input value={data.messaging.restricted} onChange={(event) => update('messaging', 'restricted', event.target.value)} /></Field></div></>}
-        {tab === 'posting' && <><SectionHeading icon="calendar" title="Posting preferences" copy="Set the cadence that drives automatic planning, scheduling, and publishing." /><div className="db-form-grid two"><Field label="Publishing frequency"><select value={data.posting.frequency} onChange={(event) => update('posting', 'frequency', event.target.value)}><option>3 posts per week</option><option>4 posts per week</option><option>5 posts per week</option><option>Daily</option></select></Field><Field label="Timezone"><input value={data.posting.timezone} onChange={(event) => update('posting', 'timezone', event.target.value)} /></Field></div><div className="db-kb-platforms">{['Instagram', 'Facebook'].map((platform) => <button className={data.posting.platforms.includes(platform) ? 'active' : ''} key={platform} onClick={() => update('posting', 'platforms', data.posting.platforms.includes(platform) ? data.posting.platforms.filter((item) => item !== platform) : [...data.posting.platforms, platform])}><span>{platform.slice(0, 1)}</span>{platform}<Icon name="check" size={14} /></button>)}</div><Toggle checked={data.posting.autoPublish} onChange={(value) => update('posting', 'autoPublish', value)} label="Automatic publishing" hint="Publish approved calendar items through official platform APIs at the scheduled time." /></>}
-        {tab === 'metaRules' && <><SectionHeading icon="ads" title="Meta recruitment rules" copy="Defaults applied automatically whenever a vacancy becomes a Meta campaign." /><div className="db-form-grid two"><Field label="Daily budget"><span className="db-input-prefix"><b>$</b><input type="number" value={data.metaRules.dailyBudget} onChange={(event) => update('metaRules', 'dailyBudget', Number(event.target.value))} /></span></Field><Field label="Default duration"><select value={data.metaRules.duration} onChange={(event) => update('metaRules', 'duration', Number(event.target.value))}><option value="14">14 days</option><option value="21">21 days</option><option value="30">30 days</option></select></Field><Field label="Special ad category"><input value={data.metaRules.category} readOnly /></Field><Field label="Lead form type"><select value={data.metaRules.leadForm} onChange={(event) => update('metaRules', 'leadForm', event.target.value)}><option>Higher intent</option><option>More volume</option></select></Field></div><div className="db-settings-toggles"><Toggle checked={data.metaRules.reviewMode} onChange={(value) => update('metaRules', 'reviewMode', value)} label="Review before launch" hint="Hold every generated campaign for edits and approval." /><Toggle checked={data.metaRules.optimize} onChange={(value) => update('metaRules', 'optimize', value)} label="Automatic budget pacing" hint="Use the saved daily budget and delivery window automatically." /></div><div className="db-employment-note"><Icon name="info" size={18} /><p><b>Employment category is locked on.</b> Recruitment campaigns use Meta’s Employment special ad category and its required targeting limitations.</p></div></>}
+        {tab === 'brand' && <><SectionHeading icon="target" title="Identity" copy="The facts a stranger should be able to repeat after one look at your work." /><div className="db-form-grid two"><Field label="Brand name"><input value={draft.brand.name} onChange={(event) => update('brand', 'name', event.target.value)} /></Field><Field label="Website"><input value={draft.brand.website} onChange={(event) => update('brand', 'website', event.target.value)} /></Field><Field label="Tagline" className="span-two"><input value={draft.brand.tagline} onChange={(event) => update('brand', 'tagline', event.target.value)} placeholder="One line people should remember" /></Field><Field label="Industry"><input value={draft.brand.industry} onChange={(event) => update('brand', 'industry', event.target.value)} /></Field><Field label="Based in"><input value={draft.brand.location} onChange={(event) => update('brand', 'location', event.target.value)} /></Field><Field label="What you do" className="span-two"><textarea rows="4" value={draft.brand.description} onChange={(event) => update('brand', 'description', event.target.value)} /></Field><Field label="Mission"><textarea rows="4" value={draft.brand.mission} onChange={(event) => update('brand', 'mission', event.target.value)} /></Field><Field label="Origin story"><textarea rows="4" value={draft.brand.story} onChange={(event) => update('brand', 'story', event.target.value)} /></Field></div></>}
+        {tab === 'audience' && <><SectionHeading icon="leads" title="Audience" copy="Who the work is for, and what they are already frustrated by." /><div className="db-form-grid two"><Field label="Primary audience" className="span-two"><textarea rows="3" value={draft.audience.primary} onChange={(event) => update('audience', 'primary', event.target.value)} /></Field><Field label="Secondary audience" className="span-two"><textarea rows="3" value={draft.audience.secondary} onChange={(event) => update('audience', 'secondary', event.target.value)} /></Field><Field label="Pains"><textarea rows="4" value={draft.audience.pains} onChange={(event) => update('audience', 'pains', event.target.value)} /></Field><Field label="Markets"><textarea rows="4" value={draft.audience.markets} onChange={(event) => update('audience', 'markets', event.target.value)} /></Field></div></>}
+        {tab === 'voice' && <><SectionHeading icon="content" title="Voice" copy="How the brand should sound when nobody from the team is in the room." /><div className="db-form-grid two"><Field label="Tone"><input value={draft.voice.tone} onChange={(event) => update('voice', 'tone', event.target.value)} /></Field><Field label="Personality"><input value={draft.voice.personality} onChange={(event) => update('voice', 'personality', event.target.value)} placeholder="Warm, precise, confident" /></Field><Field label="Languages" className="span-two"><input value={draft.voice.languages} onChange={(event) => update('voice', 'languages', event.target.value)} /></Field><Field label="A line that sounds like you" className="span-two"><textarea rows="4" value={draft.voice.sample} onChange={(event) => update('voice', 'sample', event.target.value)} /></Field></div></>}
+        {tab === 'offerings' && <><SectionHeading icon="folder" title="Offerings" copy="Each product or service the work is allowed to talk about." /><div className="db-offering-list">{draft.offerings.map((item) => <article key={item.id}><span><Icon name="spark" size={16} /></span><div><input value={item.name} aria-label="Offering name" onChange={(event) => setDraft((current) => ({ ...current, offerings: current.offerings.map((entry) => entry.id === item.id ? { ...entry, name: event.target.value } : entry) }))} /><input value={item.who || ''} aria-label="Who it is for" placeholder="Who it is for" onChange={(event) => setDraft((current) => ({ ...current, offerings: current.offerings.map((entry) => entry.id === item.id ? { ...entry, who: event.target.value } : entry) }))} /><textarea rows="2" aria-label="Offering detail" value={item.detail} onChange={(event) => setDraft((current) => ({ ...current, offerings: current.offerings.map((entry) => entry.id === item.id ? { ...entry, detail: event.target.value } : entry) }))} /></div><button onClick={() => setDraft((current) => ({ ...current, offerings: current.offerings.filter((entry) => entry.id !== item.id) }))} aria-label={`Remove ${item.name}`}><Icon name="trash" size={16} /></button></article>)}</div><div className="db-inline-add"><input value={newOffering} onChange={(event) => setNewOffering(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && addOffering()} placeholder="Add another product or service" /><Button icon="plus" onClick={addOffering}>Add</Button></div></>}
+        {tab === 'messaging' && <><SectionHeading icon="target" title="Messaging" copy="The claims to repeat, the proof behind them, and the lines to leave out." /><div className="db-form-grid two"><Field label="Messaging pillars" className="span-two"><textarea rows="3" value={draft.messaging.pillars} onChange={(event) => update('messaging', 'pillars', event.target.value)} /></Field><Field label="Proof points"><textarea rows="4" value={draft.messaging.proof} onChange={(event) => update('messaging', 'proof', event.target.value)} /></Field><Field label="Differentiator"><textarea rows="4" value={draft.messaging.differentiator} onChange={(event) => update('messaging', 'differentiator', event.target.value)} /></Field><Field label="Always include"><textarea rows="3" value={draft.messaging.required} onChange={(event) => update('messaging', 'required', event.target.value)} /></Field><Field label="Never say"><textarea rows="3" value={draft.messaging.restricted} onChange={(event) => update('messaging', 'restricted', event.target.value)} /></Field><Field label="Default call to action" className="span-two"><input value={draft.messaging.cta} onChange={(event) => update('messaging', 'cta', event.target.value)} /></Field></div></>}
+        {tab === 'visual' && <><SectionHeading icon="image" title="Look" copy="Color, photography, and type so generated visuals stay in the same family." /><div className="db-kb-colors">{draft.visual.colors.map((color, index) => <label key={`${color}-${index}`}><input type="color" value={color} aria-label={`Brand color ${index + 1}`} onChange={(event) => update('visual', 'colors', draft.visual.colors.map((entry, entryIndex) => entryIndex === index ? event.target.value.toUpperCase() : entry))} /><b>{color}</b>{draft.visual.colors.length > 1 && <button type="button" aria-label={`Remove color ${color}`} onClick={() => update('visual', 'colors', draft.visual.colors.filter((_, entryIndex) => entryIndex !== index))}><Icon name="close" size={12} /></button>}</label>)}{draft.visual.colors.length < 6 && <button type="button" className="db-kb-add-color" onClick={() => update('visual', 'colors', [...draft.visual.colors, '#3E92CC'])}><Icon name="plus" size={14} />Add color</button>}</div><div className="db-form-grid two"><Field label="Photography"><textarea rows="3" value={draft.visual.imageStyle} onChange={(event) => update('visual', 'imageStyle', event.target.value)} /></Field><Field label="Typography"><textarea rows="3" value={draft.visual.typeStyle} onChange={(event) => update('visual', 'typeStyle', event.target.value)} /></Field></div></>}
+        {tab === 'posting' && <><SectionHeading icon="calendar" title="Publishing" copy="Where, how often, and in what rhythm the content should go out." /><div className="db-kb-platforms">{['Instagram', 'Facebook'].map((platform) => <button className={draft.posting.platforms.includes(platform) ? 'active' : ''} key={platform} onClick={() => update('posting', 'platforms', draft.posting.platforms.includes(platform) ? draft.posting.platforms.filter((item) => item !== platform) : [...draft.posting.platforms, platform])}><img src={`/social_logos/${platform.toLowerCase()}.png`} alt="" />{platform}<Icon name="check" size={14} /></button>)}</div><div className="db-form-grid two"><Field label="Frequency"><select value={draft.posting.frequency} onChange={(event) => update('posting', 'frequency', event.target.value)}><option>3 posts per week</option><option>4 posts per week</option><option>5 posts per week</option><option>Daily</option></select></Field><Field label="Timezone"><input value={draft.posting.timezone} onChange={(event) => update('posting', 'timezone', event.target.value)} /></Field><Field label="Best window"><input value={draft.posting.bestTimes} onChange={(event) => update('posting', 'bestTimes', event.target.value)} /></Field><Field label="Hashtags"><input value={draft.posting.hashtags} onChange={(event) => update('posting', 'hashtags', event.target.value)} /></Field><Field label="Content mix" className="span-two"><textarea rows="3" value={draft.posting.mix} onChange={(event) => update('posting', 'mix', event.target.value)} /></Field></div><Toggle checked={draft.posting.autoPublish} onChange={(value) => update('posting', 'autoPublish', value)} label="Automatic publishing" hint="Publish approved calendar items at the scheduled time." /></>}
+        {tab === 'metaRules' && <><SectionHeading icon="ads" title="Ads" copy="Defaults applied whenever a vacancy becomes a Meta campaign." /><div className="db-form-grid two"><Field label="Daily budget"><span className="db-input-prefix"><b>$</b><input type="number" value={draft.metaRules.dailyBudget} onChange={(event) => update('metaRules', 'dailyBudget', Number(event.target.value))} /></span></Field><Field label="Default duration"><select value={draft.metaRules.duration} onChange={(event) => update('metaRules', 'duration', Number(event.target.value))}><option value="14">14 days</option><option value="21">21 days</option><option value="30">30 days</option></select></Field><Field label="Objective"><select value={draft.metaRules.objective} onChange={(event) => update('metaRules', 'objective', event.target.value)}><option>Lead generation</option><option>Traffic</option><option>Awareness</option></select></Field><Field label="Lead form"><select value={draft.metaRules.leadForm} onChange={(event) => update('metaRules', 'leadForm', event.target.value)}><option>Higher intent</option><option>More volume</option></select></Field><Field label="Countries" className="span-two"><input value={draft.metaRules.countries} onChange={(event) => update('metaRules', 'countries', event.target.value)} /></Field><Field label="Special ad category"><input value={draft.metaRules.category} readOnly /></Field></div><div className="db-settings-toggles"><Toggle checked={draft.metaRules.reviewMode} onChange={(value) => update('metaRules', 'reviewMode', value)} label="Review before launch" hint="Hold every generated campaign for edits and approval." /><Toggle checked={draft.metaRules.optimize} onChange={(value) => update('metaRules', 'optimize', value)} label="Automatic budget pacing" hint="Use the saved daily budget and delivery window automatically." /></div><div className="db-employment-note"><Icon name="info" size={18} /><p><b>Employment category is locked on.</b> Recruitment campaigns use Meta’s Employment special ad category and its required targeting limitations.</p></div></>}
       </section>
-    </div>
+    </div>}
   </div>
 }
 

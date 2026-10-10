@@ -25,9 +25,9 @@ export const contentVariants = [
 ]
 
 export const contentRecords = [
-  { id: 1, title: 'Friday founder note', caption: 'Three lessons from a week of building in public.', status: 'scheduled', format: 'Post', platforms: ['Instagram', 'Facebook'], date: '2026-09-28', time: '6:00 PM', palette: 'pink', source: 'AI' },
+  { id: 1, title: 'Friday founder note', caption: 'Three lessons from a week of building in public.', status: 'scheduled', format: 'Post', platforms: ['Instagram', 'Facebook'], date: '2026-09-28', time: '6:00 PM', palette: 'pink', source: 'AI', image: '/social-posts/post-atelier.jpg' },
   { id: 2, title: 'Move with purpose', caption: 'The best ideas rarely arrive while standing still.', status: 'published', format: 'Reel', platforms: ['Instagram', 'Facebook'], date: '2026-09-24', time: '12:30 PM', palette: 'lime', source: 'AI' },
-  { id: 3, title: 'Behind the blend', caption: 'What goes into a better morning, from bean to first sip.', status: 'scheduled', format: 'Reel', platforms: ['Instagram'], date: '2026-09-30', time: '8:30 PM', palette: 'orange', source: 'AI' },
+  { id: 3, title: 'Behind the blend', caption: 'What goes into a better morning, from bean to first sip.', status: 'scheduled', format: 'Reel', platforms: ['Instagram'], date: '2026-09-30', time: '8:30 PM', palette: 'orange', source: 'AI', image: '/social-posts/post-table.jpg' },
   { id: 4, title: 'Autumn product edit', caption: 'The pieces we keep reaching for as the weather turns.', status: 'draft', format: 'Carousel', platforms: ['Instagram', 'Facebook'], date: null, time: null, palette: 'blue', source: 'Manual' },
   { id: 5, title: 'Customer spotlight', caption: 'Meet the team who turned one clear idea into a growing community.', status: 'published', format: 'Post', platforms: ['Facebook', 'Instagram'], date: '2026-09-21', time: '10:00 AM', palette: 'violet', source: 'AI' },
   { id: 6, title: 'Weekend offer', caption: 'A little something for the people who have been with us since day one.', status: 'failed', format: 'Story', platforms: ['Instagram'], date: '2026-09-20', time: '5:30 PM', palette: 'red', source: 'Manual' },
@@ -35,22 +35,22 @@ export const contentRecords = [
 
 export const calendarContent = [
   ...contentRecords.filter((item) => item.date),
-  { id: 7, title: 'Quick tip carousel', status: 'scheduled', format: 'Carousel', platforms: ['Instagram'], date: '2026-10-02', time: '11:00 AM', palette: 'blue' },
-  { id: 8, title: 'Monthly recap', status: 'scheduled', format: 'Post', platforms: ['Facebook'], date: '2026-10-05', time: '9:00 AM', palette: 'violet' },
+  { id: 7, title: 'Quick tip carousel', status: 'scheduled', format: 'Carousel', platforms: ['Instagram'], date: '2026-10-02', time: '11:00 AM', palette: 'blue', image: '/social-posts/post-form.jpg' },
+  { id: 8, title: 'Monthly recap', status: 'scheduled', format: 'Post', platforms: ['Facebook'], date: '2026-10-05', time: '9:00 AM', palette: 'violet', image: '/social-posts/post-lumen.jpg' },
 ]
 
 export const campaigns = [
-  { id: 'cmp-1048', name: 'Senior Product Designer', objective: 'Applications', status: 'active', delivery: 'Healthy', spend: 404.16, impressions: 28410, clicks: 1242, leads: 48, cpl: 8.42, ctr: 4.37, budget: 45, updated: '18 min ago', palette: 'lime' },
-  { id: 'cmp-1047', name: 'Growth Marketing Lead', objective: 'Applications', status: 'learning', delivery: 'Learning', spend: 298.1, impressions: 20104, clicks: 742, leads: 31, cpl: 9.62, ctr: 3.69, budget: 38, updated: '1 hr ago', palette: 'orange' },
-  { id: 'cmp-1039', name: 'Frontend Engineer EU', objective: 'Applications', status: 'active', delivery: 'Healthy', spend: 870.66, impressions: 63190, clicks: 2864, leads: 126, cpl: 6.91, ctr: 4.53, budget: 50, updated: '3 hrs ago', palette: 'blue' },
+  { id: 'cmp-1048', name: 'Senior Product Designer', objective: 'Applications', status: 'active', delivery: 'Healthy', spend: 404.16, impressions: 28410, clicks: 1242, leads: 48, cpl: 8.42, ctr: 4.37, budget: 45, updated: '18 min ago', palette: 'lime', image: '/social-posts/post-form.jpg' },
+  { id: 'cmp-1047', name: 'Growth Marketing Lead', objective: 'Applications', status: 'learning', delivery: 'Learning', spend: 298.1, impressions: 20104, clicks: 742, leads: 31, cpl: 9.62, ctr: 3.69, budget: 38, updated: '1 hr ago', palette: 'orange', image: '/social-posts/post-maison.jpg' },
+  { id: 'cmp-1039', name: 'Frontend Engineer EU', objective: 'Applications', status: 'active', delivery: 'Healthy', spend: 870.66, impressions: 63190, clicks: 2864, leads: 126, cpl: 6.91, ctr: 4.53, budget: 50, updated: '3 hrs ago', palette: 'blue', image: '/social-posts/post-coast.jpg' },
   { id: 'cmp-1028', name: 'Customer Success UK', objective: 'Applications', status: 'paused', delivery: 'Paused', spend: 326.8, impressions: 22420, clicks: 716, leads: 34, cpl: 9.61, ctr: 3.19, budget: 30, updated: 'Yesterday', palette: 'pink' },
   { id: 'cmp-1012', name: 'Engineering Manager', objective: 'Applications', status: 'completed', delivery: 'Completed', spend: 684.7, impressions: 49311, clicks: 1392, leads: 72, cpl: 9.51, ctr: 2.82, budget: 35, updated: 'Sep 18', palette: 'violet' },
 ]
 
 export const leadRecords = [
-  { id: 'lead-301', name: 'Maya Thompson', email: 'maya@example.com', phone: '+31 6 555 0139', campaign: 'Senior Product Designer', status: 'new', received: '12 min ago', source: 'Instagram Feed', timeline: 'Available in 30 days' },
-  { id: 'lead-300', name: 'Noah Williams', email: 'noah@example.com', phone: '+44 20 555 0192', campaign: 'Senior Product Designer', status: 'contacted', received: '48 min ago', source: 'Facebook Feed', timeline: 'Available now' },
-  { id: 'lead-299', name: 'Sophia Garcia', email: 'sophia@example.com', phone: '+31 6 555 0108', campaign: 'Growth Marketing Lead', status: 'qualified', received: '2 hrs ago', source: 'Instagram Story', timeline: 'Available in 60 days' },
+  { id: 'lead-301', name: 'Maya Thompson', email: 'maya@example.com', phone: '+31 6 555 0139', campaign: 'Senior Product Designer', status: 'new', received: '12 min ago', source: 'Instagram Feed', timeline: 'Available in 30 days', avatar: '/reference/avatar-victoria.webp' },
+  { id: 'lead-300', name: 'Noah Williams', email: 'noah@example.com', phone: '+44 20 555 0192', campaign: 'Senior Product Designer', status: 'contacted', received: '48 min ago', source: 'Facebook Feed', timeline: 'Available now', avatar: '/reference/avatar-thomas.webp' },
+  { id: 'lead-299', name: 'Sophia Garcia', email: 'sophia@example.com', phone: '+31 6 555 0108', campaign: 'Growth Marketing Lead', status: 'qualified', received: '2 hrs ago', source: 'Instagram Story', timeline: 'Available in 60 days', avatar: '/reference/avatar-shelby.webp' },
   { id: 'lead-298', name: 'Ethan Chen', email: 'ethan@example.com', phone: '+49 30 555 0171', campaign: 'Frontend Engineer EU', status: 'new', received: '4 hrs ago', source: 'Facebook Feed', timeline: 'Available now' },
   { id: 'lead-297', name: 'Olivia Brown', email: 'olivia@example.com', phone: '+44 20 555 0156', campaign: 'Customer Success UK', status: 'closed', received: 'Yesterday', source: 'Instagram Feed', timeline: 'Available in 30 days' },
   { id: 'lead-296', name: 'Liam Davis', email: 'liam@example.com', phone: '+31 6 555 0114', campaign: 'Engineering Manager', status: 'qualified', received: 'Yesterday', source: 'Facebook Feed', timeline: 'Available in 60 days' },
@@ -97,10 +97,10 @@ export const campaignTemplates = [
 ]
 
 export const overviewMetrics = [
-  { label: 'Ad spend', value: '$2,840', delta: '+12.4%', icon: 'wallet', tone: 'lime' },
-  { label: 'Impressions', value: '184.2K', delta: '+18.2%', icon: 'eye', tone: 'blue' },
-  { label: 'New leads', value: '327', delta: '+24.1%', icon: 'users', tone: 'pink' },
-  { label: 'Content published', value: '42', delta: '+8 this month', icon: 'send', tone: 'orange' },
+  { label: 'Ad spend', value: '$2,840', delta: '+12.4%', icon: 'wallet', tone: 'lime', series: [42, 46, 44, 51, 49, 58, 55, 63, 68, 74, 71, 82] },
+  { label: 'Impressions', value: '184.2K', delta: '+18.2%', icon: 'eye', tone: 'blue', series: [28, 34, 31, 40, 48, 45, 57, 62, 70, 66, 81, 94] },
+  { label: 'New leads', value: '327', delta: '+24.1%', icon: 'users', tone: 'pink', series: [22, 26, 24, 30, 36, 33, 41, 52, 49, 61, 74, 88] },
+  { label: 'Content published', value: '42', delta: '+8 this month', icon: 'send', tone: 'orange', series: [30, 34, 38, 36, 44, 48, 46, 52, 58, 55, 64, 70] },
 ]
 
 const clone = (value) => JSON.parse(JSON.stringify(value))
