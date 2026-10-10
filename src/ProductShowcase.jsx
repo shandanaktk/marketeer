@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SmallIcon, SocialMark } from './landingIcons.jsx'
 import { productTabs, showcasePost, calendarPosts, campaignStats } from './landingMockData.js'
 
@@ -57,9 +57,43 @@ function Analytics() {
 }
 
 export default function ProductShowcase({ navigate }) {
-  const [active, setActive] = useState('schedule')
+  const [active, setActive] = useState('plan')
   const [notice, setNotice] = useState('')
+  const showcaseRef = useRef(null)
+  const timerRef = useRef(null)
+  const startedRef = useRef(false)
   const current = productTabs.find(tab => tab.id === active)
+  useEffect(() => {
+    const element = showcaseRef.current
+    if (!element) return undefined
+    const start = () => {
+      if (startedRef.current) return
+      startedRef.current = true
+      setActive('plan')
+      timerRef.current = window.setInterval(() => {
+        setActive((currentId) => {
+          const index = productTabs.findIndex(tab => tab.id === currentId)
+          return productTabs[(index + 1) % productTabs.length].id
+        })
+        setNotice('')
+      }, 4200)
+    }
+    if (!('IntersectionObserver' in window)) {
+      start()
+      return () => window.clearInterval(timerRef.current)
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        start()
+        observer.disconnect()
+      }
+    }, { threshold: 0.2 })
+    observer.observe(element)
+    return () => {
+      observer.disconnect()
+      window.clearInterval(timerRef.current)
+    }
+  }, [])
   const selectTab = (id) => { setActive(id); setNotice('') }
   const keyboardTabs = e => {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return
@@ -69,7 +103,7 @@ export default function ProductShowcase({ navigate }) {
     selectTab(productTabs[next].id)
     document.getElementById(`showcase-tab-${productTabs[next].id}`)?.focus()
   }
-  return <section className="mk-product" id="platform">
+  return <section ref={showcaseRef} className="mk-product" id="platform">
     <div className="mk-section-title" data-enter><span className="mk-overline">LESS BUSYWORK. MORE POSSIBILITY.</span><h2>Your whole social world.<br />Finally, in one place.</h2><p>From the first idea to the next big result.<br />Meet your new everyday workspace.</p></div>
     <div className="mk-product-tabs" role="tablist" aria-label="Explore the Marketeer workspace" onKeyDown={keyboardTabs}>{productTabs.map(tab => <button type="button" key={tab.id} id={`showcase-tab-${tab.id}`} role="tab" aria-selected={active === tab.id} aria-controls="showcase-panel" tabIndex={active === tab.id ? 0 : -1} onClick={() => selectTab(tab.id)}>{tab.label}</button>)}</div>
     <div className="mk-product-scroll"><div className="mk-product-app">

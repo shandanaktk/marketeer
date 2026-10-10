@@ -185,7 +185,7 @@ export function ReportingView({ notify }) {
   const cpl = (totals.spend / totals.leads).toFixed(2)
 
   return <div className="db-page db-srs-page">
-    <PageIntro eyebrow="Meta performance" icon="campaigns" title="Every result, traced back to the vacancy." description="Automatically refreshed Meta Insights across vacancy, campaign, and ad levels." actions={<><Field label="Reporting window"><select defaultValue="30"><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></Field><Button variant="secondary" icon="refresh" onClick={() => notify('Meta Insights refreshed just now.')}>Refresh</Button></>} />
+    <PageIntro eyebrow="Meta performance" icon="campaigns" title="Every result, traced back to the vacancy." description="Automatically refreshed Meta Insights across vacancy, campaign, and ad levels." actions={<><Field label="Reporting window"><select defaultValue="30"><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></Field><Button className="db-refresh-button" variant="secondary" icon="refresh" onClick={() => notify('Meta Insights refreshed just now.')}>Refresh</Button></>} />
     <div className="db-report-status"><span><i /> Meta data synced</span><small>Automatic refresh every 30 minutes · Updated just now</small></div>
     <section className="db-report-metrics">{[
       ['Spend', `$${totals.spend.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, 'wallet'],

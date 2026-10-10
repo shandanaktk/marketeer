@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AdsLibraryView, AdsStudio, CampaignsView, LeadsView, OptimizeView } from './AdsWorkspace.jsx'
+import { AdsStudio, CampaignsView, LeadsView, OptimizeView } from './AdsWorkspace.jsx'
 import { ContentCalendar, ContentCreate, ContentLibrary } from './ContentWorkspace.jsx'
 import { campaigns, calendarContent, connectedChannels, dashboardMockService, leadRecords, metaConnection, overviewMetrics } from './dashboardMockData.js'
 import { Badge, Button, ChannelLogo, Field, Icon, PageIntro, Toggle } from './dashboardUI.jsx'
@@ -91,24 +91,21 @@ const SETTINGS_PANELS = [
   ['brand', 'Brand profile', 'target'],
   ['ai', 'AI defaults', 'spark'],
   ['notifications', 'Notifications', 'bell'],
-  ['access', 'Access', 'leads'],
+  // ['access', 'Access', 'leads'], // Hidden until workspace access controls are ready.
 ]
 
 function SettingsView({ data, notify }) {
   const [panel, setPanel] = useState('brand')
   const [brand, setBrand] = useState({ name: data.workspaceName || 'Marketeer Studio', website: 'https://marketeer.co', industry: data.industry || 'Creative services', tone: data.voice || 'Bold & warm', description: 'AI-powered campaign and content creation for ambitious small teams.', locations: 'United States', banned: 'cheap, guaranteed', required: 'Marketeer' })
   const [defaults, setDefaults] = useState({ review: true, aiImages: true, autoHashtags: false, approval: true, leads: true, performance: true, published: true, connections: true, weekly: false })
-  const [members, setMembers] = useState([{ id: 'you', name: 'Alex Morgan', email: 'demo@marketeer.ai', role: 'Owner' }, { id: 'sam', name: 'Sam Rivera', email: 'sam@marketeer.co', role: 'Editor' }])
-  const [invite, setInvite] = useState({ email: '', role: 'Editor' })
   const setDefault = (key) => (value) => setDefaults((current) => ({ ...current, [key]: value }))
   const save = async () => { await dashboardMockService.save(); notify('Workspace preferences saved.') }
-  const sendInvite = () => { const email = invite.email.trim(); if (!email.includes('@')) { notify('Enter a valid email to invite.'); return } setMembers((current) => [...current, { id: `member-${Date.now()}`, name: email.split('@')[0], email, role: invite.role }]); setInvite({ email: '', role: 'Editor' }); notify(`Invite sent to ${email}.`) }
   return <div className="db-page db-settings"><PageIntro eyebrow="Workspace settings" icon="settings" title="Keep every creation on brand." description="These defaults guide content generation and campaign plans across the workspace." actions={<Button icon="check" onClick={save}>Save changes</Button>} />
     <div className="db-settings-layout"><nav className="db-card">{SETTINGS_PANELS.map(([id, label, icon]) => <button className={panel === id ? 'active' : ''} onClick={() => setPanel(id)} key={id}><Icon name={icon} size={16} />{label}</button>)}</nav>
       {panel === 'brand' && <section className="db-card"><div className="db-section-heading"><span><Icon name="target" size={18} /></span><div><h2>Brand profile</h2><p>Shared context for organic content and paid campaigns.</p></div></div><div className="db-form-grid two"><Field label="Workspace name"><input value={brand.name} onChange={(event) => setBrand({ ...brand, name: event.target.value })} /></Field><Field label="Website"><input value={brand.website} onChange={(event) => setBrand({ ...brand, website: event.target.value })} /></Field><Field label="Industry"><input value={brand.industry} onChange={(event) => setBrand({ ...brand, industry: event.target.value })} /></Field><Field label="Default tone"><select value={brand.tone} onChange={(event) => setBrand({ ...brand, tone: event.target.value })}><option>Bold & warm</option><option>Professional</option><option>Playful</option><option>Luxury</option><option>Editorial</option></select></Field><Field label="Business description" className="span-two"><textarea rows="4" value={brand.description} onChange={(event) => setBrand({ ...brand, description: event.target.value })} /></Field><Field label="Primary markets"><input value={brand.locations} onChange={(event) => setBrand({ ...brand, locations: event.target.value })} /></Field><Field label="Must include"><input value={brand.required} onChange={(event) => setBrand({ ...brand, required: event.target.value })} /></Field><Field label="Never use" className="span-two"><input value={brand.banned} onChange={(event) => setBrand({ ...brand, banned: event.target.value })} /></Field></div></section>}
       {panel === 'ai' && <section className="db-card"><div className="db-section-heading"><span><Icon name="spark" size={18} /></span><div><h2>AI defaults</h2><p>The baseline Marketeer uses before you review a draft or campaign.</p></div></div><div className="db-pref-list"><Toggle checked={defaults.review} onChange={setDefault('review')} label="Professional quality review" hint="Check finished designs for weak layout or artwork." /><Toggle checked={defaults.aiImages} onChange={setDefault('aiImages')} label="Generate visual directions" hint="Include new images in campaign plans." /><Toggle checked={defaults.autoHashtags} onChange={setDefault('autoHashtags')} label="Add hashtags automatically" hint="Preselect suggested tags during refinement." /><Toggle checked={defaults.approval} onChange={setDefault('approval')} label="Always require approval" hint="Nothing publishes without a final confirmation." /></div></section>}
       {panel === 'notifications' && <section className="db-card"><div className="db-section-heading"><span><Icon name="bell" size={18} /></span><div><h2>Notifications</h2><p>Choose which workspace events reach you.</p></div></div><div className="db-pref-list"><Toggle checked={defaults.leads} onChange={setDefault('leads')} label="New leads" hint="When a lead form is submitted." /><Toggle checked={defaults.performance} onChange={setDefault('performance')} label="Performance" hint="Budget, delivery, or creative fatigue." /><Toggle checked={defaults.published} onChange={setDefault('published')} label="Publishing" hint="When a post goes live or fails." /><Toggle checked={defaults.connections} onChange={setDefault('connections')} label="Connections" hint="When a platform needs to be reconnected." /><Toggle checked={defaults.weekly} onChange={setDefault('weekly')} label="Weekly summary" hint="A Monday note on spend, leads, and scheduled posts." /></div></section>}
-      {panel === 'access' && <section className="db-card"><div className="db-section-heading"><span><Icon name="leads" size={18} /></span><div><h2>Access</h2><p>People who can work in this workspace.</p></div></div><div className="db-invite-row"><Field label="Email"><input type="email" value={invite.email} placeholder="name@company.com" onChange={(event) => setInvite({ ...invite, email: event.target.value })} /></Field><Field label="Role"><select value={invite.role} onChange={(event) => setInvite({ ...invite, role: event.target.value })}><option>Editor</option><option>Analyst</option></select></Field><Button icon="plus" onClick={sendInvite}>Invite</Button></div><div className="db-member-list">{members.map((member) => <article key={member.id}><span className="db-lead-mark">{member.name.split(' ').map((word) => word[0]).slice(0, 2).join('')}</span><div><b>{member.name}</b><small>{member.email}</small></div><span className="db-member-role">{member.role}</span>{member.role === 'Owner' ? null : <button type="button" onClick={() => setMembers((current) => current.filter((item) => item.id !== member.id))} aria-label={`Remove ${member.name}`}><Icon name="trash" size={15} /></button>}</article>)}</div></section>}
+      {/* Access settings intentionally commented out until workspace roles are ready. */}
     </div>
   </div>
 }
@@ -116,7 +113,7 @@ function SettingsView({ data, notify }) {
 const NAV_GROUPS = [
   { label: 'Workspace', items: [['overview', 'Overview', 'home'], ['knowledge', 'Knowledge Base', 'spark'], ['vacancies', 'Vacancies', 'file']] },
   { label: 'Content', items: [['create', 'Create', 'create'], ['content', 'Content library', 'content'], ['calendar', 'Calendar', 'calendar']] },
-  { label: 'Meta ads', items: [['adstudio', 'Campaign studio', 'ads'], ['campaigns', 'Campaigns', 'campaigns'], ['reporting', 'Reporting', 'campaigns'], ['leads', 'Leads', 'leads'], ['optimize', 'Optimize', 'optimize'], ['assets', 'Asset library', 'library']] },
+  { label: 'Meta ads', items: [['adstudio', 'Campaign studio', 'ads'], ['campaigns', 'Campaigns', 'campaigns'], ['reporting', 'Reporting', 'campaigns'], ['leads', 'Leads', 'leads'], ['optimize', 'Optimize', 'optimize']] },
   { label: 'Manage', items: [['connections', 'Connections', 'link'], ['settings', 'Settings', 'settings']] },
 ]
 const VALID_SECTIONS = NAV_GROUPS.flatMap((group) => group.items.map((item) => item[0]))
@@ -167,7 +164,7 @@ function Dashboard({ data = {}, onNavigate, theme, onToggleTheme }) {
     <aside className={`db-sidebar ${sidebarOpen ? 'open' : ''}`}>
       <div className="db-sidebar-brand"><button onClick={() => onNavigate?.('home')} aria-label="Marketeer home"><em className="db-brand-full">Marketeer</em><span>.</span><em className="db-brand-mark" aria-hidden="true">m</em></button><button className="db-mobile-close" onClick={() => setSidebar(false)} aria-label="Close sidebar"><Icon name="close" size={19} /></button></div>
       <nav>{NAV_GROUPS.map((group) => <div className="db-nav-group" key={group.label}><small>{group.label}</small>{group.items.map(([id, label, icon]) => <button className={section === id ? 'active' : ''} onClick={() => go(id)} key={id} aria-label={label} title={label}><span><Icon name={icon} size={18} /></span><b>{label}</b>{id === 'leads' && <i>{leadRecords.filter((lead) => lead.status === 'new').length}</i>}{id === 'connections' && <em className={metaConnected ? 'connected' : ''} />}</button>)}</div>)}</nav>
-      <div className="db-sidebar-bottom"><div className="db-usage"><span><Icon name="spark" size={14} /> AI creations</span><b>18 <small>/ 30 this month</small></b><i><em /></i><button onClick={() => notify('Plan management will open here once billing is connected.')}>Upgrade plan <Icon name="arrow" size={13} /></button></div><div className="db-profile"><span>{initials}<i /></span><div><b>{name}</b><small>demo@marketeer.ai</small></div></div></div>
+      <div className="db-sidebar-bottom">{/* AI creations / Upgrade plan card intentionally commented out until billing is connected. */}<div className="db-profile"><span>{initials}<i /></span><div><b>{name}</b><small>demo@marketeer.ai</small></div></div></div>
     </aside>
     {sidebarOpen && <button className="db-nav-scrim" onClick={() => setSidebar(false)} aria-label="Close navigation" />}
     <div className="db-main-shell"><header className="db-topbar"><div className="db-topbar-left"><button className="db-menu-button" aria-expanded={sidebarOpen} onClick={() => setSidebar(!sidebarOpen)} aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}><Icon name="sidebar" size={18} /></button><div className="db-breadcrumb"><span>{section === 'overview' ? 'Command center' : ['create', 'content', 'calendar'].includes(section) ? 'Content' : ['adstudio', 'campaigns', 'reporting', 'leads', 'optimize', 'assets'].includes(section) ? 'Meta ads' : 'Workspace'}</span><i>/</i><b>{LABELS[section]}</b></div></div><div className="db-top-actions">
@@ -189,7 +186,7 @@ function Dashboard({ data = {}, onNavigate, theme, onToggleTheme }) {
         {section === 'reporting' && <ReportingView notify={notify} />}
         {section === 'leads' && <LeadsView {...sharedAds} />}
         {section === 'optimize' && <OptimizeView {...sharedAds} />}
-        {section === 'assets' && <AdsLibraryView {...sharedAds} onGo={go} />}
+        {/* Asset library tab intentionally commented out. */}
         {section === 'connections' && <Connections channels={channels} setChannels={setChannels} metaConnected={metaConnected} setMetaConnected={setMetaConnected} notify={notify} />}
         {section === 'settings' && <SettingsView data={data} notify={notify} />}
       </div>
