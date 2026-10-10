@@ -56,7 +56,7 @@
   .db-publish-summary { grid-template-columns: 1fr; gap: 10px; }.db-publish-summary > div { padding: 0 0 10px; border-right: 0; border-bottom: 1px solid var(--db-stroke); }.db-publish-summary > div:last-child { padding: 0; border: 0; }
   .db-toolbar { flex-wrap: wrap; }.db-filter-pills { flex-basis: 100%; }.db-toolbar-search { flex: 1; }
   .db-post-detail,.db-campaign-detail { grid-template-columns: 1fr; }
-  .db-calendar { overflow-x: auto; }.db-calendar > header { min-width: 850px; }
+  .db-calendar { overflow-x: auto; }.db-calendar > header, .db-weekdays, .db-month-grid { min-width: 980px; }
   .db-meta-strip { flex-wrap: wrap; }.db-meta-strip > div:nth-child(2) { min-width: calc(100% - 60px); }.db-meta-strip > .db-field { flex: 1; }.db-meta-health { margin-left: 55px; }
   .db-job-steps { grid-template-columns: repeat(3,1fr); }
   .db-creative-variants { grid-template-columns: repeat(2,1fr); }

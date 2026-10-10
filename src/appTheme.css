@@ -12,7 +12,7 @@
 .db-account-popover [role='menuitem']:last-child{color:var(--mk-orange)}
 .db-account>.db-top-avatar:focus-visible{outline:2px solid var(--mk-olive);outline-offset:3px}
 :root,html[data-theme='dark']{--app-contrast-rgb:255,250,255;--app-ink:#fffaff;--app-muted:#b9aea8;--app-bg:#1e1b18;--app-panel:#2a2623;--app-line:#403a36;--lime:#3e92cc;--orange:#d8315b;--blue:#8ec8ef;--paper:#fffaff;font-family:var(--mk-font)}
-html[data-theme='light']{--app-contrast-rgb:30,27,24;--app-ink:#1e1b18;--app-muted:#6a615c;--app-bg:#fffaff;--app-panel:#fff;--app-line:#e7dfe3;--lime:#0a2463;--orange:#d8315b;--blue:#3e92cc}
+html[data-theme='light']{--app-contrast-rgb:30,27,24;--app-ink:#1e1b18;--app-muted:#6a615c;--app-bg:#e4f1fb;--app-panel:#f6f7f9;--app-line:#d7e4ee;--lime:#0a2463;--orange:#d8315b;--blue:#3e92cc}
 body,button,input,select,textarea{font-family:var(--mk-font)}
 .db-dashboard,.ob-auth-page,.ob-onboarding-page{font-family:var(--mk-font)!important}
 .db-dashboard :is(h1,h2,h3,h4,button,input,select,textarea,em),.ob-auth-page :is(h1,h2,h3,button,input,select,textarea,em),.ob-onboarding-page :is(h1,h2,h3,button,input,select,textarea,em){font-family:var(--mk-font)!important;font-style:normal}
@@ -26,6 +26,11 @@ html[data-theme] .db-ambient,html[data-theme] .ob-ambient{display:none}
 html[data-theme] .db-sidebar{background:var(--app-panel);box-shadow:none;border-color:var(--app-line)}
 html[data-theme] .db-topbar{background:var(--app-panel);border-color:var(--app-line)}
 html[data-theme] .db-card{background:var(--app-panel);border-color:var(--app-line);box-shadow:0 3px 16px #18201005;backdrop-filter:none;border-radius:15px}
+html[data-theme='light'] .mk-site{--mk-paper:#e4f1fb;--mk-surface:#f6f7f9;--mk-border:#d7e4ee}
+html[data-theme='light'] .db-modal{background:#f6f7f9;color:#1e1b18;border-color:#d7e4ee;box-shadow:0 24px 70px rgba(30,27,24,.16)}
+html[data-theme='light'] .db-modal>header,html[data-theme='light'] .db-modal>footer{border-color:#d7e4ee}
+html[data-theme='light'] .db-modal>header button{background:#eef1f4}
+html[data-theme='light'] .db-modal>header h2,html[data-theme='light'] .db-modal>header button{color:#1e1b18}
 html[data-theme] .db-nav-group>button.active{background:#3e92cc1c;color:var(--app-ink);border-color:transparent}
 html[data-theme] .db-nav-group>button.active::before{background:var(--mk-olive);box-shadow:none}
 html[data-theme] .db-nav-group>button.active>span{background:#3e92cc20;color:var(--lime)}
@@ -191,14 +196,14 @@ html[data-theme] .ob-summary-card li>b{color:var(--app-ink);font-size:14px;font-
 html[data-theme] .ob-summary-logos{display:flex;gap:6px}
 html[data-theme] .ob-summary-logos img{width:28px;height:28px;padding:3px;object-fit:contain;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px #00000010}
 html[data-theme='dark'] .ob-summary-card{background:#2a2623;border-color:#403a36}
-html[data-theme='light'] .db-main-shell{background:radial-gradient(880px 420px at 88% -8%,#3e92cc12,transparent 62%),#f7f4f6}
+html[data-theme='light'] .db-main-shell{background:#e4f1fb}
 html[data-theme='light'] .db-overview{display:grid;gap:16px}
-html[data-theme='light'] .db-overview-hero{margin:0;padding:28px 32px;min-height:0;border:1px solid #efe6ea;border-radius:24px;background:linear-gradient(115deg,#fff 0%,#f7f8fa 78%);box-shadow:0 16px 40px #1e1b180c}
+html[data-theme='light'] .db-overview-hero{margin:0;padding:28px 32px;min-height:0;border:1px solid #d7e4ee;border-radius:24px;background:#f6f7f9;box-shadow:0 16px 40px #0a24630c}
 html[data-theme='light'] .db-overview-hero h1,html[data-theme='light'] .db-overview-hero h1 em{color:#1e1b18}
-html[data-theme='light'] .db-overview .db-card{border-color:#efe6ea;border-radius:20px;background:#fff;box-shadow:0 12px 32px #1e1b180c}
+html[data-theme='light'] .db-overview .db-card{border-color:#d7e4ee;border-radius:20px;background:#f6f7f9;box-shadow:0 12px 32px #0a24630c}
 html[data-theme='light'] .db-metric-grid.overview{gap:14px}
 html[data-theme='light'] .db-metric-grid.overview article{min-height:0}
-html[data-theme='light'] .db-metric-grid.overview .db-metric-icon,html[data-theme='light'] .db-metric-grid.overview article.pink .db-metric-icon,html[data-theme='light'] .db-metric-grid.overview article.orange .db-metric-icon{color:#1e1b18;background:#f4f1ee}
+html[data-theme='light'] .db-metric-grid.overview .db-metric-icon,html[data-theme='light'] .db-metric-grid.overview article.pink .db-metric-icon,html[data-theme='light'] .db-metric-grid.overview article.orange .db-metric-icon{color:#1e1b18;background:#eef1f4}
 html[data-theme='light'] .db-metric-grid.overview article.blue .db-metric-icon{color:#3e92cc;background:#3e92cc14}
 html[data-theme='light'] .db-metric-grid.overview article>strong{font-size:30px;font-weight:750;letter-spacing:-.045em;color:#1e1b18}
 html[data-theme='light'] .db-metric-grid.overview article>em{margin-left:8px;padding:3px 8px;border-radius:999px;color:#1e1b18;background:#f4f1ee;font-size:12px}
@@ -212,7 +217,7 @@ html[data-theme='light'] .db-lead-pulse>button:not(.db-button):last-of-type{marg
 html[data-theme='light'] .db-overview-insight,html[data-theme='light'] .db-lead-pulse>.db-button{margin-top:auto}
 html[data-theme='light'] .db-overview .db-action-card span.lime{background:#1e1b18;color:#fffaff}
 html[data-theme='light'] .db-overview .db-action-card span.blue{background:#3e92cc;color:#fffaff}
-html[data-theme='light'] .db-action-card>div:nth-of-type(1)>button{border-color:#efe6ea;background:#fff;box-shadow:0 6px 16px #1e1b1808}
+html[data-theme='light'] .db-action-card>div:nth-of-type(1)>button{border-color:#d7e4ee;background:#f6f7f9;box-shadow:0 6px 16px #0a246308}
 html[data-theme='light'] .db-action-card>div:nth-of-type(1)>button:hover{border-color:#1e1b18;background:#fff}
 html[data-theme='light'] .db-overview .db-badge:not(.red){color:#1e1b18;background:#f4f1ee;border-color:#e7dfe3}
 html[data-theme='light'] .db-overview .db-badge.blue{color:#1e1b18;background:#3e92cc18;border-color:#3e92cc33}
@@ -221,5 +226,5 @@ html[data-theme] .db-shot{width:64px;height:64px;object-fit:cover;border-radius:
 html[data-theme] .db-upcoming .db-shot{width:52px;height:52px;flex:0 0 auto}
 html[data-theme] .db-queue-logo{width:18px;height:18px;flex:0 0 auto;object-fit:contain}
 html[data-theme] .db-lead-photo{width:40px;height:40px;flex:0 0 auto;object-fit:cover;border-radius:50%}
-html[data-theme='light'] .db-live-campaigns>button:hover,html[data-theme='light'] .db-upcoming>button:hover,html[data-theme='light'] .db-lead-pulse>button:not(.db-button):hover{background:#f7f4f6}
+html[data-theme='light'] .db-live-campaigns>button:hover,html[data-theme='light'] .db-upcoming>button:hover,html[data-theme='light'] .db-lead-pulse>button:not(.db-button):hover{background:#eef3f8}
 @media(prefers-reduced-motion:reduce){.db-dashboard *,.ob-auth-page *,.ob-onboarding-page *{animation:none!important;transition:none!important}}

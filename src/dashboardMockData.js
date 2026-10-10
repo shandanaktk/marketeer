@@ -26,11 +26,11 @@ export const contentVariants = [
 
 export const contentRecords = [
   { id: 1, title: 'Friday founder note', caption: 'Three lessons from a week of building in public.', status: 'scheduled', format: 'Post', platforms: ['Instagram', 'Facebook'], date: '2026-09-28', time: '6:00 PM', palette: 'pink', source: 'AI', image: '/social-posts/post-atelier.jpg' },
-  { id: 2, title: 'Move with purpose', caption: 'The best ideas rarely arrive while standing still.', status: 'published', format: 'Reel', platforms: ['Instagram', 'Facebook'], date: '2026-09-24', time: '12:30 PM', palette: 'lime', source: 'AI' },
+  { id: 2, title: 'Move with purpose', caption: 'The best ideas rarely arrive while standing still.', status: 'published', format: 'Reel', platforms: ['Instagram', 'Facebook'], date: '2026-09-24', time: '12:30 PM', palette: 'lime', source: 'AI', image: '/social-posts/post-purpose.jpg' },
   { id: 3, title: 'Behind the blend', caption: 'What goes into a better morning, from bean to first sip.', status: 'scheduled', format: 'Reel', platforms: ['Instagram'], date: '2026-09-30', time: '8:30 PM', palette: 'orange', source: 'AI', image: '/social-posts/post-table.jpg' },
   { id: 4, title: 'Autumn product edit', caption: 'The pieces we keep reaching for as the weather turns.', status: 'draft', format: 'Carousel', platforms: ['Instagram', 'Facebook'], date: null, time: null, palette: 'blue', source: 'Manual' },
-  { id: 5, title: 'Customer spotlight', caption: 'Meet the team who turned one clear idea into a growing community.', status: 'published', format: 'Post', platforms: ['Facebook', 'Instagram'], date: '2026-09-21', time: '10:00 AM', palette: 'violet', source: 'AI' },
-  { id: 6, title: 'Weekend offer', caption: 'A little something for the people who have been with us since day one.', status: 'failed', format: 'Story', platforms: ['Instagram'], date: '2026-09-20', time: '5:30 PM', palette: 'red', source: 'Manual' },
+  { id: 5, title: 'Customer spotlight', caption: 'Meet the team who turned one clear idea into a growing community.', status: 'published', format: 'Post', platforms: ['Facebook', 'Instagram'], date: '2026-09-21', time: '10:00 AM', palette: 'violet', source: 'AI', image: '/social-posts/post-spotlight.jpg' },
+  { id: 6, title: 'Weekend offer', caption: 'A little something for the people who have been with us since day one.', status: 'failed', format: 'Story', platforms: ['Instagram'], date: '2026-09-20', time: '5:30 PM', palette: 'red', source: 'Manual', image: '/social-posts/post-offer.jpg' },
 ]
 
 export const calendarContent = [
@@ -40,9 +40,9 @@ export const calendarContent = [
 ]
 
 export const campaigns = [
-  { id: 'cmp-1048', name: 'Senior Product Designer', objective: 'Applications', status: 'active', delivery: 'Healthy', spend: 404.16, impressions: 28410, clicks: 1242, leads: 48, cpl: 8.42, ctr: 4.37, budget: 45, updated: '18 min ago', palette: 'lime', image: '/social-posts/post-form.jpg' },
-  { id: 'cmp-1047', name: 'Growth Marketing Lead', objective: 'Applications', status: 'learning', delivery: 'Learning', spend: 298.1, impressions: 20104, clicks: 742, leads: 31, cpl: 9.62, ctr: 3.69, budget: 38, updated: '1 hr ago', palette: 'orange', image: '/social-posts/post-maison.jpg' },
-  { id: 'cmp-1039', name: 'Frontend Engineer EU', objective: 'Applications', status: 'active', delivery: 'Healthy', spend: 870.66, impressions: 63190, clicks: 2864, leads: 126, cpl: 6.91, ctr: 4.53, budget: 50, updated: '3 hrs ago', palette: 'blue', image: '/social-posts/post-coast.jpg' },
+  { id: 'cmp-1048', name: 'Senior Product Designer', objective: 'Applications', status: 'active', delivery: 'Healthy', spend: 404.16, impressions: 28410, clicks: 1242, leads: 48, cpl: 8.42, ctr: 4.37, budget: 45, updated: '18 min ago', palette: 'lime', image: '/social-posts/post-form.jpg', start: '2026-09-08', end: '2026-10-09' },
+  { id: 'cmp-1047', name: 'Growth Marketing Lead', objective: 'Applications', status: 'learning', delivery: 'Learning', spend: 298.1, impressions: 20104, clicks: 742, leads: 31, cpl: 9.62, ctr: 3.69, budget: 38, updated: '1 hr ago', palette: 'orange', image: '/social-posts/post-maison.jpg', start: '2026-09-15', end: '2026-10-04' },
+  { id: 'cmp-1039', name: 'Frontend Engineer EU', objective: 'Applications', status: 'active', delivery: 'Healthy', spend: 870.66, impressions: 63190, clicks: 2864, leads: 126, cpl: 6.91, ctr: 4.53, budget: 50, updated: '3 hrs ago', palette: 'blue', image: '/social-posts/post-coast.jpg', start: '2026-09-01', end: '2026-09-30' },
   { id: 'cmp-1028', name: 'Customer Success UK', objective: 'Applications', status: 'paused', delivery: 'Paused', spend: 326.8, impressions: 22420, clicks: 716, leads: 34, cpl: 9.61, ctr: 3.19, budget: 30, updated: 'Yesterday', palette: 'pink' },
   { id: 'cmp-1012', name: 'Engineering Manager', objective: 'Applications', status: 'completed', delivery: 'Completed', spend: 684.7, impressions: 49311, clicks: 1392, leads: 72, cpl: 9.51, ctr: 2.82, budget: 35, updated: 'Sep 18', palette: 'violet' },
 ]

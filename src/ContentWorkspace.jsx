@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { calendarContent, connectedChannels, contentRecords, dashboardMockService } from './dashboardMockData.js'
+import { calendarContent, campaigns, connectedChannels, contentRecords, dashboardMockService } from './dashboardMockData.js'
 import { Badge, Button, CreativeArt, EmptyState, Field, Icon, Modal, PageIntro, PlatformMark, SocialPreview, Spinner } from './dashboardUI.jsx'
 
 const CONTENT_STEPS = ['Brief & assets', 'Generate', 'Refine', 'Preview & schedule', 'Confirm']
@@ -189,17 +189,52 @@ function monthCells(anchor) {
 
 const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
+const liveCampaigns = campaigns.filter((campaign) => ['active', 'learning'].includes(campaign.status) && campaign.start && campaign.end)
+const channelLogo = (name) => `/social_logos/${String(name).toLowerCase().includes('facebook') ? 'facebook' : 'instagram'}.png`
+const prettyDay = (value) => new Date(`${value}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+const campaignsOn = (dateKey) => liveCampaigns.filter((campaign) => dateKey >= campaign.start && dateKey <= campaign.end)
+
 export function ContentCalendar({ notify, onGo }) {
   const [anchor, setAnchor] = useState(new Date(2026, 8, 1))
   const [selected, setSelected] = useState(null)
   const cells = useMemo(() => monthCells(anchor), [anchor])
   const month = anchor.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   const move = (amount) => setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + amount, 1))
+  const campaignOpen = selected?.kind === 'campaign'
   return (
     <div className="db-page">
-      <PageIntro eyebrow="Content calendar" icon="calendar" title="See the whole story." description="Plan your publishing rhythm across channels, formats, and campaigns." actions={<Button icon="plus" onClick={() => onGo('create')}>New post</Button>} />
-      <section className="db-calendar db-card"><header><div><button onClick={() => move(-1)} aria-label="Previous month"><Icon name="back" size={17} /></button><button onClick={() => setAnchor(new Date(2026, 8, 1))}>Today</button><button onClick={() => move(1)} aria-label="Next month"><Icon name="arrow" size={17} /></button></div><h2>{month}</h2><div className="db-calendar-legend"><span><i className="lime" />Published</span><span><i className="blue" />Scheduled</span></div></header><div className="db-weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}</div><div className="db-month-grid">{cells.map(({ date: cellDate, muted }, index) => { const dateKey = isoDate(cellDate); const events = calendarContent.filter((item) => item.date === dateKey); const today = dateKey === '2026-09-26'; return <div className={`${muted ? 'muted' : ''} ${today ? 'today' : ''}`} key={`${dateKey}-${index}`}><span>{cellDate.getDate()}</span>{events.map((event) => <button className={event.status === 'published' ? 'published' : 'scheduled'} onClick={() => setSelected(event)} key={event.id}><i><PlatformMark platform={event.platforms[0]} /></i><b>{event.time}</b><small>{event.title}</small></button>)}{!muted && <button className="db-day-add" onClick={() => { notify(`Starting a post for ${dateKey}.`); onGo('create') }}><Icon name="plus" size={13} /> Add</button>}</div> })}</div></section>
-      {selected && <Modal title={selected.title} onClose={() => setSelected(null)} footer={<><Button variant="ghost" onClick={() => setSelected(null)}>Close</Button><Button icon="edit" onClick={() => notify('This scheduled post is ready to edit from Content.')}>Edit post</Button></>}><div className="db-calendar-popover"><CreativeArt palette={selected.palette} theme={selected.title.toUpperCase().replace(' ', ' / ')} compact /><Badge tone={selected.status === 'published' ? 'lime' : 'blue'}>{selected.status}</Badge><p>{selected.date} at {selected.time}</p><div>{selected.platforms.map((platform) => <span key={platform}><PlatformMark platform={platform} /> {platform}</span>)}</div></div></Modal>}
+      <PageIntro eyebrow="Content calendar" icon="calendar" title="See the whole story." description="Posts and live campaigns sit on the days they run." actions={<Button icon="plus" onClick={() => onGo('create')}>New post</Button>} />
+      <section className="db-calendar db-card">
+        <header>
+          <div><button onClick={() => move(-1)} aria-label="Previous month"><Icon name="back" size={17} /></button><button onClick={() => setAnchor(new Date(2026, 8, 1))}>Today</button><button onClick={() => move(1)} aria-label="Next month"><Icon name="arrow" size={17} /></button></div>
+          <h2>{month}</h2>
+          <div className="db-calendar-legend"><span><i className="lime" />Published</span><span><i className="blue" />Scheduled</span><span><i className="campaign" />Live campaign</span></div>
+        </header>
+        <div className="db-weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => <span key={day}>{day}</span>)}</div>
+        <div className="db-month-grid">{cells.map(({ date: cellDate, muted }, index) => {
+          const dateKey = isoDate(cellDate)
+          const events = calendarContent.filter((item) => item.date === dateKey)
+          const running = muted ? [] : campaignsOn(dateKey)
+          const today = dateKey === '2026-09-26'
+          return <div className={`db-day ${muted ? 'muted' : ''} ${today ? 'today' : ''}`} key={`${dateKey}-${index}`}>
+            <span>{cellDate.getDate()}</span>
+            {events.map((event) => <button className={`db-cal-post ${event.status}`} onClick={() => setSelected(event)} key={event.id}>
+              <img src={event.image} alt="" />
+              <em><img src={channelLogo(event.platforms[0])} alt="" /><span><b>{event.title}</b><small>{event.time}</small></span></em>
+            </button>)}
+            {running.map((campaign) => <button className="db-cal-live" onClick={() => setSelected({ ...campaign, kind: 'campaign', title: campaign.name })} key={campaign.id}><img src={campaign.image} alt="" /><b>{campaign.name}</b></button>)}
+            {!muted && <button className="db-day-add" onClick={() => { notify(`Starting a post for ${dateKey}.`); onGo('create') }}><Icon name="plus" size={13} /> Add</button>}
+          </div>
+        })}</div>
+      </section>
+      {selected && <Modal title={selected.title || selected.name} onClose={() => setSelected(null)} footer={<><Button variant="ghost" onClick={() => setSelected(null)}>Close</Button>{campaignOpen ? <Button icon="arrow" onClick={() => { setSelected(null); onGo('campaigns') }}>View campaign</Button> : <Button icon="edit" onClick={() => notify('This scheduled post is ready to edit from Content.')}>Edit post</Button>}</>}>
+        <div className="db-calendar-popover">
+          {selected.image ? <img className="db-cal-modal-shot" src={selected.image} alt="" /> : <CreativeArt palette={selected.palette} theme={(selected.title || selected.name).toUpperCase().replace(' ', ' / ')} compact />}
+          <Badge tone={campaignOpen ? 'blue' : selected.status === 'published' ? 'lime' : selected.status === 'failed' ? 'orange' : 'blue'}>{campaignOpen ? selected.delivery : selected.status}</Badge>
+          {campaignOpen ? <p>{prettyDay(selected.start)} – {prettyDay(selected.end)} · ${selected.budget}/day · {selected.leads} leads</p> : <p>{prettyDay(selected.date)} at {selected.time}{selected.format ? ` · ${selected.format}` : ''}</p>}
+          {!campaignOpen && <div>{selected.platforms.map((platform) => <span key={platform}><img src={channelLogo(platform)} alt="" /> {platform}</span>)}</div>}
+        </div>
+      </Modal>}
     </div>
   )
 }
