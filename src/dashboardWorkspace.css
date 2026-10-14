@@ -47,3 +47,7 @@ html[data-theme] .db-settings .db-section-heading > span { color: #3e92cc; backg
 }
 .db-toast { position: fixed; z-index: 150; right: 22px; bottom: 22px; display: flex; width: min(370px,calc(100vw - 30px)); min-height: 54px; align-items: center; gap: 10px; padding: 10px 11px; border: 1px solid rgba(62,146,204,.2); border-radius: 13px; color: #fff; background: rgba(22,24,20,.96); box-shadow: 0 20px 50px rgba(0,0,0,.45); backdrop-filter: blur(18px); animation: db-toast-in .35s ease both; }.db-toast > span { display: grid; width: 31px; height: 31px; place-items: center; border-radius: 8px; color: #111; background: var(--db-lime); }.db-toast p { flex: 1; margin: 0; color: #fff; font-size: 12.5px; line-height: 1.4; }.db-toast > button { display: grid; width: 27px; height: 27px; place-items: center; border: 0; color: #fff; background: transparent; }.db-toast.error { border-color: rgba(216,49,91,.24); }.db-toast.error > span { color: var(--app-ink); background: var(--db-orange); }
 @keyframes db-toast-in { from { opacity: 0; transform: translateY(15px); } }
+
+/* Inline selectors for multi-account Meta and publishing connections. */
+.db-fact-select { max-width: 100%; margin-top: 2px; padding: 4px 8px; border: 1px solid var(--db-stroke); border-radius: 8px; color: inherit; font: inherit; font-size: 13px; background: var(--db-panel-soft); }
+.db-connect-list .db-fact-select { display: block; margin-top: 6px; font-size: 12px; }

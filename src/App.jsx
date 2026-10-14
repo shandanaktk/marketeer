@@ -1,26 +1,83 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import OnboardingFlow from './OnboardingFlow.jsx'
 import LandingPage from './LandingPage.jsx'
+import { getMe, session } from './api.js'
 import { useTheme } from './theme.jsx'
+
+const VIEWS = ['signin', 'signup', 'onboarding', 'dashboard', 'auth-callback']
+const PRIVATE = ['onboarding', 'dashboard']
 
 function getView() {
   const view = new URLSearchParams(window.location.search).get('view')
-  return ['signin', 'signup', 'onboarding', 'dashboard'].includes(view) ? view : 'home'
+  return VIEWS.includes(view) ? view : 'home'
+}
+
+function urlFor(next) {
+  return next === 'home' ? window.location.pathname : `${window.location.pathname}?view=${next}`
+}
+
+// Private screens need a session; without one the browser lands on sign-in.
+function resolveView() {
+  const view = getView()
+  if (PRIVATE.includes(view) && !session.active()) {
+    window.history.replaceState({}, '', urlFor('signin'))
+    return 'signin'
+  }
+  return view
 }
 
 export default function App() {
-  const [view, setView] = useState(getView)
+  const [view, setView] = useState(resolveView)
+  const [account, setAccount] = useState(null)
+  // The private view the signed-in account was last verified for.
+  const [verified, setVerified] = useState(null)
   const [theme, onToggleTheme] = useTheme()
+
   useEffect(() => {
-    const onPopState = () => setView(getView())
+    const onPopState = () => setView(resolveView())
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
   }, [])
-  const navigate = (next) => {
-    window.history.pushState({}, '', next === 'home' ? window.location.pathname : `${window.location.pathname}?view=${next}`)
+
+  const navigate = useCallback((next, { replace = false } = {}) => {
+    const target = PRIVATE.includes(next) && !session.active() ? 'signin' : next
+    window.history[replace ? 'replaceState' : 'pushState']({}, '', urlFor(target))
     window.scrollTo({ top: 0, behavior: 'instant' })
-    setView(next)
+    setView(target)
+  }, [])
+
+  // Google / Apple sign-in lands here with the tokens in the URL fragment.
+  useEffect(() => {
+    if (view !== 'auth-callback') return
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    if (params.get('access_token')) session.store({ access_token: params.get('access_token'), refresh_token: params.get('refresh_token') })
+    window.history.replaceState({}, '', window.location.pathname)
+    getMe()
+      .then((me) => { setAccount(me); navigate(me.onboarding_completed ? 'dashboard' : 'onboarding', { replace: true }) })
+      .catch(() => { session.clear(); navigate('signin', { replace: true }) })
+  }, [view, navigate])
+
+  // Confirm the session for private screens; the dashboard needs a finished onboarding.
+  useEffect(() => {
+    if (!PRIVATE.includes(view)) return undefined
+    let cancelled = false
+    getMe()
+      .then((me) => {
+        if (cancelled) return
+        setAccount(me)
+        if (view === 'dashboard' && !me.onboarding_completed) navigate('onboarding', { replace: true })
+        else setVerified(view)
+      })
+      .catch(() => { if (!cancelled) { session.clear(); navigate('signin', { replace: true }) } })
+    return () => { cancelled = true }
+  }, [view, navigate])
+
+  const checking = view === 'auth-callback' || (PRIVATE.includes(view) && verified !== view)
+  if (checking) {
+    return <main className="app-boot" aria-busy="true"><img className="db-mascot db-loader-mark" src="/mascot/marketeer-m.png" alt="" /><p>Opening your workspace…</p></main>
   }
-  if (view !== 'home') return <OnboardingFlow initialView={view} onNavigate={navigate} theme={theme} onToggleTheme={onToggleTheme} />
-  return <LandingPage navigate={navigate} theme={theme} onToggleTheme={onToggleTheme} />
+  if (view !== 'home') {
+    return <OnboardingFlow initialView={view} account={account} setAccount={setAccount} onNavigate={navigate} theme={theme} onToggleTheme={onToggleTheme} />
+  }
+  return <LandingPage navigate={(next) => navigate(next === 'signin' && session.active() ? 'dashboard' : next)} theme={theme} onToggleTheme={onToggleTheme} />
 }

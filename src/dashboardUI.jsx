@@ -1,4 +1,9 @@
 import { useEffect } from 'react'
+import { useBrand } from './brandContext.js'
+
+function BrandAvatar({ brand }) {
+  return brand.logo ? <span className="db-preview-avatar" style={{ backgroundImage: `url(${brand.logo})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'transparent' }}>{brand.initials}</span> : <span className="db-preview-avatar">{brand.initials}</span>
+}
 
 export function Icon({ name, size = 18 }) {
   const paths = {
@@ -84,41 +89,45 @@ export function Toggle({ checked, onChange, label, hint }) {
 }
 
 export function CreativeArt({ palette = 'lime', theme = 'MOVE / WITH PURPOSE', compact = false, imageUrl }) {
-  const [first, ...rest] = theme.split(' / ')
+  const brand = useBrand()
+  const [first, ...rest] = (theme || 'YOUR / MESSAGE').split(' / ')
   return (
     <div className={`db-creative-art ${palette} ${compact ? 'compact' : ''}`} style={imageUrl ? { backgroundImage: `linear-gradient(180deg, transparent, rgba(5,5,5,.45)), url(${imageUrl})` } : undefined}>
-      <span>MARKETEER / 2026</span><i className="orbit one" /><i className="orbit two" /><b>{first}<em>{rest.join(' ') || 'CREATE'}</em></b><small>MADE TO MOVE</small>
+      <span>{brand.name.toUpperCase()} / {new Date().getFullYear()}</span><i className="orbit one" /><i className="orbit two" /><b>{first}<em>{rest.join(' ') || 'CREATE'}</em></b><small>MADE TO MOVE</small>
     </div>
   )
 }
 
-export function SocialPreview({ caption, hashtags = [], platforms = ['Instagram'], palette = 'lime', theme, imageUrl, format = 'Post' }) {
+export function SocialPreview({ caption, hashtags = [], platforms = ['Instagram'], palette = 'lime', theme, imageUrl, format = 'Post', mediaType = '' }) {
+  const brand = useBrand()
+  const isVideo = String(mediaType).startsWith('video')
   return (
     <article className={`db-social-preview ${format.toLowerCase()}`}>
       <header>
-        <span className="db-preview-avatar">MS</span>
-        <div><b>marketeer.studio</b><small>{format}</small></div>
+        <BrandAvatar brand={brand} />
+        <div><b>{brand.handle}</b><small>{format}</small></div>
         <span className="db-library-logos">{platforms.map((platform) => <ChannelLogo platform={platform} key={platform} />)}</span>
       </header>
-      {imageUrl ? <img className="db-preview-shot" src={imageUrl} alt="" /> : <CreativeArt palette={palette} theme={theme} />}
+      {imageUrl ? (isVideo ? <video className="db-preview-shot" src={imageUrl} muted loop autoPlay playsInline /> : <img className="db-preview-shot" src={imageUrl} alt="" />) : <CreativeArt palette={palette} theme={theme} />}
       <div className="db-preview-actions" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 4.6-7 9-7 9Z" /></svg>
         <svg viewBox="0 0 24 24"><path d="M6 17.5 4.5 20.5 7 19.2A8.5 8.5 0 1 0 6 17.5Z" /></svg>
         <svg viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" /></svg>
       </div>
-      <p><b>marketeer.studio</b> {caption || 'Your caption will appear here.'}</p>
+      <p><b>{brand.handle}</b> {caption || 'Your caption will appear here.'}</p>
       {!!hashtags.length && <p className="tags">{hashtags.map((tag) => `#${tag}`).join(' ')}</p>}
     </article>
   )
 }
 
 export function AdPreview({ headline, primary, cta = 'SIGN_UP', palette = 'lime', theme = 'MOVE / WITH PURPOSE', imageUrl }) {
+  const brand = useBrand()
   return (
     <article className="db-ad-preview-card">
-      <header><span className="db-preview-avatar">MS</span><div><b>Marketeer Studio</b><small>Sponsored</small></div><ChannelLogo platform="Facebook" /></header>
+      <header><BrandAvatar brand={brand} /><div><b>{brand.name}</b><small>Sponsored</small></div><ChannelLogo platform="Facebook" /></header>
       <p>{primary}</p>
       {imageUrl ? <img className="db-ad-shot" src={imageUrl} alt="" /> : <CreativeArt palette={palette} theme={theme} />}
-      <footer><div><small>MARKETEER.CO</small><b>{headline}</b></div><button type="button">{String(cta).replaceAll('_', ' ')}</button></footer>
+      <footer><div><small>{(brand.domain || brand.name).toUpperCase()}</small><b>{headline}</b></div><button type="button">{String(cta).replaceAll('_', ' ')}</button></footer>
     </article>
   )
 }
@@ -141,6 +150,14 @@ export function Modal({ title, onClose, children, wide = false, footer }) {
   )
 }
 
-export function Spinner({ label = 'Working on it…', progress }) {
-  return <div className="db-spinner-state"><img className="db-mascot db-loader-mark" src="/mascot/marketeer-m.png" alt="" /><h2>{label}</h2><p>Marketeer is using your brand context and selections.</p><div className="db-progress"><i style={{ width: `${progress || 68}%` }} /></div></div>
+export function Spinner({ label = 'Working on it…', progress, detail }) {
+  return <div className="db-spinner-state"><img className="db-mascot db-loader-mark" src="/mascot/marketeer-m.png" alt="" /><h2>{label}</h2><p>{detail || 'Marketeer is using your brand context and selections.'}</p><div className="db-progress"><i style={{ width: `${progress || 68}%` }} /></div></div>
+}
+
+export function LoadingState({ label = 'Loading…' }) {
+  return <div className="db-empty" aria-busy="true"><span><img className="db-mascot db-loader-mark" src="/mascot/marketeer-m.png" alt="" style={{ width: 34, height: 34 }} /></span><h3>{label}</h3><p>Fetching the latest from your workspace.</p></div>
+}
+
+export function ErrorState({ error, onRetry }) {
+  return <div className="db-empty"><span><Icon name="info" size={25} /></span><h3>Couldn’t load this</h3><p>{error?.message || 'Something went wrong.'}</p>{onRetry && <Button variant="secondary" icon="refresh" onClick={() => onRetry()}>Try again</Button>}</div>
 }

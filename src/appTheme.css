@@ -316,3 +316,7 @@ html[data-theme='light'] .ob-auth-card .ob-social-row > button { background: tra
 @media (max-width: 760px) {
   .db-campaign-lead-grid { grid-template-columns: 1fr; }
 }
+
+/* Session check before private screens render. */
+.app-boot { display: grid; min-height: 100vh; place-content: center; justify-items: center; gap: 14px; color: var(--app-muted, #8a8a8a); background: var(--app-bg, #0b0b0c); font-size: 14px; }
+.app-boot img { width: 56px; height: 56px; }

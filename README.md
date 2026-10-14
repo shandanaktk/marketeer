@@ -11,7 +11,7 @@ npm run dev -- --host 0.0.0.0
 
 Vite serves the app on port `5173` by default.
 
-Useful demo URLs:
+Useful URLs (the dashboard needs a signed-in account; private views redirect to sign-in):
 
 - Landing page: `/`
 - Sign up: `/?view=signup`
@@ -22,14 +22,15 @@ Useful demo URLs:
 
 ## API configuration
 
-Copy `.env.example` to `.env.local` and set:
+Copy `.env.example` to `.env.local` and set the Marketeer API address (`Marketeer-backend`):
 
 ```env
-VITE_API_BASE_URL=https://your-main-api.example.com
-VITE_META_ADS_API_BASE_URL=https://your-meta-api.example.com
+VITE_API_BASE_URL=https://api.your-domain.com
 ```
 
-Until API URLs and authentication are available, the UI uses the isolated mock adapters in `src/dashboardMockData.js` and `src/srsMockData.js`. Components do not embed the main demo record sets, so those modules can be replaced by API adapters later.
+In development it defaults to `http://localhost:8091`. Every screen reads and writes through `src/api.js` — accounts, onboarding, Knowledge Base, vacancies, Content Studio, publishing channels, Meta Ads, reporting, leads and optimization. There are no mock records in the dashboard.
+
+Sessions use an access token and a rotating refresh token in `localStorage`; an expired access token is refreshed transparently, and a revoked session returns the user to sign-in.
 
 ## Production build
 
@@ -53,7 +54,7 @@ The static production output is written to `dist/`.
 - Publish directory: not used for Dockerfile builds; the image serves the built `dist` directory
 - Start command: leave blank (the Dockerfile starts Nginx)
 
-These paths assume the connected repository is this directory, `E:\marketeer\marketeer`, not its parent. Commit and push the changed files before deploying the `main` branch. The two optional `VITE_*` API URLs must be supplied as Docker build arguments; they are compiled into the public frontend and must not contain secrets. Changing them requires a rebuild.
+These paths assume the connected repository is this directory, `E:\marketeer\marketeer`, not its parent. Commit and push the changed files before deploying the `main` branch. `VITE_API_BASE_URL` must be supplied as a Docker build argument; they are compiled into the public frontend and must not contain secrets. Changing them requires a rebuild.
 
 Equivalent local Docker commands:
 
@@ -64,7 +65,7 @@ docker run --rm -p 8080:80 marketeer
 
 ## Dashboard account menu
 
-The header search UI and its state/handler are commented out for later integration. The avatar opens Settings and Log out, with arrow-key navigation, Escape, and outside-click dismissal. Log out removes the `access_token` used by the API adapter and reloads the sign-in page to clear in-memory demo state, preserving the chosen theme. Backend authentication/session revocation and protected routes are not implemented in this frontend prototype.
+The header search UI and its state/handler are commented out for later integration. The avatar opens Settings and Log out, with arrow-key navigation, Escape, and outside-click dismissal. Log out revokes the refresh token on the API, clears the stored tokens, and reloads the sign-in page, preserving the chosen theme. The bell shows unread workspace notifications (new leads, publishing results, connection health, weekly summary).
 
 Alternatively, for a static-site build:
 
