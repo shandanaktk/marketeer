@@ -248,7 +248,7 @@ function AuthScreen({ mode, onNavigate, onSignedIn }) {
               <span>{busy === 'email' ? (isSignIn ? 'Signing in…' : 'Creating your account…') : isSignIn ? 'Sign in' : 'Create free account'}</span><i><ArrowIcon /></i>
             </button>
           </form>
-          <p className="ob-legal">By continuing, you agree to our Terms and Privacy Policy.</p>
+          <p className="ob-legal">By continuing, you agree to our <button type="button" className="ob-legal-link" onClick={() => onNavigate('terms')}>Terms</button> and <button type="button" className="ob-legal-link" onClick={() => onNavigate('privacy')}>Privacy Policy</button>.</p>
         </section>
       </div>
     </main>

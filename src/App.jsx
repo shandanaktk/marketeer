@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import OnboardingFlow from './OnboardingFlow.jsx'
 import LandingPage from './LandingPage.jsx'
+import LegalPage from './LegalPage.jsx'
 import { getMe, session } from './api.js'
 import { useTheme } from './theme.jsx'
 
-const VIEWS = ['signin', 'signup', 'onboarding', 'dashboard', 'auth-callback']
+const VIEWS = ['signin', 'signup', 'onboarding', 'dashboard', 'auth-callback', 'privacy', 'terms']
 const PRIVATE = ['onboarding', 'dashboard']
+const LEGAL = ['privacy', 'terms']
 
 function getView() {
   const view = new URLSearchParams(window.location.search).get('view')
@@ -76,8 +78,12 @@ export default function App() {
   if (checking) {
     return <main className="app-boot" aria-busy="true"><img className="db-mascot db-loader-mark" src="/mascot/marketeer-m.png" alt="" /><p>Opening your workspace…</p></main>
   }
+  const go = (next) => navigate(next === 'signin' && session.active() ? 'dashboard' : next)
+  if (LEGAL.includes(view)) {
+    return <LegalPage page={view} navigate={go} theme={theme} onToggleTheme={onToggleTheme} />
+  }
   if (view !== 'home') {
     return <OnboardingFlow initialView={view} account={account} setAccount={setAccount} onNavigate={navigate} theme={theme} onToggleTheme={onToggleTheme} />
   }
-  return <LandingPage navigate={(next) => navigate(next === 'signin' && session.active() ? 'dashboard' : next)} theme={theme} onToggleTheme={onToggleTheme} />
+  return <LandingPage navigate={go} theme={theme} onToggleTheme={onToggleTheme} />
 }
