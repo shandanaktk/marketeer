@@ -9,13 +9,23 @@ const VIEWS = ['signin', 'signup', 'onboarding', 'dashboard', 'auth-callback', '
 const PRIVATE = ['onboarding', 'dashboard']
 const LEGAL = ['privacy', 'terms']
 
+function pathOf() {
+  return window.location.pathname.replace(/\/+$/, '') || '/'
+}
+
 function getView() {
+  const path = pathOf()
+  if (path === '/privacy') return 'privacy'
+  if (path === '/terms') return 'terms'
   const view = new URLSearchParams(window.location.search).get('view')
+  if (LEGAL.includes(view)) return view
   return VIEWS.includes(view) ? view : 'home'
 }
 
 function urlFor(next) {
-  return next === 'home' ? window.location.pathname : `${window.location.pathname}?view=${next}`
+  if (next === 'home') return '/'
+  if (LEGAL.includes(next)) return `/${next}`
+  return `/?view=${next}`
 }
 
 // Private screens need a session; without one the browser lands on sign-in.
@@ -36,6 +46,13 @@ export default function App() {
   const [theme, onToggleTheme] = useTheme()
 
   useEffect(() => {
+    // Old ?view=privacy|terms links redirect to clean paths.
+    const params = new URLSearchParams(window.location.search)
+    const legacy = params.get('view')
+    if (LEGAL.includes(legacy) && !LEGAL.includes(pathOf().slice(1))) {
+      window.history.replaceState({}, '', `/${legacy}`)
+      setView(legacy)
+    }
     const onPopState = () => setView(resolveView())
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
@@ -53,7 +70,7 @@ export default function App() {
     if (view !== 'auth-callback') return
     const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
     if (params.get('access_token')) session.store({ access_token: params.get('access_token'), refresh_token: params.get('refresh_token') })
-    window.history.replaceState({}, '', window.location.pathname)
+    window.history.replaceState({}, '', '/')
     getMe()
       .then((me) => { setAccount(me); navigate(me.onboarding_completed ? 'dashboard' : 'onboarding', { replace: true }) })
       .catch(() => { session.clear(); navigate('signin', { replace: true }) })

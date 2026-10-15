@@ -255,21 +255,11 @@ export default function LegalPage({ page, navigate, theme, onToggleTheme }) {
           </div>
         </header>
         <div className="mk-legal-body">
-          <aside className="mk-legal-aside" aria-label="On this page">
-            <p className="mk-overline">On this page</p>
-            <ol>
-              {sections.map((section) => (
-                <li key={section.title}>
-                  <a href={`#${section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`}>
-                    {section.title}
-                  </a>
-                </li>
-              ))}
-            </ol>
-            <button type="button" className="mk-text-button mk-legal-switch" onClick={() => navigate(other.view)}>
+          <div className="mk-legal-toolbar">
+            <button type="button" className="mk-legal-switch" onClick={() => navigate(other.view)}>
               See {other.label} <Arrow />
             </button>
-          </aside>
+          </div>
           <article className="mk-legal-content">
             {sections.map((section) => {
               const id = section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
