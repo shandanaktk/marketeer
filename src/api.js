@@ -34,7 +34,10 @@ function messageOf(body, status) {
   const detail = body?.detail
   if (typeof detail === 'string') return detail
   if (Array.isArray(detail)) return detail.map((item) => item?.msg?.replace(/^Value error, /, '')).filter(Boolean).join(' ') || 'Check the highlighted details.'
-  if (detail?.message) return detail.title ? `${detail.title}: ${detail.message}` : detail.message
+  if (detail?.message) {
+    const text = detail.title ? `${detail.title}: ${detail.message}` : detail.message
+    return detail.while ? `${text} (while ${detail.while})` : text
+  }
   return body?.message || `Request failed (${status})`
 }
 
