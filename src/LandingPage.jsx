@@ -151,6 +151,15 @@ export default function LandingPage({ navigate, theme, onToggleTheme }) {
     {loading && <div className="mk-loader" role="status" aria-label="Loading Marketeer"><Wordmark /><div><i /></div><small>GOOD THINGS IN MOTION</small></div>}
     <a className="mk-skip-link" href="#main">Skip to content</a><Nav navigate={navigate} theme={theme} onToggleTheme={onToggleTheme} />
     <main id="main"><Hero navigate={navigate} /><Marquee /><Statement navigate={navigate} /><ProductShowcase navigate={navigate} /><Gallery navigate={navigate} /><Connections navigate={navigate} /><MetaSection navigate={navigate} /><HowItWorks /><section className="mk-final"><div data-enter><h2>You’ve got ideas.<br /><span>Let’s get them out there.</span></h2><button className="mk-button mk-button-orange" onClick={() => navigate('signup')}>Let’s make things happen <Arrow /></button></div><div className="mk-footer-display" aria-hidden="true">MARKETEER</div></section></main>
-    <footer className="mk-footer"><a href="#top"><Wordmark /></a><span>© 2026 Marketeer. Made for your next move.</span><button onClick={() => setPaused(!paused)} aria-pressed={paused}>{paused ? '▶ Resume motion' : 'Ⅱ Pause motion'}</button><a href="#top">Back to top ↑</a></footer>
+    <footer className="mk-footer">
+      <a href="#top"><Wordmark /></a>
+      <nav className="mk-footer-links" aria-label="Legal">
+        <button type="button" onClick={() => navigate('privacy')}>Privacy</button>
+        <button type="button" onClick={() => navigate('terms')}>Terms</button>
+      </nav>
+      <span>© 2026 Marketeer. Made for your next move.</span>
+      <button type="button" onClick={() => setPaused(!paused)} aria-pressed={paused}>{paused ? '▶ Resume motion' : 'Ⅱ Pause motion'}</button>
+      <a href="#top">Back to top ↑</a>
+    </footer>
   </div>
 }

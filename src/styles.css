@@ -4402,6 +4402,19 @@ svg {
   line-height: 1.55;
 }
 
+.ob-legal-link {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
 .ob-complete-copy {
   color: rgba(var(--app-contrast-rgb), .66);
   font-size: 16px;
