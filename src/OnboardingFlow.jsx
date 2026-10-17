@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Dashboard from './Dashboard.jsx'
 import { ThemeButton } from './theme.jsx'
+import { COUNTRIES, RADII, defaultCountry, isCountry } from './countries.js'
 import {
   completeOnboarding, connectChannel, disconnectChannel, getChannels, getMe, getOnboarding, initialsOf,
   linkSocialLogin, login, saveOnboarding, scanWebsite, signup, startSocialLogin, uploadMedia,
@@ -49,7 +50,7 @@ const platforms = [
 ]
 
 // Answers saved to the server between steps (credentials never are).
-const SAVED_KEYS = ['role', 'provider', 'businessName', 'industry', 'website', 'goals', 'logo', 'colors', 'voice', 'customVoice', 'description', 'postingPlatforms', 'postingFrequency', 'timezone', 'metaBudget', 'metaDuration', 'reviewMode', 'connected', 'workspaceName', 'invites']
+const SAVED_KEYS = ['role', 'provider', 'businessName', 'industry', 'website', 'goals', 'logo', 'colors', 'voice', 'customVoice', 'description', 'postingPlatforms', 'postingFrequency', 'timezone', 'metaBudget', 'metaDuration', 'metaCountry', 'metaCity', 'metaRadius', 'reviewMode', 'connected', 'workspaceName', 'invites']
 const savable = (data) => Object.fromEntries(SAVED_KEYS.filter((key) => data[key] !== undefined).map((key) => [key, data[key]]))
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
 
@@ -544,6 +545,7 @@ function AutomationStep({ data, setData, onBack, onContinue, busy }) {
   const submit = (event) => {
     event.preventDefault()
     if (!(Number(data.metaBudget) >= 5)) { setError('The daily budget needs to be at least $5.'); return }
+    if (!isCountry(data.metaCountry)) { setError('Choose the country you hire in from the list — Meta needs it to target recruitment ads.'); return }
     setError('')
     onContinue()
   }
@@ -569,6 +571,12 @@ function AutomationStep({ data, setData, onBack, onContinue, busy }) {
             <Field label="Daily budget"><span className="ob-budget-input"><i>$</i><input type="number" min="5" value={data.metaBudget} onChange={(event) => setData({ ...data, metaBudget: event.target.value })} /></span></Field>
             <div className="ob-field"><span className="ob-field-label">Campaign duration</span><MenuField label="Campaign duration" value={data.metaDuration} options={[{ value: '14', label: '14 days' }, { value: '21', label: '21 days' }, { value: '30', label: '30 days' }]} onChange={(metaDuration) => setData({ ...data, metaDuration })} /></div>
           </div>
+          <div className="ob-two-fields">
+            <Field label="Hiring country"><input list="ob-country-list" value={data.metaCountry} onChange={(event) => setData({ ...data, metaCountry: event.target.value })} placeholder="Start typing a country" autoComplete="off" /></Field>
+            <Field label="City" hint="Optional"><input value={data.metaCity} onChange={(event) => setData({ ...data, metaCity: event.target.value })} placeholder="e.g. Toronto" /></Field>
+          </div>
+          <datalist id="ob-country-list">{COUNTRIES.map((country) => <option value={country.name} key={country.code} />)}</datalist>
+          {data.metaCity.trim() && <div className="ob-field"><span className="ob-field-label">Reach around the city</span><MenuField label="Radius" value={String(data.metaRadius)} options={RADII.map((km) => ({ value: String(km), label: `${km} km` }))} onChange={(metaRadius) => setData({ ...data, metaRadius })} /></div>}
           <button type="button" className={`ob-rule-toggle ${data.reviewMode ? 'on' : ''}`} onClick={() => setData({ ...data, reviewMode: !data.reviewMode })}><span><i /></span><p><b>Review campaigns before launch</b><small>Hold generated campaigns for edits and approval.</small></p></button>
           <div className="ob-employment-lock"><span>!</span><p><b>Employment targeting stays compliant.</b> Age, gender, and detailed-targeting limitations are locked automatically.</p></div>
         </section>
@@ -684,6 +692,7 @@ function CompleteStep({ data, onBack, onDashboard, busy, error }) {
           <li><span>Rhythm</span><b>{data.postingFrequency}</b></li>
           <li><span>Timezone</span><b>{data.timezone.replace('_', ' ')}</b></li>
           <li><span>Meta ads</span><b>${data.metaBudget}/day · {data.metaDuration} days{data.reviewMode ? ' · review on' : ''}</b></li>
+          {data.metaCountry && <li><span>Hiring area</span><b>{data.metaCity.trim() ? `${data.metaCity.trim()} + ${data.metaRadius} km, ` : 'All of '}{data.metaCountry}</b></li>}
           <li><span>Channels</span>{channels.length > 0 ? <div className="ob-summary-logos">{channels.map((channel) => <img key={channel.name} src={channel.src} alt={channel.name} />)}</div> : <b>Add these in Settings</b>}</li>
           {(data.role === 'Agency' || data.role === 'Freelancer') && <li><span>Workspace</span><b>{data.workspaceName || 'Personal workspace'} · {data.invites.length + 1} member{data.invites.length ? 's' : ''}</b></li>}
         </ul>
@@ -733,6 +742,9 @@ function initialData(account) {
     timezone: browserTimezone(),
     metaBudget: '45',
     metaDuration: '21',
+    metaCountry: defaultCountry(),
+    metaCity: '',
+    metaRadius: '40',
     reviewMode: true,
     connected: [],
     workspaceName: '',
