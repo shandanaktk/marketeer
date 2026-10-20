@@ -3,8 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DEFAULT_CURRENCY, TIMEZONE, formatDate, locale, t } from './i18n.js'
 
-const configured = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
-export const API_BASE = configured || (import.meta.env.DEV ? 'http://localhost:8091' : '')
+// Local Vite proxies `/api` to the deployed backend so the browser is not blocked by CORS.
+export const API_BASE = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '')
+
+function resolveUrl(path) {
+  return API_BASE ? new URL(`${API_BASE}${path}`) : new URL(path, window.location.origin)
+}
 
 const ACCESS = 'access_token'
 const REFRESH = 'refresh_token'
@@ -46,7 +50,7 @@ let refreshing = null
 async function refreshSession() {
   const token = session.refresh()
   if (!token) return false
-  refreshing = refreshing || fetch(`${API_BASE}/api/v1/auth/refresh`, {
+  refreshing = refreshing || fetch(resolveUrl('/api/v1/auth/refresh'), {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: token }),
   }).then(async (response) => {
     if (!response.ok) return false
@@ -63,8 +67,8 @@ function expireSession() {
 }
 
 export async function request(path, { method = 'GET', body, query, auth = true, retry = true, raw = false } = {}) {
-  if (!API_BASE) throw new ApiError('The API address is not configured (VITE_API_BASE_URL).', 0)
-  const url = new URL(`${API_BASE}${path}`)
+  if (!API_BASE && !import.meta.env.DEV) throw new ApiError('The API address is not configured (VITE_API_BASE_URL).', 0)
+  const url = resolveUrl(path)
   Object.entries(query || {}).forEach(([key, value]) => { if (value !== undefined && value !== null && value !== '') url.searchParams.set(key, value) })
   const headers = new Headers()
   const token = session.access()
