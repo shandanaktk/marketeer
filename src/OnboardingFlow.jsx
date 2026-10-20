@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { DEFAULT_COUNTRY, LanguageButton, TIMEZONE, t } from './i18n.js'
+import { currencySymbol } from './api.js'
 import Dashboard from './Dashboard.jsx'
 import { ThemeButton } from './theme.jsx'
-import { COUNTRIES, RADII, defaultCountry, isCountry } from './countries.js'
+import { COUNTRIES, RADII, isCountry } from './countries.js'
 import {
   completeOnboarding, connectChannel, disconnectChannel, getChannels, getMe, getOnboarding, initialsOf,
   linkSocialLogin, login, saveOnboarding, scanWebsite, signup, startSocialLogin, uploadMedia,
@@ -15,6 +17,7 @@ const roles = [
 ]
 
 const industries = [
+  'Staffing & Recruitment',
   'E-commerce',
   'SaaS',
   'Local Service',
@@ -35,14 +38,13 @@ const goals = [
 const voices = ['Professional', 'Playful', 'Bold', 'Friendly', 'Luxury']
 
 const palette = [
-  '#0A2463', '#1E4B8F', '#3E92CC', '#8EC8EF', '#D8315B', '#F28B9F',
-  '#1E1B18', '#6A615C', '#C8A791', '#E47E3D', '#F8E6C4', '#898F65',
-  '#102A43', '#2F7EB5', '#0F766E', '#C2410C', '#7C3AED', '#FFFAFF',
+  '#B3DC1F', '#A1C631', '#E1FF74', '#00B2FF', '#1269CF', '#0A2463',
+  '#000000', '#2E2E2E', '#585858', '#999999', '#F8F8F8', '#FFFFFF',
+  '#D8315B', '#E47E3D', '#F0B429', '#0F766E', '#7C3AED', '#C8A791',
 ]
 
-const DEFAULT_COLORS = ['#898F65', '#C8A791', '#E47E3D', '#F8E6C4']
-const TIMEZONES = ['Europe/Amsterdam', 'Europe/London', 'America/New_York', 'Asia/Karachi']
-const browserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London'
+const DEFAULT_COLORS = ['#B3DC1F', '#000000', '#FFFFFF', '#00B2FF']
+const TIMEZONES = [TIMEZONE, 'Europe/Berlin', 'Europe/Vienna', 'Europe/Paris', 'Europe/Rome', 'Europe/London', 'America/New_York']
 
 const platforms = [
   { id: 'facebook', name: 'Facebook', detail: 'Pages, feed, and lead ads through the Meta Graph API', color: '#1877f2' },
@@ -127,7 +129,7 @@ function AppleLogo() {
 
 function Wordmark({ onHome }) {
   return (
-    <button className="ob-wordmark" type="button" onClick={onHome} aria-label="Back to Marketeer home">
+    <button className="ob-wordmark" type="button" onClick={onHome} aria-label={t('Back to Marketeer home')}>
       Marketeer<span>.</span>
     </button>
   )
@@ -159,17 +161,17 @@ function AuthScreen({ mode, onNavigate, onSignedIn }) {
   const params = new URLSearchParams(window.location.search)
   const [account, setAccount] = useState({ name: '', email: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState(params.get('auth_error') || (params.get('expired') ? 'Your session expired. Please sign in again.' : ''))
+  const [error, setError] = useState(params.get('auth_error') || (params.get('expired') ? t('Your session expired. Please sign in again.') : ''))
   const [busy, setBusy] = useState('')
 
   const submit = async (event) => {
     event.preventDefault()
     if ((!isSignIn && !account.name.trim()) || !account.email.trim() || !account.password.trim()) {
-      setError('Add your details to continue.')
+      setError(t('Add your details to continue.'))
       return
     }
-    if (!isEmail(account.email)) { setError('Enter a valid email address.'); return }
-    if (!isSignIn && account.password.length < 8) { setError('Use at least 8 characters for your password.'); return }
+    if (!isEmail(account.email)) { setError(t('Enter a valid email address.')); return }
+    if (!isSignIn && account.password.length < 8) { setError(t('Use at least 8 characters for your password.')); return }
     setError('')
     setBusy('email')
     try {
@@ -195,61 +197,61 @@ function AuthScreen({ mode, onNavigate, onSignedIn }) {
       <nav className="ob-auth-nav">
         <Wordmark onHome={() => onNavigate('home')} />
         <p>
-          {isSignIn ? 'New to Marketeer?' : 'Already have an account?'}
+          {isSignIn ? t('New to Marketeer?') : t('Already have an account?')}
           <button type="button" onClick={() => onNavigate(isSignIn ? 'signup' : 'signin')}>
-            {isSignIn ? 'Create account' : 'Sign in'}
+            {isSignIn ? t('Create account') : t('Sign in')}
           </button>
         </p>
       </nav>
 
       <div className="ob-auth-layout">
-        <section className="ob-auth-story" aria-label="Marketeer introduction">
-          <div className="ob-kicker"><span>✦</span> AI-powered campaign studio</div>
-          <h1>{isSignIn ? <>Welcome<br /><em>back.</em></> : <>Your ideas.<br /><em>Everywhere.</em></>}</h1>
-          <p>{isSignIn ? 'Your next campaign is closer than you think.' : 'Build campaigns, create on-brand content, and publish across every feed—all in one place.'}</p>
+        <section className="ob-auth-story" aria-label={t('Marketeer introduction')}>
+          <div className="ob-kicker"><span>✦</span> {t('AI-powered campaign studio')}</div>
+          <h1>{isSignIn ? <>{t('Welcome')}<br /><em>{t('back.')}</em></> : <>{t('Your ideas.')}<br /><em>{t('Everywhere.')}</em></>}</h1>
+          <p>{isSignIn ? t('Your next campaign is closer than you think.') : t('Build campaigns, create on-brand content, and publish across every feed—all in one place.')}</p>
           <div className="ob-story-preview">
-            <div className="ob-preview-card preview-one"><span>NEW CAMPAIGN</span><b>Less setup.<br />More impact.</b><i>↗</i></div>
-            <div className="ob-preview-card preview-two"><span>READY TO POST</span><b>Meet your<br /><em>new routine.</em></b><i>✦</i></div>
-            <div className="ob-preview-card preview-three"><span>MARKETEER AI</span><b>12 ideas</b><small>generated in 8 sec</small></div>
+            <div className="ob-preview-card preview-one"><span>{t('NEW CAMPAIGN')}</span><b>{t('Less setup.')}<br />{t('More impact.')}</b><i>↗</i></div>
+            <div className="ob-preview-card preview-two"><span>{t('READY TO POST')}</span><b>{t('Meet your')}<br /><em>{t('new routine.')}</em></b><i>✦</i></div>
+            <div className="ob-preview-card preview-three"><span>{t('MARKETEER AI')}</span><b>{t('12 ideas')}</b><small>{t('generated in 8 sec')}</small></div>
           </div>
-          <div className="ob-auth-proof"><span>4.9</span><div>★★★★★<small>Loved by 1,000+ growing brands</small></div></div>
+          <div className="ob-auth-proof"><span>4.8</span><div>★★★★★<small>{t('Trusted across Central Switzerland')}</small></div></div>
         </section>
 
         <section className="ob-glass ob-auth-card">
           <div className="ob-card-glint" />
           <div className="ob-auth-heading">
-            <span className="ob-mini-index">{isSignIn ? 'WELCOME BACK' : 'START FOR FREE'}</span>
-            <h2>{isSignIn ? 'Sign in to Marketeer' : 'Create your account'}</h2>
-            <p>{isSignIn ? 'Pick up right where you left off.' : 'No credit card. Just better marketing.'}</p>
+            <span className="ob-mini-index">{isSignIn ? t('WELCOME BACK') : t('START FOR FREE')}</span>
+            <h2>{isSignIn ? t('Sign in to Marketeer') : t('Create your account')}</h2>
+            <p>{isSignIn ? t('Pick up right where you left off.') : t('No credit card. Just better marketing.')}</p>
           </div>
 
           <div className="ob-social-row">
-            <button type="button" disabled={Boolean(busy)} onClick={() => social('google')}><GoogleLogo /> {busy === 'google' ? 'Opening…' : 'Google'}</button>
-            <button type="button" disabled={Boolean(busy)} onClick={() => social('apple')}><AppleLogo /> {busy === 'apple' ? 'Opening…' : 'Apple'}</button>
+            <button type="button" disabled={Boolean(busy)} onClick={() => social('google')}><GoogleLogo /> {busy === 'google' ? t('Opening…') : t('Google')}</button>
+            <button type="button" disabled={Boolean(busy)} onClick={() => social('apple')}><AppleLogo /> {busy === 'apple' ? t('Opening…') : t('Apple')}</button>
           </div>
-          <div className="ob-divider"><span>or use email</span></div>
+          <div className="ob-divider"><span>{t('or use email')}</span></div>
 
           <form onSubmit={submit} className="ob-auth-form">
             {!isSignIn && (
-              <Field label="Your name">
-                <input value={account.name} onChange={(event) => setAccount((current) => ({ ...current, name: event.target.value }))} placeholder="Your full name" autoComplete="name" />
+              <Field label={t('Your name')}>
+                <input value={account.name} onChange={(event) => setAccount((current) => ({ ...current, name: event.target.value }))} placeholder={t('Your full name')} autoComplete="name" />
               </Field>
             )}
-            <Field label="Email address">
-              <input type="email" value={account.email} onChange={(event) => setAccount((current) => ({ ...current, email: event.target.value }))} placeholder="you@company.com" autoComplete="email" />
+            <Field label={t('Email address')}>
+              <input type="email" value={account.email} onChange={(event) => setAccount((current) => ({ ...current, email: event.target.value }))} placeholder={t('you@company.com')} autoComplete="email" />
             </Field>
-            <Field label="Password">
+            <Field label={t('Password')}>
               <span className="ob-password-wrap">
-                <input type={showPassword ? 'text' : 'password'} value={account.password} onChange={(event) => setAccount((current) => ({ ...current, password: event.target.value }))} placeholder="8+ characters" autoComplete={isSignIn ? 'current-password' : 'new-password'} />
-                <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}><EyeIcon closed={showPassword} /></button>
+                <input type={showPassword ? 'text' : 'password'} value={account.password} onChange={(event) => setAccount((current) => ({ ...current, password: event.target.value }))} placeholder={t('8+ characters')} autoComplete={isSignIn ? 'current-password' : 'new-password'} />
+                <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? t('Hide password') : t('Show password')}><EyeIcon closed={showPassword} /></button>
               </span>
             </Field>
             {error && <p className="ob-form-error" role="alert">{error}</p>}
             <button className="ob-primary ob-auth-submit" type="submit" disabled={Boolean(busy)}>
-              <span>{busy === 'email' ? (isSignIn ? 'Signing in…' : 'Creating your account…') : isSignIn ? 'Sign in' : 'Create free account'}</span><i><ArrowIcon /></i>
+              <span>{busy === 'email' ? (isSignIn ? t('Signing in…') : t('Creating your account…')) : isSignIn ? t('Sign in') : t('Create free account')}</span><i><ArrowIcon /></i>
             </button>
           </form>
-          <p className="ob-legal">By continuing, you agree to our <button type="button" className="ob-legal-link" onClick={() => onNavigate('terms')}>Terms</button> and <button type="button" className="ob-legal-link" onClick={() => onNavigate('privacy')}>Privacy Policy</button>.</p>
+          <p className="ob-legal">{t('By continuing, you agree to our')} <button type="button" className="ob-legal-link" onClick={() => onNavigate('terms')}>{t('Terms')}</button> {t('and')} <button type="button" className="ob-legal-link" onClick={() => onNavigate('privacy')}>{t('Privacy Policy')}</button>.</p>
         </section>
       </div>
     </main>
@@ -266,14 +268,14 @@ function ScreenHeading({ index, eyebrow, title, subtitle }) {
   )
 }
 
-function FooterActions({ onBack, onContinue, skipLabel, onSkip, continueLabel = 'Continue', disabled = false, busy = false }) {
+function FooterActions({ onBack, onContinue, skipLabel, onSkip, continueLabel, disabled = false, busy = false }) {
   return (
     <footer className="ob-form-actions">
-      <button className="ob-back" type="button" onClick={onBack}><ArrowIcon back /> Back</button>
+      <button className="ob-back" type="button" onClick={onBack}><ArrowIcon back /> {t('Back')}</button>
       <div>
         {skipLabel && <button className="ob-skip" type="button" onClick={onSkip} disabled={busy}>{skipLabel}</button>}
         <button className="ob-primary" type="submit" onClick={onContinue} disabled={disabled || busy}>
-          <span>{busy ? 'Saving…' : continueLabel}</span><i><ArrowIcon /></i>
+          <span>{busy ? t('Saving…') : continueLabel || t('Continue')}</span><i><ArrowIcon /></i>
         </button>
       </div>
     </footer>
@@ -287,11 +289,11 @@ function BasicsStep({ data, setData, onBack, onContinue, busy }) {
   const submit = (event) => {
     event.preventDefault()
     if (!data.email.trim() || !data.role) {
-      setError('Add your account details and choose the option that fits you best.')
+      setError(t('Add your account details and choose the option that fits you best.'))
       return
     }
-    if (!isEmail(data.email)) { setError('Enter a valid email address.'); return }
-    if (data.password && data.password.length < 8) { setError('Passwords need at least 8 characters.'); return }
+    if (!isEmail(data.email)) { setError(t('Enter a valid email address.')); return }
+    if (data.password && data.password.length < 8) { setError(t('Passwords need at least 8 characters.')); return }
     setError('')
     onContinue()
   }
@@ -309,29 +311,29 @@ function BasicsStep({ data, setData, onBack, onContinue, busy }) {
 
   return (
     <form className="ob-step" onSubmit={submit}>
-      <ScreenHeading index={1} eyebrow="Account basics" title={<>Welcome to <em>Marketeer.</em></>} subtitle="Let’s get your account set up in under 2 minutes." />
+      <ScreenHeading index={1} eyebrow={t('Account basics')} title={<>{t('Welcome to')} <em>{t('Marketeer.')}</em></>} subtitle={t('Let’s get your account set up in under 2 minutes.')} />
       <div className="ob-two-fields">
-        <Field label="Email">
+        <Field label={t('Email')}>
           <input type="email" value={data.email} onChange={(event) => setData({ ...data, email: event.target.value })} autoComplete="email" />
         </Field>
-        <Field label="Password" hint={data.hasPassword ? 'Leave blank to keep' : 'Optional'}>
+        <Field label={t('Password')} hint={data.hasPassword ? t('Leave blank to keep') : t('Optional')}>
           <span className="ob-password-wrap">
-            <input type={showPassword ? 'text' : 'password'} value={data.password} onChange={(event) => setData({ ...data, password: event.target.value })} autoComplete="new-password" placeholder={data.hasPassword ? '••••••••' : '8+ characters'} />
-            <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label="Toggle password visibility"><EyeIcon closed={showPassword} /></button>
+            <input type={showPassword ? 'text' : 'password'} value={data.password} onChange={(event) => setData({ ...data, password: event.target.value })} autoComplete="new-password" placeholder={data.hasPassword ? '••••••••' : t('8+ characters')} />
+            <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={t('Toggle password visibility')}><EyeIcon closed={showPassword} /></button>
           </span>
         </Field>
       </div>
-      <div className="ob-inline-divider"><span>or continue with</span></div>
+      <div className="ob-inline-divider"><span>{t('or continue with')}</span></div>
       <div className="ob-social-row compact">
-        <button type="button" disabled={Boolean(linking)} onClick={() => link('google')} className={data.providers?.includes('google') ? 'selected' : ''}><GoogleLogo /> {linking === 'google' ? 'Opening…' : 'Google'} {data.providers?.includes('google') && <CheckIcon />}</button>
-        <button type="button" disabled={Boolean(linking)} onClick={() => link('apple')} className={data.providers?.includes('apple') ? 'selected' : ''}><AppleLogo /> {linking === 'apple' ? 'Opening…' : 'Apple'} {data.providers?.includes('apple') && <CheckIcon />}</button>
+        <button type="button" disabled={Boolean(linking)} onClick={() => link('google')} className={data.providers?.includes('google') ? 'selected' : ''}><GoogleLogo /> {linking === 'google' ? t('Opening…') : t('Google')} {data.providers?.includes('google') && <CheckIcon />}</button>
+        <button type="button" disabled={Boolean(linking)} onClick={() => link('apple')} className={data.providers?.includes('apple') ? 'selected' : ''}><AppleLogo /> {linking === 'apple' ? t('Opening…') : t('Apple')} {data.providers?.includes('apple') && <CheckIcon />}</button>
       </div>
       <fieldset className="ob-choice-set">
-        <legend>What best describes you?</legend>
+        <legend>{t('What best describes you?')}</legend>
         <div className="ob-role-grid">
           {roles.map((role) => (
             <button key={role.name} type="button" className={data.role === role.name ? 'ob-choice-card selected' : 'ob-choice-card'} onClick={() => setData({ ...data, role: role.name })}>
-              <i>{role.icon}</i><span><b>{role.name}</b><small>{role.caption}</small></span><em><CheckIcon /></em>
+              <i>{role.icon}</i><span><b>{t(role.name)}</b><small>{t(role.caption)}</small></span><em><CheckIcon /></em>
             </button>
           ))}
         </div>
@@ -371,7 +373,7 @@ function BusinessStep({ data, setData, onBack, onContinue, busy }) {
   const submit = async (event) => {
     event.preventDefault()
     if (!data.businessName.trim() || !data.industry) {
-      setError('Add a business name and choose an industry to continue.')
+      setError(t('Add a business name and choose an industry to continue.'))
       return
     }
     setError('')
@@ -379,22 +381,22 @@ function BusinessStep({ data, setData, onBack, onContinue, busy }) {
   }
   return (
     <form className="ob-step" onSubmit={submit}>
-      <ScreenHeading index={2} eyebrow="Your business" title={<>Tell us about<br /><em>your business.</em></>} subtitle="This helps Marketeer understand what you do and who you’re talking to." />
+      <ScreenHeading index={2} eyebrow={t('Your business')} title={<>{t('Tell us about')}<br /><em>{t('your business.')}</em></>} subtitle={t('This helps Marketeer understand what you do and who you’re talking to.')} />
       <div className="ob-business-fields">
-        <Field label="Business name">
-          <input value={data.businessName} onChange={(event) => setData({ ...data, businessName: event.target.value })} placeholder="e.g. Marketeer" autoFocus />
+        <Field label={t('Business name')}>
+          <input value={data.businessName} onChange={(event) => setData({ ...data, businessName: event.target.value })} placeholder={t('e.g. Personal Sigma Schwyz AG')} autoFocus />
         </Field>
         <div className="ob-field">
-          <span className="ob-field-label">Industry</span>
-          <MenuField label="Industry" placeholder="Select your industry" value={data.industry} options={industries} onChange={(industry) => setData({ ...data, industry })} />
+          <span className="ob-field-label">{t('Industry')}</span>
+          <MenuField label={t('Industry')} placeholder={t('Select your industry')} value={data.industry} options={industries.map((industry) => ({ value: industry, label: t(industry) }))} onChange={(industry) => setData({ ...data, industry })} />
         </div>
-        <Field label="Website URL" hint="Optional">
-          <span className="ob-url-wrap"><i>https://</i><input value={data.website} onChange={(event) => setData({ ...data, website: event.target.value.replace(/^https?:\/\//, '') })} placeholder="yourbusiness.com" inputMode="url" /></span>
+        <Field label={t('Website URL')} hint={t('Optional')}>
+          <span className="ob-url-wrap"><i>https://</i><input value={data.website} onChange={(event) => setData({ ...data, website: event.target.value.replace(/^https?:\/\//, '') })} placeholder="ihr-unternehmen.ch" inputMode="url" /></span>
         </Field>
-        {data.website && <div className="ob-smart-note"><span>✦</span><p><b>{scanning ? 'Scanning your site…' : 'Website detected'}</b>We’ll scan your site to auto-fill your branding in the next step.</p></div>}
+        {data.website && <div className="ob-smart-note"><span>✦</span><p><b>{scanning ? t('Scanning your site…') : t('Website detected')}</b>{t('We’ll scan your site to auto-fill your branding in the next step.')}</p></div>}
       </div>
       {error && <p className="ob-form-error" role="alert">{error}</p>}
-      <FooterActions onBack={onBack} skipLabel="Skip for now" onSkip={() => onContinue(data)} busy={busy || scanning} continueLabel={scanning ? 'Scanning…' : 'Continue'} />
+      <FooterActions onBack={onBack} skipLabel={t('Skip for now')} onSkip={() => onContinue(data)} busy={busy || scanning} continueLabel={scanning ? t('Scanning…') : t('Continue')} />
     </form>
   )
 }
@@ -406,16 +408,16 @@ function GoalsStep({ data, setData, onBack, onContinue, busy }) {
   }
   return (
     <form className="ob-step" onSubmit={(event) => { event.preventDefault(); onContinue() }}>
-      <ScreenHeading index={3} eyebrow="Your goals" title={<>What are you hoping<br /><em>to achieve?</em></>} subtitle="Pick as many as apply—we’ll tailor your dashboard around this." />
+      <ScreenHeading index={3} eyebrow={t('Your goals')} title={<>{t('What are you hoping')}<br /><em>{t('to achieve?')}</em></>} subtitle={t('Pick as many as apply—we’ll tailor your dashboard around this.')} />
       <div className="ob-goal-grid">
         {goals.map((goal) => (
           <button type="button" key={goal.name} className={`ob-goal-card ${goal.tone} ${data.goals.includes(goal.name) ? 'selected' : ''}`} onClick={() => toggleGoal(goal.name)}>
             <span className="ob-goal-emoji">{goal.emoji}</span><em><CheckIcon /></em>
-            <b>{goal.name}</b><small>{goal.detail}</small>
+            <b>{t(goal.name)}</b><small>{t(goal.detail)}</small>
           </button>
         ))}
       </div>
-      <p className="ob-selection-count"><span>{data.goals.length || 'No'}</span> goal{data.goals.length === 1 ? '' : 's'} selected</p>
+      <p className="ob-selection-count">{data.goals.length === 1 ? t('1 goal selected') : t('{n} goals selected', { n: data.goals.length || t('No') })}</p>
       <FooterActions onBack={onBack} disabled={!data.goals.length} busy={busy} />
     </form>
   )
@@ -469,35 +471,35 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
   }
   const submit = (event) => {
     event.preventDefault()
-    if (data.colors.some((color) => !/^#[0-9a-fA-F]{6}$/.test(color))) { setError('Use six-digit hex colors, like #3E92CC.'); return }
+    if (data.colors.some((color) => !/^#[0-9a-fA-F]{6}$/.test(color))) { setError(t('Use six-digit hex colors, like #B3DC1F.')); return }
     onContinue()
   }
   return (
     <form className="ob-step" onSubmit={submit}>
-      <ScreenHeading index={4} eyebrow="Brand identity" title={<>Let’s set up<br /><em>your brand.</em></>} subtitle={data.scanned ? 'We pulled a starting point from your website—feel free to adjust anything.' : 'Give Marketeer a feel for your look, sound, and story.'} />
+      <ScreenHeading index={4} eyebrow={t('Brand identity')} title={<>{t('Let’s set up')}<br /><em>{t('your brand.')}</em></>} subtitle={data.scanned ? t('We pulled a starting point from your website—feel free to adjust anything.') : t('Give Marketeer a feel for your look, sound, and story.')} />
       <div className="ob-brand-layout">
         <div className="ob-brand-left">
-          <div className="ob-field-label">Logo <small>PNG, JPG or SVG</small></div>
+          <div className="ob-field-label">{t('Logo')} <small>{t('PNG, JPG or SVG')}</small></div>
           <button className="ob-upload" type="button" onClick={() => uploadRef.current?.click()}>
             <input ref={uploadRef} type="file" accept="image/png,image/jpeg,image/svg+xml" onChange={handleLogo} tabIndex="-1" />
-            {data.logo ? <img src={data.logo} alt="Uploaded logo preview" /> : <span>{initialsOf(data.businessName || data.name)}</span>}
-            <p><b>{uploading ? 'Uploading…' : logoName || (data.logo ? 'Your logo' : 'Upload your logo')}</b><small>{data.logo ? 'Click to replace' : 'or drag and drop here'}</small></p><i>↑</i>
+            {data.logo ? <img src={data.logo} alt={t('Uploaded logo preview')} /> : <span>{initialsOf(data.businessName || data.name)}</span>}
+            <p><b>{uploading ? t('Uploading…') : logoName || (data.logo ? t('Your logo') : t('Upload your logo'))}</b><small>{data.logo ? t('Click to replace') : t('or drag and drop here')}</small></p><i>↑</i>
           </button>
           <div className="ob-color-block">
-            <div className="ob-field-label">Brand colors <small>Pick from the palette or type a hex</small></div>
+            <div className="ob-field-label">{t('Brand colors')} <small>{t('Pick from the palette or type a hex')}</small></div>
             <div className="ob-color-strip">
               {data.colors.map((color, index) => (
                 <div className="ob-color-chip" key={index}>
-                  <button type="button" className={`ob-color-swatch ${paletteFor === index ? 'is-editing' : ''}`} style={{ background: color }} aria-label={`Edit brand color ${index + 1}`} onClick={() => setPaletteFor(index)} />
-                  <input className="ob-color-hex" aria-label={`Hex for brand color ${index + 1}`} value={color} maxLength={7} onChange={(event) => updateColor(index, event.target.value.startsWith('#') ? event.target.value : `#${event.target.value}`)} />
-                  {data.colors.length > 2 && <button type="button" aria-label={`Remove color ${color}`} onClick={() => setData({ ...data, colors: data.colors.filter((_, item) => item !== index) })}>×</button>}
+                  <button type="button" className={`ob-color-swatch ${paletteFor === index ? 'is-editing' : ''}`} style={{ background: color }} aria-label={t('Edit brand color {n}', { n: index + 1 })} onClick={() => setPaletteFor(index)} />
+                  <input className="ob-color-hex" aria-label={t('Hex for brand color {n}', { n: index + 1 })} value={color} maxLength={7} onChange={(event) => updateColor(index, event.target.value.startsWith('#') ? event.target.value : `#${event.target.value}`)} />
+                  {data.colors.length > 2 && <button type="button" aria-label={t('Remove color {color}', { color })} onClick={() => setData({ ...data, colors: data.colors.filter((_, item) => item !== index) })}>×</button>}
                 </div>
               ))}
-              {data.colors.length < 6 && <button className={`ob-color-add ${paletteFor === 'add' ? 'is-open' : ''}`} type="button" onClick={() => setPaletteFor(paletteFor === 'add' ? null : 'add')}><b>+</b><small>Custom</small></button>}
+              {data.colors.length < 6 && <button className={`ob-color-add ${paletteFor === 'add' ? 'is-open' : ''}`} type="button" onClick={() => setPaletteFor(paletteFor === 'add' ? null : 'add')}><b>+</b><small>{t('Custom')}</small></button>}
             </div>
             {paletteFor !== null && (
               <div className="ob-palette" ref={paletteRef}>
-                <p>{paletteFor === 'add' ? 'Add a brand color' : 'Replace this color'}</p>
+                <p>{paletteFor === 'add' ? t('Add a brand color') : t('Replace this color')}</p>
                 <div className="ob-palette-grid">
                   {palette.map((color) => {
                     const used = data.colors.some((item) => item.toUpperCase() === color)
@@ -506,8 +508,8 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
                   })}
                 </div>
                 <label className="ob-palette-any">
-                  Any color
-                  <input type="color" aria-label="Pick any color" value={/^#[0-9a-fA-F]{6}$/.test(paletteFor === 'add' ? '#3e92cc' : data.colors[paletteFor] || '') ? (paletteFor === 'add' ? '#3e92cc' : data.colors[paletteFor]) : '#3e92cc'} onChange={(event) => choosePaletteColor(event.target.value)} />
+                  {t('Any color')}
+                  <input type="color" aria-label={t('Pick any color')} value={/^#[0-9a-fA-F]{6}$/.test(paletteFor === 'add' ? '#b3dc1f' : data.colors[paletteFor] || '') ? (paletteFor === 'add' ? '#b3dc1f' : data.colors[paletteFor]) : '#b3dc1f'} onChange={(event) => choosePaletteColor(event.target.value)} />
                 </label>
               </div>
             )}
@@ -515,16 +517,16 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
         </div>
         <div className="ob-brand-right">
           <div className="ob-voice-block">
-            <div className="ob-field-label">Brand voice <small>Select one</small></div>
+            <div className="ob-field-label">{t('Brand voice')} <small>{t('Select one')}</small></div>
             <div className="ob-voice-options">
-              {voices.map((voice) => <button type="button" key={voice} className={data.voice === voice ? 'selected' : ''} onClick={() => setData({ ...data, voice, customVoice: '' })}>{voice}</button>)}
+              {voices.map((voice) => <button type="button" key={voice} className={data.voice === voice ? 'selected' : ''} onClick={() => setData({ ...data, voice, customVoice: '' })}>{t(voice)}</button>)}
             </div>
-            <input className="ob-own-voice" value={data.customVoice} onChange={(event) => setData({ ...data, customVoice: event.target.value, voice: '' })} placeholder="Or describe your own voice..." />
+            <input className="ob-own-voice" value={data.customVoice} onChange={(event) => setData({ ...data, customVoice: event.target.value, voice: '' })} placeholder={t('Or describe your own voice...')} />
           </div>
-          <Field label="Short business description">
-            <span className="ob-textarea-wrap"><textarea maxLength="240" value={data.description} onChange={(event) => setData({ ...data, description: event.target.value })} placeholder="In a sentence or two, what does your business do?" /><small>{data.description.length}/240</small></span>
+          <Field label={t('Short business description')}>
+            <span className="ob-textarea-wrap"><textarea maxLength="240" value={data.description} onChange={(event) => setData({ ...data, description: event.target.value })} placeholder={t('In a sentence or two, what does your business do?')} /><small>{data.description.length}/240</small></span>
           </Field>
-          <div className="ob-ai-note"><span>✦</span><p>This is what Marketeer’s AI will use to write and design everything on your behalf.</p></div>
+          <div className="ob-ai-note"><span>✦</span><p>{t('This is what Marketeer’s AI will use to write and design everything on your behalf.')}</p></div>
         </div>
       </div>
       {error && <p className="ob-form-error" role="alert">{error}</p>}
@@ -544,41 +546,41 @@ function AutomationStep({ data, setData, onBack, onContinue, busy }) {
   const timezones = TIMEZONES.includes(data.timezone) ? TIMEZONES : [data.timezone, ...TIMEZONES]
   const submit = (event) => {
     event.preventDefault()
-    if (!(Number(data.metaBudget) >= 5)) { setError('The daily budget needs to be at least $5.'); return }
-    if (!isCountry(data.metaCountry)) { setError('Choose the country you hire in from the list — Meta needs it to target recruitment ads.'); return }
+    if (!(Number(data.metaBudget) >= 5)) { setError(t('The daily budget needs to be at least {amount}.', { amount: `${currencySymbol()} 5` })); return }
+    if (!isCountry(data.metaCountry)) { setError(t('Choose the country you hire in from the list — Meta needs it to target recruitment ads.')); return }
     setError('')
     onContinue()
   }
 
   return (
     <form className="ob-step" onSubmit={submit}>
-      <ScreenHeading index={5} eyebrow="Automation rules" title={<>Set the rhythm.<br /><em>We’ll run it.</em></>} subtitle="Choose the publishing cadence and recruitment ad defaults Marketeer should apply automatically." />
+      <ScreenHeading index={5} eyebrow={t('Automation rules')} title={<>{t('Set the rhythm.')}<br /><em>{t('We’ll run it.')}</em></>} subtitle={t('Choose the publishing cadence and recruitment ad defaults Marketeer should apply automatically.')} />
       <div className="ob-automation-layout">
         <section>
-          <header className="ob-rule-head"><b>Organic publishing</b><small>Select every channel Marketeer should post to</small></header>
+          <header className="ob-rule-head"><b>{t('Organic publishing')}</b><small>{t('Select every channel Marketeer should post to')}</small></header>
           <div className="ob-rule-platforms">
-            {[{ name: 'Instagram', detail: 'Feed, stories, and reels' }, { name: 'Facebook', detail: 'Pages, feed, and lead ads' }].map((platform) => <button type="button" className={data.postingPlatforms.includes(platform.name) ? 'selected' : ''} onClick={() => togglePlatform(platform.name)} key={platform.name}><img src={`/social_logos/${platform.name.toLowerCase()}.png`} alt="" /><span><b>{platform.name}</b><small>{platform.detail}</small></span><i><CheckIcon /></i></button>)}
+            {[{ name: 'Instagram', detail: t('Feed, stories, and reels') }, { name: 'Facebook', detail: t('Pages, feed, and lead ads') }].map((platform) => <button type="button" className={data.postingPlatforms.includes(platform.name) ? 'selected' : ''} onClick={() => togglePlatform(platform.name)} key={platform.name}><img src={`/social_logos/${platform.name.toLowerCase()}.png`} alt="" /><span><b>{platform.name}</b><small>{platform.detail}</small></span><i><CheckIcon /></i></button>)}
           </div>
-          <p className="ob-rhythm-note"><b>{data.postingPlatforms.length || 'No'} channel{data.postingPlatforms.length === 1 ? '' : 's'}</b> · {data.postingFrequency} · {data.timezone.replace('_', ' ')}</p>
+          <p className="ob-rhythm-note"><b>{data.postingPlatforms.length === 1 ? t('1 channel') : t('{n} channels', { n: data.postingPlatforms.length || t('No') })}</b> · {t(data.postingFrequency)} · {data.timezone.replace('_', ' ')}</p>
           <div className="ob-two-fields">
-            <div className="ob-field"><span className="ob-field-label">Publishing frequency</span><MenuField label="Publishing frequency" value={data.postingFrequency} options={['3 posts per week', '4 posts per week', '5 posts per week', 'Daily']} onChange={(postingFrequency) => setData({ ...data, postingFrequency })} /></div>
-            <div className="ob-field"><span className="ob-field-label">Timezone</span><MenuField label="Timezone" value={data.timezone} options={timezones} onChange={(timezone) => setData({ ...data, timezone })} /></div>
+            <div className="ob-field"><span className="ob-field-label">{t('Publishing frequency')}</span><MenuField label={t('Publishing frequency')} value={data.postingFrequency} options={['3 posts per week', '4 posts per week', '5 posts per week', 'Daily'].map((item) => ({ value: item, label: t(item) }))} onChange={(postingFrequency) => setData({ ...data, postingFrequency })} /></div>
+            <div className="ob-field"><span className="ob-field-label">{t('Timezone')}</span><MenuField label={t('Timezone')} value={data.timezone} options={timezones} onChange={(timezone) => setData({ ...data, timezone })} /></div>
           </div>
         </section>
         <section className="ob-meta-rules">
-          <header className="ob-rule-head"><b>Meta recruitment ads</b><small>Employment defaults stay locked for compliance</small></header>
+          <header className="ob-rule-head"><b>{t('Meta recruitment ads')}</b><small>{t('Employment defaults stay locked for compliance')}</small></header>
           <div className="ob-two-fields">
-            <Field label="Daily budget"><span className="ob-budget-input"><i>$</i><input type="number" min="5" value={data.metaBudget} onChange={(event) => setData({ ...data, metaBudget: event.target.value })} /></span></Field>
-            <div className="ob-field"><span className="ob-field-label">Campaign duration</span><MenuField label="Campaign duration" value={data.metaDuration} options={[{ value: '14', label: '14 days' }, { value: '21', label: '21 days' }, { value: '30', label: '30 days' }]} onChange={(metaDuration) => setData({ ...data, metaDuration })} /></div>
+            <Field label={t('Daily budget')}><span className="ob-budget-input"><i>{currencySymbol()}</i><input type="number" min="5" value={data.metaBudget} onChange={(event) => setData({ ...data, metaBudget: event.target.value })} /></span></Field>
+            <div className="ob-field"><span className="ob-field-label">{t('Campaign duration')}</span><MenuField label={t('Campaign duration')} value={data.metaDuration} options={[{ value: '14', label: t('14 days') }, { value: '21', label: t('21 days') }, { value: '30', label: t('30 days') }]} onChange={(metaDuration) => setData({ ...data, metaDuration })} /></div>
           </div>
           <div className="ob-two-fields">
-            <Field label="Hiring country"><input list="ob-country-list" value={data.metaCountry} onChange={(event) => setData({ ...data, metaCountry: event.target.value })} placeholder="Start typing a country" autoComplete="off" /></Field>
-            <Field label="City" hint="Optional"><input value={data.metaCity} onChange={(event) => setData({ ...data, metaCity: event.target.value })} placeholder="e.g. Toronto" /></Field>
+            <Field label={t('Hiring country')}><input list="ob-country-list" value={data.metaCountry} onChange={(event) => setData({ ...data, metaCountry: event.target.value })} placeholder={t('Start typing a country')} autoComplete="off" /></Field>
+            <Field label={t('City')} hint={t('Optional')}><input value={data.metaCity} onChange={(event) => setData({ ...data, metaCity: event.target.value })} placeholder={t('e.g. Schwyz')} /></Field>
           </div>
           <datalist id="ob-country-list">{COUNTRIES.map((country) => <option value={country.name} key={country.code} />)}</datalist>
-          {data.metaCity.trim() && <div className="ob-field"><span className="ob-field-label">Reach around the city</span><MenuField label="Radius" value={String(data.metaRadius)} options={RADII.map((km) => ({ value: String(km), label: `${km} km` }))} onChange={(metaRadius) => setData({ ...data, metaRadius })} /></div>}
-          <button type="button" className={`ob-rule-toggle ${data.reviewMode ? 'on' : ''}`} onClick={() => setData({ ...data, reviewMode: !data.reviewMode })}><span><i /></span><p><b>Review campaigns before launch</b><small>Hold generated campaigns for edits and approval.</small></p></button>
-          <div className="ob-employment-lock"><span>!</span><p><b>Employment targeting stays compliant.</b> Age, gender, and detailed-targeting limitations are locked automatically.</p></div>
+          {data.metaCity.trim() && <div className="ob-field"><span className="ob-field-label">{t('Reach around the city')}</span><MenuField label={t('Radius')} value={String(data.metaRadius)} options={RADII.map((km) => ({ value: String(km), label: `${km} km` }))} onChange={(metaRadius) => setData({ ...data, metaRadius })} /></div>}
+          <button type="button" className={`ob-rule-toggle ${data.reviewMode ? 'on' : ''}`} onClick={() => setData({ ...data, reviewMode: !data.reviewMode })}><span><i /></span><p><b>{t('Review campaigns before launch')}</b><small>{t('Hold generated campaigns for edits and approval.')}</small></p></button>
+          <div className="ob-employment-lock"><span>!</span><p><b>{t('Employment targeting stays compliant.')}</b> {t('Age, gender, and detailed-targeting limitations are locked automatically.')}</p></div>
         </section>
       </div>
       {error && <p className="ob-form-error" role="alert">{error}</p>}
@@ -617,7 +619,7 @@ function ConnectStep({ data, setData, onBack, onContinue, busy, notice }) {
   }
   return (
     <form className="ob-step" onSubmit={(event) => { event.preventDefault(); onContinue() }}>
-      <ScreenHeading index={6} eyebrow="Your platforms" title={<>Connect your<br /><em>accounts.</em></>} subtitle="Link your platforms so Marketeer can publish on your behalf. You can always do this later." />
+      <ScreenHeading index={6} eyebrow={t('Your platforms')} title={<>{t('Connect your')}<br /><em>{t('accounts.')}</em></>} subtitle={t('Link your platforms so Marketeer can publish on your behalf. You can always do this later.')} />
       <div className="ob-connect-list">
         {platforms.map((platform) => {
           const channel = channels.find((item) => item.id === platform.id)
@@ -625,15 +627,15 @@ function ConnectStep({ data, setData, onBack, onContinue, busy, notice }) {
           return (
             <article className={connected ? 'ob-connect-card connected' : 'ob-connect-card'} key={platform.id}>
               <span className="ob-platform-icon"><img src={`/social_logos/${platform.id}.png`} alt="" /></span>
-              <div><h3>{platform.name}{platform.optional && <small>Optional</small>}</h3><p>{connected && channel.handle ? `${channel.handle} · ` : ''}{platform.detail}</p></div>
-              <button type="button" disabled={Boolean(working)} onClick={() => toggle(platform.id)}>{working === platform.id ? 'Opening…' : connected ? <><CheckIcon /> Connected</> : <>Connect <ArrowIcon /></>}</button>
+              <div><h3>{platform.name}{platform.optional && <small>{t('Optional')}</small>}</h3><p>{connected && channel.handle ? `${channel.handle} · ` : ''}{t(platform.detail)}</p></div>
+              <button type="button" disabled={Boolean(working)} onClick={() => toggle(platform.id)}>{working === platform.id ? t('Opening…') : connected ? <><CheckIcon /> {t('Connected')}</> : <>{t('Connect')} <ArrowIcon /></>}</button>
             </article>
           )
         })}
       </div>
       {error && <p className="ob-form-error" role="alert">{error}</p>}
-      <div className="ob-security-note"><span>⌾</span><p><b>Your accounts stay yours.</b> Secure OAuth means we never see or store your passwords.</p></div>
-      <FooterActions onBack={onBack} skipLabel="I’ll connect these later" onSkip={onContinue} busy={busy} />
+      <div className="ob-security-note"><span>⌾</span><p><b>{t('Your accounts stay yours.')}</b> {t('Secure OAuth means we never see or store your passwords.')}</p></div>
+      <FooterActions onBack={onBack} skipLabel={t('I’ll connect these later')} onSkip={onContinue} busy={busy} />
     </form>
   )
 }
@@ -644,64 +646,64 @@ function WorkspaceStep({ data, setData, onBack, onContinue, busy }) {
   const addInvite = () => {
     const cleanInvite = invite.trim().toLowerCase()
     if (!cleanInvite || data.invites.includes(cleanInvite)) return
-    if (!isEmail(cleanInvite)) { setError('Enter a valid teammate email.'); return }
+    if (!isEmail(cleanInvite)) { setError(t('Enter a valid teammate email.')); return }
     setError('')
     setData({ ...data, invites: [...data.invites, cleanInvite] })
     setInvite('')
   }
   return (
     <form className="ob-step" onSubmit={(event) => { event.preventDefault(); onContinue() }}>
-      <ScreenHeading index={7} eyebrow="Your workspace" title={<>Set up your<br /><em>workspace.</em></>} subtitle="Invite your team or set up separate spaces for each client." />
+      <ScreenHeading index={7} eyebrow={t('Your workspace')} title={<>{t('Set up your')}<br /><em>{t('workspace.')}</em></>} subtitle={t('Invite your team or set up separate spaces for each client.')} />
       <div className="ob-workspace-fields">
-        <Field label="Workspace name">
-          <input value={data.workspaceName} onChange={(event) => setData({ ...data, workspaceName: event.target.value })} placeholder={data.role === 'Agency' ? 'My Agency' : 'My Client Workspace'} autoFocus />
+        <Field label={t('Workspace name')}>
+          <input value={data.workspaceName} onChange={(event) => setData({ ...data, workspaceName: event.target.value })} placeholder={data.role === 'Agency' ? t('My Agency') : t('My Client Workspace')} autoFocus />
         </Field>
         <div className="ob-invite-block">
-          <div className="ob-field-label">Invite teammates <small>Optional</small></div>
-          <div className="ob-invite-input"><input type="email" value={invite} onChange={(event) => setInvite(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addInvite() } }} placeholder="teammate@company.com" /><button type="button" onClick={addInvite}>+ Add</button></div>
-          {data.invites.length > 0 && <div className="ob-invite-list">{data.invites.map((email) => <span key={email}>{email}<button type="button" onClick={() => setData({ ...data, invites: data.invites.filter((item) => item !== email) })} aria-label={`Remove ${email}`}>×</button></span>)}</div>}
-          <button className="ob-add-another" type="button" onClick={addInvite}>+ Add another teammate</button>
+          <div className="ob-field-label">{t('Invite teammates')} <small>{t('Optional')}</small></div>
+          <div className="ob-invite-input"><input type="email" value={invite} onChange={(event) => setInvite(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addInvite() } }} placeholder={t('teammate@company.com')} /><button type="button" onClick={addInvite}>{t('+ Add')}</button></div>
+          {data.invites.length > 0 && <div className="ob-invite-list">{data.invites.map((email) => <span key={email}>{email}<button type="button" onClick={() => setData({ ...data, invites: data.invites.filter((item) => item !== email) })} aria-label={t('Remove {email}', { email })}>×</button></span>)}</div>}
+          <button className="ob-add-another" type="button" onClick={addInvite}>{t('+ Add another teammate')}</button>
         </div>
       </div>
       {error && <p className="ob-form-error" role="alert">{error}</p>}
       <div className="ob-workspace-preview">
-        <span>{initialsOf(data.workspaceName || data.businessName || data.name)}</span><p><small>WORKSPACE PREVIEW</small><b>{data.workspaceName || (data.role === 'Agency' ? 'My Agency' : 'My Workspace')}</b></p><em>{data.invites.length + 1} member{data.invites.length ? 's' : ''}</em>
+        <span>{initialsOf(data.workspaceName || data.businessName || data.name)}</span><p><small>{t('WORKSPACE PREVIEW')}</small><b>{data.workspaceName || (data.role === 'Agency' ? t('My Agency') : t('My Workspace'))}</b></p><em>{data.invites.length ? t('{n} members', { n: data.invites.length + 1 }) : t('1 member')}</em>
       </div>
-      <FooterActions onBack={onBack} skipLabel="Skip for now" onSkip={onContinue} busy={busy} />
+      <FooterActions onBack={onBack} skipLabel={t('Skip for now')} onSkip={onContinue} busy={busy} />
     </form>
   )
 }
 
 function CompleteStep({ data, onBack, onDashboard, busy, error }) {
-  const displayName = data.name.trim().split(' ')[0] || 'there'
+  const displayName = data.name.trim().split(' ')[0] || t('there')
   const channels = data.postingPlatforms.map((name) => ({ name, src: `/social_logos/${name.toLowerCase()}.png` }))
   return (
     <section className="ob-step ob-complete-step">
       <div className="ob-confetti" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /></div>
       <div className="ob-success-mark"><CheckIcon /></div>
-      <ScreenHeading index={8} eyebrow="Setup complete" title={<>You’re all set,<br /><em>{displayName}!</em> 🎉</>} subtitle="Your creative command center is ready to go." />
+      <ScreenHeading index={8} eyebrow={t('Setup complete')} title={<>{t('You’re all set,')}<br /><em>{displayName}!</em> 🎉</>} subtitle={t('Your creative command center is ready to go.')} />
       <div className="ob-summary-card">
         <div className="ob-summary-band">
           <div>
-            <p><b>{data.businessName || 'Your brand'}</b><span>{[data.industry, data.voice || data.customVoice].filter(Boolean).join(' · ') || 'Brand profile'}</span></p>
+            <p><b>{data.businessName || t('Your brand')}</b><span>{[data.industry, data.voice || data.customVoice].filter(Boolean).join(' · ') || t('Brand profile')}</span></p>
             <div className="ob-summary-swatches">{data.colors.map((color, index) => <span key={`${color}-${index}`} style={{ background: color }} />)}</div>
           </div>
-          <em>Ready</em>
+          <em>{t('Ready')}</em>
         </div>
         <ul>
-          <li><span>Rhythm</span><b>{data.postingFrequency}</b></li>
-          <li><span>Timezone</span><b>{data.timezone.replace('_', ' ')}</b></li>
-          <li><span>Meta ads</span><b>${data.metaBudget}/day · {data.metaDuration} days{data.reviewMode ? ' · review on' : ''}</b></li>
-          {data.metaCountry && <li><span>Hiring area</span><b>{data.metaCity.trim() ? `${data.metaCity.trim()} + ${data.metaRadius} km, ` : 'All of '}{data.metaCountry}</b></li>}
-          <li><span>Channels</span>{channels.length > 0 ? <div className="ob-summary-logos">{channels.map((channel) => <img key={channel.name} src={channel.src} alt={channel.name} />)}</div> : <b>Add these in Settings</b>}</li>
-          {(data.role === 'Agency' || data.role === 'Freelancer') && <li><span>Workspace</span><b>{data.workspaceName || 'Personal workspace'} · {data.invites.length + 1} member{data.invites.length ? 's' : ''}</b></li>}
+          <li><span>{t('Rhythm')}</span><b>{t(data.postingFrequency)}</b></li>
+          <li><span>{t('Timezone')}</span><b>{data.timezone.replace('_', ' ')}</b></li>
+          <li><span>{t('Meta ads')}</span><b>{currencySymbol()} {data.metaBudget}{t('/day')} · {t('{n} days', { n: data.metaDuration })}{data.reviewMode ? t(' · review on') : ''}</b></li>
+          {data.metaCountry && <li><span>{t('Hiring area')}</span><b>{data.metaCity.trim() ? `${data.metaCity.trim()} + ${data.metaRadius} km, ` : t('All of ')}{data.metaCountry}</b></li>}
+          <li><span>{t('Channels')}</span>{channels.length > 0 ? <div className="ob-summary-logos">{channels.map((channel) => <img key={channel.name} src={channel.src} alt={channel.name} />)}</div> : <b>{t('Add these in Settings')}</b>}</li>
+          {(data.role === 'Agency' || data.role === 'Freelancer') && <li><span>{t('Workspace')}</span><b>{data.workspaceName || t('Personal workspace')} · {data.invites.length ? t('{n} members', { n: data.invites.length + 1 }) : t('1 member')}</b></li>}
         </ul>
       </div>
-      <p className="ob-complete-copy">Your dashboard is ready. This is where you’ll create ads, generate content, and publish across Facebook and Instagram—all powered by AI.</p>
+      <p className="ob-complete-copy">{t('Your dashboard is ready. This is where you’ll create ads, generate content, and publish across Facebook and Instagram—all powered by AI.')}</p>
       {error && <p className="ob-form-error" role="alert">{error}</p>}
       <footer className="ob-form-actions">
-        <button className="ob-back" type="button" onClick={onBack}><ArrowIcon back /> Back</button>
-        <button className="ob-primary ob-dashboard-button" type="button" disabled={busy} onClick={onDashboard}><span>{busy ? 'Setting up…' : 'Go to dashboard'}</span><i><ArrowIcon /></i></button>
+        <button className="ob-back" type="button" onClick={onBack}><ArrowIcon back /> {t('Back')}</button>
+        <button className="ob-primary ob-dashboard-button" type="button" disabled={busy} onClick={onDashboard}><span>{busy ? t('Setting up…') : t('Go to dashboard')}</span><i><ArrowIcon /></i></button>
       </footer>
     </section>
   )
@@ -714,7 +716,7 @@ function ProgressRail({ step, role }) {
     <aside className="ob-progress-rail">
       <div className="ob-progress-count"><span>{String(active + 1).padStart(2, '0')}</span><i>/</i><em>{String(sequence.length).padStart(2, '0')}</em></div>
       <div className="ob-progress-bars">{sequence.map((screen, index) => <span key={screen} className={index <= active ? 'active' : ''}><i /></span>)}</div>
-      <p>{step === 8 ? 'Your setup is complete.' : 'Your progress is saved automatically.'}</p>
+      <p>{step === 8 ? t('Your setup is complete.') : t('Your progress is saved automatically.')}</p>
     </aside>
   )
 }
@@ -734,16 +736,16 @@ function initialData(account) {
     goals: [],
     logo: '',
     colors: DEFAULT_COLORS,
-    voice: 'Bold',
+    voice: 'Professional',
     customVoice: '',
     description: '',
     postingPlatforms: ['Instagram', 'Facebook'],
     postingFrequency: '4 posts per week',
-    timezone: browserTimezone(),
+    timezone: TIMEZONE,
     metaBudget: '45',
     metaDuration: '21',
-    metaCountry: defaultCountry(),
-    metaCity: '',
+    metaCountry: DEFAULT_COUNTRY,
+    metaCity: 'Schwyz',
     metaRadius: '40',
     reviewMode: true,
     connected: [],
@@ -779,7 +781,7 @@ function OnboardingFlow({ initialView, account, setAccount, onNavigate, theme, o
       }))
       if (params.get('social')) {
         setStep(6)
-        setNotice(params.get('social') === 'error' ? { type: 'error', message: params.get('message') || 'The connection did not complete.' } : { type: 'success' })
+        setNotice(params.get('social') === 'error' ? { type: 'error', message: params.get('message') || t('The connection did not complete.') } : { type: 'success' })
       } else if (params.get('linked')) {
         setStep(1)
       } else {
@@ -797,7 +799,7 @@ function OnboardingFlow({ initialView, account, setAccount, onNavigate, theme, o
       setData(initialData(user))
       onNavigate(user.onboarding_completed ? 'dashboard' : 'onboarding')
     }
-    return <><ThemeButton theme={theme} onToggle={onToggleTheme} className="global-theme-button" /><AuthScreen key={initialView} mode={initialView} onNavigate={onNavigate} onSignedIn={signedIn} /></>
+    return <><div className="global-controls"><LanguageButton /><ThemeButton theme={theme} onToggle={onToggleTheme} className="global-theme-button" /></div><AuthScreen key={initialView} mode={initialView} onNavigate={onNavigate} onSignedIn={signedIn} /></>
   }
 
   if (initialView === 'dashboard') {
@@ -849,22 +851,22 @@ function OnboardingFlow({ initialView, account, setAccount, onNavigate, theme, o
 
   return (
     <main className="ob-onboarding-page">
-      <ThemeButton theme={theme} onToggle={onToggleTheme} className="global-theme-button" />
+      <div className="global-controls"><LanguageButton /><ThemeButton theme={theme} onToggle={onToggleTheme} className="global-theme-button" /></div>
       <AmbientBackground />
       <nav className="ob-onboarding-nav">
         <Wordmark onHome={() => onNavigate('home')} />
         <ProgressRail step={step} role={data.role} />
-        <button className="ob-save-exit" type="button" onClick={saveAndExit}>Save & exit <span>↗</span></button>
+        <button className="ob-save-exit" type="button" onClick={saveAndExit}>{t('Save & exit')} <span>↗</span></button>
       </nav>
       <div className="ob-onboarding-wrap">
         <aside className="ob-side-note">
-          <span>MARKETEER / SETUP</span>
-          <p>{step === 8 ? 'Ready when you are.' : 'A better campaign starts with a little context.'}</p>
-          <div><i>✦</i><small>{step === 4 ? 'Your brand settings guide every AI-generated ad and post.' : step === 5 ? 'These defaults power both automatic pipelines.' : step === 6 ? 'Connect once, then publish everywhere from one place.' : 'About 2 minutes to your first AI-powered workspace.'}</small></div>
+          <span>{t('MARKETEER / SETUP')}</span>
+          <p>{step === 8 ? t('Ready when you are.') : t('A better campaign starts with a little context.')}</p>
+          <div><i>✦</i><small>{step === 4 ? t('Your brand settings guide every AI-generated ad and post.') : step === 5 ? t('These defaults power both automatic pipelines.') : step === 6 ? t('Connect once, then publish everywhere from one place.') : t('About 2 minutes to your first AI-powered workspace.')}</small></div>
         </aside>
         <div className="ob-glass ob-flow-card" key={step}>
           <div className="ob-card-glint" />
-          {!loaded ? <div className="ob-step"><ScreenHeading index={step} eyebrow="Loading" title={<>One moment…</>} subtitle="Picking up where you left off." /></div> : <>
+          {!loaded ? <div className="ob-step"><ScreenHeading index={step} eyebrow={t('Loading')} title={<>{t('One moment…')}</>} subtitle={t('Picking up where you left off.')} /></div> : <>
             {step === 1 && <BasicsStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
             {step === 2 && <BusinessStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
             {step === 3 && <GoalsStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}

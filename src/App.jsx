@@ -4,6 +4,7 @@ import LandingPage from './LandingPage.jsx'
 import LegalPage from './LegalPage.jsx'
 import { getMe, session } from './api.js'
 import { useTheme } from './theme.jsx'
+import { t, useLanguage } from './i18n.js'
 
 const VIEWS = ['signin', 'signup', 'onboarding', 'dashboard', 'auth-callback', 'privacy', 'terms']
 const PRIVATE = ['onboarding', 'dashboard']
@@ -44,6 +45,13 @@ export default function App() {
   // The private view the signed-in account was last verified for.
   const [verified, setVerified] = useState(null)
   const [theme, onToggleTheme] = useTheme()
+  const { language } = useLanguage()
+
+  useEffect(() => {
+    document.title = language === 'de'
+      ? 'Marketeer — Content und Kampagnen für Personal Sigma Schwyz'
+      : 'Marketeer — Content and campaigns for Personal Sigma Schwyz'
+  }, [language])
 
   useEffect(() => {
     // Old ?view=privacy|terms links redirect to clean paths.
@@ -93,7 +101,7 @@ export default function App() {
 
   const checking = view === 'auth-callback' || (PRIVATE.includes(view) && verified !== view)
   if (checking) {
-    return <main className="app-boot" aria-busy="true"><img className="db-mascot db-loader-mark" src="/mascot/marketeer-m.png" alt="" /><p>Opening your workspace…</p></main>
+    return <main className="app-boot" aria-busy="true"><img className="db-mascot db-loader-mark" src="/brand/mark.svg" alt="" /><p>{t('Opening your workspace…')}</p></main>
   }
   const go = (next) => navigate(next === 'signin' && session.active() ? 'dashboard' : next)
   if (LEGAL.includes(view)) {

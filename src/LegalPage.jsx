@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
+import { LanguageButton, t } from './i18n.js'
 import { ThemeButton } from './theme.jsx'
 import { Arrow } from './landingIcons.jsx'
 
 function Wordmark() {
-  return <span className="mk-wordmark">marketeer<span>↗</span></span>
+  return <span className="mk-wordmark">marketeer<span>.</span></span>
 }
 
 const privacySections = [
@@ -207,17 +208,18 @@ const termsSections = [
 function LegalNav({ page, navigate, theme, onToggleTheme }) {
   return (
     <header className="mk-nav mk-legal-nav">
-      <button type="button" className="mk-legal-brand" aria-label="Marketeer home" onClick={() => navigate('home')}>
+      <button type="button" className="mk-legal-brand" aria-label={t('Marketeer home')} onClick={() => navigate('home')}>
         <Wordmark />
       </button>
-      <nav className="mk-legal-nav-links" aria-label="Legal pages">
-        <button type="button" className={page === 'privacy' ? 'is-active' : ''} onClick={() => navigate('privacy')}>Privacy</button>
-        <button type="button" className={page === 'terms' ? 'is-active' : ''} onClick={() => navigate('terms')}>Terms</button>
+      <nav className="mk-legal-nav-links" aria-label={t('Legal pages')}>
+        <button type="button" className={page === 'privacy' ? 'is-active' : ''} onClick={() => navigate('privacy')}>{t('Privacy')}</button>
+        <button type="button" className={page === 'terms' ? 'is-active' : ''} onClick={() => navigate('terms')}>{t('Terms')}</button>
       </nav>
       <div className="mk-nav-actions">
+        <LanguageButton />
         <ThemeButton theme={theme} onToggle={onToggleTheme} />
-        <button type="button" className="mk-button mk-nav-signup" onClick={() => navigate('signup')}>Sign up <Arrow /></button>
-        <button type="button" className="mk-login" onClick={() => navigate('signin')}>Login</button>
+        <button type="button" className="mk-button mk-nav-signup" onClick={() => navigate('signup')}>{t('Sign up')} <Arrow /></button>
+        <button type="button" className="mk-login" onClick={() => navigate('signin')}>{t('Login')}</button>
       </div>
     </header>
   )
@@ -225,11 +227,11 @@ function LegalNav({ page, navigate, theme, onToggleTheme }) {
 
 export default function LegalPage({ page, navigate, theme, onToggleTheme }) {
   const isPrivacy = page === 'privacy'
-  const title = isPrivacy ? 'Privacy Policy' : 'Terms of Service'
-  const eyebrow = isPrivacy ? 'YOUR DATA, YOUR CONTROL' : 'THE FINE PRINT, MADE CLEAR'
+  const title = isPrivacy ? t('Privacy Policy') : t('Terms of Service')
+  const eyebrow = isPrivacy ? t('YOUR DATA, YOUR CONTROL') : t('THE FINE PRINT, MADE CLEAR')
   const intro = isPrivacy
-    ? 'How Marketeer collects, uses, and protects information when you use our product and website.'
-    : 'The rules for using Marketeer — your account, content, AI features, and what we both agree to.'
+    ? t('How Marketeer collects, uses, and protects information when you use our product and website.')
+    : t('The rules for using Marketeer — your account, content, AI features, and what we both agree to.')
   const sections = isPrivacy ? privacySections : termsSections
   const other = isPrivacy
     ? { label: 'Terms of Service', view: 'terms' }
@@ -242,7 +244,7 @@ export default function LegalPage({ page, navigate, theme, onToggleTheme }) {
 
   return (
     <div className="mk-site mk-legal-site mk-loaded mk-scrolled">
-      <a className="mk-skip-link" href="#main">Skip to content</a>
+      <a className="mk-skip-link" href="#main">{t('Skip to content')}</a>
       <LegalNav page={page} navigate={navigate} theme={theme} onToggleTheme={onToggleTheme} />
       <main id="main" className="mk-legal">
         <header className="mk-legal-hero">
@@ -251,13 +253,13 @@ export default function LegalPage({ page, navigate, theme, onToggleTheme }) {
             <p className="mk-overline">{eyebrow}</p>
             <h1>{title}</h1>
             <p className="mk-legal-intro">{intro}</p>
-            <p className="mk-legal-updated">Last updated · October 15, 2026</p>
+            <p className="mk-legal-updated">{t('Last updated · October 15, 2026')}</p>
           </div>
         </header>
         <div className="mk-legal-body">
           <div className="mk-legal-toolbar">
             <button type="button" className="mk-legal-switch" onClick={() => navigate(other.view)}>
-              See {other.label} <Arrow />
+              {t('See')} {t(other.label)} <Arrow />
             </button>
           </div>
           <article className="mk-legal-content">
@@ -265,31 +267,31 @@ export default function LegalPage({ page, navigate, theme, onToggleTheme }) {
               const id = section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
               return (
                 <section key={section.title} id={id}>
-                  <h2>{section.title}</h2>
-                  {section.body.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+                  <h2>{t(section.title)}</h2>
+                  {section.body.map((paragraph, index) => <p key={index}>{t(paragraph)}</p>)}
                 </section>
               )
             })}
             <div className="mk-legal-cta">
-              <p>Ready to make your next move?</p>
+              <p>{t('Ready to make your next move?')}</p>
               <button type="button" className="mk-button mk-button-orange" onClick={() => navigate('signup')}>
-                Get started <Arrow />
+                {t('Get started')} <Arrow />
               </button>
             </div>
           </article>
         </div>
       </main>
       <footer className="mk-footer">
-        <button type="button" className="mk-footer-brand" onClick={() => navigate('home')} aria-label="Marketeer home">
+        <button type="button" className="mk-footer-brand" onClick={() => navigate('home')} aria-label={t('Marketeer home')}>
           <Wordmark />
         </button>
-        <nav className="mk-footer-links" aria-label="Legal">
-          <button type="button" className={isPrivacy ? 'is-active' : ''} onClick={() => navigate('privacy')}>Privacy</button>
-          <button type="button" className={!isPrivacy ? 'is-active' : ''} onClick={() => navigate('terms')}>Terms</button>
+        <nav className="mk-footer-links" aria-label={t('Legal')}>
+          <button type="button" className={isPrivacy ? 'is-active' : ''} onClick={() => navigate('privacy')}>{t('Privacy')}</button>
+          <button type="button" className={!isPrivacy ? 'is-active' : ''} onClick={() => navigate('terms')}>{t('Terms')}</button>
         </nav>
-        <span>© 2026 Marketeer. Made for your next move.</span>
+        <span>{t('© 2026 Marketeer. Made for your next move.')}</span>
         <button type="button" className="mk-footer-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          Back to top ↑
+          {t('Back to top ↑')}
         </button>
       </footer>
     </div>

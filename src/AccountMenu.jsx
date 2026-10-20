@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { t } from './i18n.js'
 import { Icon } from './dashboardUI.jsx'
 
 export default function AccountMenu({ name, email, initials, onSettings, onLogout }) {
@@ -55,8 +56,8 @@ export default function AccountMenu({ name, email, initials, onSettings, onLogou
           event.preventDefault()
           close()
           onSettings()
-        }}><Icon name="settings" size={17} /> Settings <span>↗</span></a>
-        <button type="button" role="menuitem" onClick={() => { setOpen(false); onLogout() }}><svg className="db-icon" width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v16h5m6-12 4 4-4 4M9 12h10" /></svg> Log out</button>
+        }}><Icon name="settings" size={17} /> {t('Settings')} <span>↗</span></a>
+        <button type="button" role="menuitem" onClick={() => { setOpen(false); onLogout() }}><svg className="db-icon" width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v16h5m6-12 4 4-4 4M9 12h10" /></svg> {t('Log out')}</button>
       </div>
     </div>}
   </div>

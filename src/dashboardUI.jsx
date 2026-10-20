@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { t } from './i18n.js'
 import { useBrand } from './brandContext.js'
 
 function BrandAvatar({ brand }) {
@@ -88,12 +89,12 @@ export function Toggle({ checked, onChange, label, hint }) {
   return <button type="button" className={`db-toggle-row ${checked ? 'on' : ''}`} onClick={() => onChange(!checked)}><span className="db-toggle"><i /></span><span><b>{label}</b>{hint && <small>{hint}</small>}</span></button>
 }
 
-export function CreativeArt({ palette = 'lime', theme = 'MOVE / WITH PURPOSE', compact = false, imageUrl }) {
+export function CreativeArt({ palette = 'lime', theme, compact = false, imageUrl }) {
   const brand = useBrand()
-  const [first, ...rest] = (theme || 'YOUR / MESSAGE').split(' / ')
+  const [first, ...rest] = (theme || t('YOUR / MESSAGE')).split(' / ')
   return (
     <div className={`db-creative-art ${palette} ${compact ? 'compact' : ''}`} style={imageUrl ? { backgroundImage: `linear-gradient(180deg, transparent, rgba(5,5,5,.45)), url(${imageUrl})` } : undefined}>
-      <span>{brand.name.toUpperCase()} / {new Date().getFullYear()}</span><i className="orbit one" /><i className="orbit two" /><b>{first}<em>{rest.join(' ') || 'CREATE'}</em></b><small>MADE TO MOVE</small>
+      <span>{brand.name.toUpperCase()} / {new Date().getFullYear()}</span><i className="orbit one" /><i className="orbit two" /><b>{first}<em>{rest.join(' ') || t('CREATE')}</em></b><small>{t('MADE TO MOVE')}</small>
     </div>
   )
 }
@@ -114,20 +115,20 @@ export function SocialPreview({ caption, hashtags = [], platforms = ['Instagram'
         <svg viewBox="0 0 24 24"><path d="M6 17.5 4.5 20.5 7 19.2A8.5 8.5 0 1 0 6 17.5Z" /></svg>
         <svg viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M10 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" /></svg>
       </div>
-      <p><b>{brand.handle}</b> {caption || 'Your caption will appear here.'}</p>
+      <p><b>{brand.handle}</b> {caption || t('Your caption will appear here.')}</p>
       {!!hashtags.length && <p className="tags">{hashtags.map((tag) => `#${tag}`).join(' ')}</p>}
     </article>
   )
 }
 
-export function AdPreview({ headline, primary, cta = 'SIGN_UP', palette = 'lime', theme = 'MOVE / WITH PURPOSE', imageUrl }) {
+export function AdPreview({ headline, primary, cta = 'SIGN_UP', palette = 'lime', theme, imageUrl }) {
   const brand = useBrand()
   return (
     <article className="db-ad-preview-card">
-      <header><BrandAvatar brand={brand} /><div><b>{brand.name}</b><small>Sponsored</small></div><ChannelLogo platform="Facebook" /></header>
+      <header><BrandAvatar brand={brand} /><div><b>{brand.name}</b><small>{t('Sponsored')}</small></div><ChannelLogo platform="Facebook" /></header>
       <p>{primary}</p>
       {imageUrl ? <img className="db-ad-shot" src={imageUrl} alt="" /> : <CreativeArt palette={palette} theme={theme} />}
-      <footer><div><small>{(brand.domain || brand.name).toUpperCase()}</small><b>{headline}</b></div><button type="button">{String(cta).replaceAll('_', ' ')}</button></footer>
+      <footer><div><small>{(brand.domain || brand.name).toUpperCase()}</small><b>{headline}</b></div><button type="button">{t(String(cta).replaceAll('_', ' '))}</button></footer>
     </article>
   )
 }
@@ -144,20 +145,20 @@ export function Modal({ title, onClose, children, wide = false, footer }) {
   }, [onClose])
   return (
     <div className="db-modal-layer" role="dialog" aria-modal="true" aria-label={title}>
-      <button className="db-modal-scrim" onClick={onClose} aria-label="Close dialog" />
-      <section className={`db-modal ${wide ? 'wide' : ''}`}><header><h2>{title}</h2><button onClick={onClose} aria-label="Close"><Icon name="close" size={19} /></button></header><div className="db-modal-body">{children}</div>{footer && <footer>{footer}</footer>}</section>
+      <button className="db-modal-scrim" onClick={onClose} aria-label={t('Close dialog')} />
+      <section className={`db-modal ${wide ? 'wide' : ''}`}><header><h2>{title}</h2><button onClick={onClose} aria-label={t('Close')}><Icon name="close" size={19} /></button></header><div className="db-modal-body">{children}</div>{footer && <footer>{footer}</footer>}</section>
     </div>
   )
 }
 
-export function Spinner({ label = 'Working on it…', progress, detail }) {
-  return <div className="db-spinner-state"><img className="db-mascot db-loader-mark" src="/mascot/marketeer-m.png" alt="" /><h2>{label}</h2><p>{detail || 'Marketeer is using your brand context and selections.'}</p><div className="db-progress"><i style={{ width: `${progress || 68}%` }} /></div></div>
+export function Spinner({ label, progress, detail }) {
+  return <div className="db-spinner-state"><img className="db-mascot db-loader-mark" src="/brand/mark.svg" alt="" /><h2>{label || t('Working on it…')}</h2><p>{detail || t('Marketeer is using your brand context and selections.')}</p><div className="db-progress"><i style={{ width: `${progress || 68}%` }} /></div></div>
 }
 
-export function LoadingState({ label = 'Loading…' }) {
-  return <div className="db-empty" aria-busy="true"><span><img className="db-mascot db-loader-mark" src="/mascot/marketeer-m.png" alt="" style={{ width: 34, height: 34 }} /></span><h3>{label}</h3><p>Fetching the latest from your workspace.</p></div>
+export function LoadingState({ label }) {
+  return <div className="db-empty" aria-busy="true"><span><img className="db-mascot db-loader-mark" src="/brand/mark.svg" alt="" style={{ width: 34, height: 34 }} /></span><h3>{label || t('Loading…')}</h3><p>{t('Fetching the latest from your workspace.')}</p></div>
 }
 
 export function ErrorState({ error, onRetry }) {
-  return <div className="db-empty"><span><Icon name="info" size={25} /></span><h3>Couldn’t load this</h3><p>{error?.message || 'Something went wrong.'}</p>{onRetry && <Button variant="secondary" icon="refresh" onClick={() => onRetry()}>Try again</Button>}</div>
+  return <div className="db-empty"><span><Icon name="info" size={25} /></span><h3>{t('Couldn’t load this')}</h3><p>{error?.message || t('Something went wrong.')}</p>{onRetry && <Button variant="secondary" icon="refresh" onClick={() => onRetry()}>{t('Try again')}</Button>}</div>
 }

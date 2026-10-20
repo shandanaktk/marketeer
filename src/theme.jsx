@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { t } from './i18n.js'
 
 /* eslint-disable react-refresh/only-export-components */
 
@@ -30,9 +31,9 @@ function ThemeGlyph({ theme }) {
 export function ThemeButton({ theme, onToggle, className = '' }) {
   const next = theme === 'dark' ? 'light' : 'dark'
   return (
-    <button className={`theme-button ${className}`} type="button" onClick={onToggle} aria-label={`Switch to ${next} mode`} title={`Switch to ${next} mode`}>
+    <button className={`theme-button ${className}`} type="button" onClick={onToggle} aria-label={t('Switch to {mode} mode', { mode: t(next === 'dark' ? 'Dark' : 'Light') })} title={t('Switch to {mode} mode', { mode: t(next === 'dark' ? 'Dark' : 'Light') })}>
       <span aria-hidden="true"><ThemeGlyph theme={theme} /></span>
-      <small>{theme === 'dark' ? 'Light' : 'Dark'}</small>
+      <small>{t(theme === 'dark' ? 'Light' : 'Dark')}</small>
     </button>
   )
 }

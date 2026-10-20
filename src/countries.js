@@ -13,14 +13,9 @@ const byName = new Map(COUNTRIES.map((country) => [country.name.toLowerCase(), c
 
 export const isCountry = (value) => byName.has(String(value || '').trim().toLowerCase())
 
-// The visitor's own country, from the browser locale (e.g. en-PK → Pakistan).
+// V1 is Swiss: default targeting to Switzerland rather than the browser locale.
 export function defaultCountry() {
-  try {
-    const region = new Intl.Locale(navigator.language).maximize().region
-    return COUNTRIES.find((country) => country.code === region)?.name || ''
-  } catch {
-    return ''
-  }
+  return 'Switzerland'
 }
 
 export const RADII = [25, 40, 60, 80]

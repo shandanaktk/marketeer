@@ -1,6 +1,7 @@
 // The one network layer for the app. Every screen talks to the Marketeer API
 // through these functions; nothing renders placeholder records.
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { DEFAULT_CURRENCY, TIMEZONE, formatDate, locale, t } from './i18n.js'
 
 const configured = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
 export const API_BASE = configured || (import.meta.env.DEV ? 'http://localhost:8091' : '')
@@ -265,11 +266,15 @@ export function useResource(loader, deps = []) {
 }
 
 // ── Formatting ──────────────────────────────────────────────────────────────
-const SYMBOLS = { USD: '$', EUR: '€', GBP: '£', AUD: 'A$', CAD: 'C$', INR: '₹', JPY: '¥' }
-export const currencySymbol = (currency = 'USD') => SYMBOLS[currency] || `${currency} `
-export function money(value, currency = 'USD', digits = 2) {
+const SYMBOLS = { USD: '$', EUR: '€', GBP: '£', AUD: 'A$', CAD: 'C$', INR: '₹', JPY: '¥', CHF: 'CHF ' }
+export const currencySymbol = (currency = DEFAULT_CURRENCY) => SYMBOLS[currency] || `${currency} `
+export function money(value, currency = DEFAULT_CURRENCY, digits = 2) {
   const amount = Number(value || 0)
-  return `${currencySymbol(currency)}${amount.toLocaleString(undefined, { minimumFractionDigits: digits, maximumFractionDigits: digits })}`
+  try {
+    return new Intl.NumberFormat(locale(), { style: 'currency', currency, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(amount)
+  } catch {
+    return `${currencySymbol(currency)}${amount.toLocaleString(locale(), { minimumFractionDigits: digits, maximumFractionDigits: digits })}`
+  }
 }
 export function compact(value) {
   const number = Number(value || 0)
@@ -281,16 +286,25 @@ export function relativeTime(value) {
   if (!value) return '—'
   const date = new Date(value)
   const minutes = Math.round((Date.now() - date.getTime()) / 60000)
-  if (minutes < 1) return 'Just now'
-  if (minutes < 60) return `${minutes} min ago`
+  if (minutes < 1) return t('just now')
+  if (minutes < 60) return t('{n} min ago', { n: minutes })
   const hours = Math.round(minutes / 60)
-  if (hours < 24) return `${hours} hr${hours === 1 ? '' : 's'} ago`
-  if (hours < 48) return 'Yesterday'
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  if (hours < 24) return t('{n} hr ago', { n: hours })
+  if (hours < 48) return t('Yesterday')
+  return formatDate(date, { month: 'short', day: 'numeric' })
 }
-export const isoDay = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-export const timeLabel = (date) => date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-export const time24 = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+function zurichParts(date, options) {
+  return new Intl.DateTimeFormat('en-GB', { timeZone: TIMEZONE, hour12: false, ...options }).formatToParts(date)
+}
+export const isoDay = (date) => {
+  const parts = Object.fromEntries(zurichParts(date, { year: 'numeric', month: '2-digit', day: '2-digit' }).map((part) => [part.type, part.value]))
+  return `${parts.year}-${parts.month}-${parts.day}`
+}
+export const timeLabel = (date) => formatDate(date, { hour: '2-digit', minute: '2-digit' })
+export const time24 = (date) => {
+  const parts = Object.fromEntries(zurichParts(date, { hour: '2-digit', minute: '2-digit' }).map((part) => [part.type, part.value]))
+  return `${parts.hour}:${parts.minute}`
+}
 export const initialsOf = (name = '') => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'M'
 export const deltaText = (value, suffix = '%') => (value === null || value === undefined ? 'No prior period' : `${value >= 0 ? '+' : '−'}${Math.abs(value).toFixed(1)}${suffix}`)
 
