@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatDate, t, weekdayShort } from './i18n.js'
 import {
-  deletePost, fixPrompt, generateContent, getCampaignTable, getChannels, getKnowledge, getSettings, isoDay, listPosts,
+  approvePost, deletePost, fixPrompt, generateContent, getCampaignTable, getChannels, getKnowledge, getSettings, isoDay, listPosts,
   money, newBackground, publishPost, renderCreative, rewriteCaption, savePost, suggestHashtags, toPostRecord, uploadMedia, useResource,
 } from './api.js'
 import { useBrand } from './brandContext.js'
@@ -267,7 +267,9 @@ export function ContentCreate({ notify, onGo, draft = null }) {
   )
 }
 
-const statusTone = (status) => status === 'published' ? 'lime' : status === 'scheduled' ? 'blue' : status === 'failed' ? 'red' : 'gray'
+const STATUS_LABELS = { all: 'All', review: 'Awaiting approval', draft: 'Draft', scheduled: 'Scheduled', published: 'Published', failed: 'Failed', publishing: 'Publishing', claimed: 'Publishing' }
+const statusLabel = (status) => t(STATUS_LABELS[status] || status)
+const statusTone = (status) => status === 'published' ? 'lime' : status === 'scheduled' ? 'blue' : status === 'review' ? 'orange' : status === 'failed' ? 'red' : 'gray'
 const channelLogo = (name) => `/social_logos/${String(name).toLowerCase().includes('facebook') ? 'facebook' : 'instagram'}.png`
 
 export function ContentLibrary({ notify, onGo }) {
@@ -278,7 +280,7 @@ export function ContentLibrary({ notify, onGo }) {
   const [detail, setDetail] = useState(null)
   const [busy, setBusy] = useState('')
   const records = posts.data || []
-  const filters = ['all', 'draft', 'scheduled', 'published', 'failed']
+  const filters = ['all', 'review', 'draft', 'scheduled', 'published', 'failed']
   const visible = records.filter((item) => (filter === 'all' || item.status === filter) && `${item.title} ${item.caption}`.toLowerCase().includes(query.toLowerCase()))
   const remove = async (id) => {
     setBusy('delete')
@@ -293,17 +295,26 @@ export function ContentLibrary({ notify, onGo }) {
       notify(updated.status === 'failed' ? (updated.error || t('Publishing failed.')) : updated.status === 'published' ? t('Post published.') : t('Publishing started — this can take a minute for video.'), updated.status === 'failed' ? 'error' : 'success')
     } catch (failure) { notify(failure.message, 'error') } finally { setBusy('') }
   }
+  const approve = async (id) => {
+    setBusy('approve')
+    try {
+      const updated = toPostRecord(await approvePost(id))
+      posts.setData((current) => current.map((item) => item.id === id ? updated : item))
+      setDetail(updated)
+      notify(t('Approved. It publishes at its scheduled time.'))
+    } catch (failure) { notify(failure.message, 'error') } finally { setBusy('') }
+  }
   const edit = (item) => { setDetail(null); onGo('create', item) }
   const refresh = async () => { await posts.reload(); notify(t('Content library refreshed.')) }
   const links = detail ? Object.entries(detail.results || {}).filter(([, result]) => result.permalink) : []
   return (
     <div className="db-page">
       <PageIntro eyebrow={t('Content library')} icon="content" title={t('Every idea, in one place.')} description={t('Review drafts, scheduled posts, and published work across every connected channel.')} actions={<Button icon="plus" onClick={() => onGo('create')}>{t('Create post')}</Button>} />
-      <div className="db-toolbar db-card"><div className="db-filter-pills">{filters.map((item) => <button className={filter === item ? 'active' : ''} onClick={() => setFilter(item)} key={item}>{item}<span>{item === 'all' ? records.length : records.filter((record) => record.status === item).length}</span></button>)}</div><label className="db-toolbar-search"><Icon name="search" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('Search content…')} /></label><Button variant="ghost" icon="refresh" disabled={posts.loading} onClick={refresh}>{t('Refresh')}</Button></div>
+      <div className="db-toolbar db-card"><div className="db-filter-pills">{filters.map((item) => <button className={filter === item ? 'active' : ''} onClick={() => setFilter(item)} key={item}>{statusLabel(item)}<span>{item === 'all' ? records.length : records.filter((record) => record.status === item).length}</span></button>)}</div><label className="db-toolbar-search"><Icon name="search" size={16} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('Search content…')} /></label><Button variant="ghost" icon="refresh" disabled={posts.loading} onClick={refresh}>{t('Refresh')}</Button></div>
       {posts.loading && !posts.data ? <LoadingState label={t('Loading your content…')} /> : posts.error && !posts.data ? <ErrorState error={posts.error} onRetry={posts.reload} /> : visible.length ? <div className="db-content-grid">{visible.map((item) => <article className="db-card db-content-card" key={item.id}>
         <button className="db-content-art" onClick={() => setDetail(item)}>
           {item.image ? <img className="db-library-shot" src={item.image} alt="" /> : <CreativeArt palette={item.palette} theme={item.theme || item.title.toUpperCase()} compact />}
-          <Badge tone={statusTone(item.status)}>{item.status}</Badge>
+          <Badge tone={statusTone(item.status)}>{statusLabel(item.status)}</Badge>
         </button>
         <div className="db-content-card-body">
           <div className="db-content-meta"><span>{item.format}</span><span>·</span><span>{item.source}</span></div>
@@ -316,7 +327,7 @@ export function ContentLibrary({ notify, onGo }) {
           <Button variant="ghost" icon="edit" onClick={() => edit(item)}>{t('Edit')}</Button>
         </footer>
       </article>)}</div> : <EmptyState icon="content" title={records.length ? t('No posts match this view') : t('No posts yet')} body={records.length ? t('Try another status or search phrase.') : t('Create your first post and it will appear here.')} action={records.length ? null : <Button icon="plus" onClick={() => onGo('create')}>{t('Create post')}</Button>} />}
-      {detail && <Modal title={detail.title} onClose={() => setDetail(null)} wide footer={<><Button variant="ghost" icon="trash" disabled={Boolean(busy)} onClick={() => remove(detail.id)}>{busy === 'delete' ? t('Deleting…') : t('Delete')}</Button><Button variant="secondary" icon="edit" onClick={() => edit(detail)}>{t('Edit post')}</Button>{!['published', 'publishing'].includes(detail.status) && <Button icon="send" disabled={Boolean(busy)} onClick={() => publish(detail.id)}>{busy === 'publish' ? t('Publishing…') : t('Publish now')}</Button>}</>}>
+      {detail && <Modal title={detail.title} onClose={() => setDetail(null)} wide footer={<><Button variant="ghost" icon="trash" disabled={Boolean(busy)} onClick={() => remove(detail.id)}>{busy === 'delete' ? t('Deleting…') : t('Delete')}</Button><Button variant="secondary" icon="edit" onClick={() => edit(detail)}>{t('Edit post')}</Button>{detail.status === 'review' && <Button icon="check" disabled={Boolean(busy)} onClick={() => approve(detail.id)}>{busy === 'approve' ? t('Approving…') : t('Approve')}</Button>}{!['published', 'publishing', 'review'].includes(detail.status) && <Button icon="send" disabled={Boolean(busy)} onClick={() => publish(detail.id)}>{busy === 'publish' ? t('Publishing…') : t('Publish now')}</Button>}</>}>
         <div className="db-post-detail">
           <article className="db-library-preview">
             <header>
@@ -328,7 +339,7 @@ export function ContentLibrary({ notify, onGo }) {
             <p><b>{brand.handle}</b> {detail.caption}{detail.hashtags.length ? ` ${detail.hashtags.map((tag) => `#${tag}`).join(' ')}` : ''}</p>
           </article>
           <div>
-            <Badge tone={statusTone(detail.status)}>{detail.status}</Badge>
+            <Badge tone={statusTone(detail.status)}>{statusLabel(detail.status)}</Badge>
             <h3>{t('Post details')}</h3>
             <dl>
               <div><dt>{t('Format')}</dt><dd>{detail.format}</dd></div>
@@ -385,7 +396,7 @@ export function ContentCalendar({ notify, onGo, adsConnected = false }) {
         <header>
           <div><button onClick={() => move(-1)} aria-label={t('Previous month')}><Icon name="back" size={17} /></button><button onClick={() => setAnchor(thisMonth())}>{t('Today')}</button><button onClick={() => move(1)} aria-label={t('Next month')}><Icon name="arrow" size={17} /></button></div>
           <h2>{month}{posts.loading ? t(' · loading…') : ''}</h2>
-          <div className="db-calendar-legend"><span><i className="lime" />{t('Published')}</span><span><i className="blue" />{t('Scheduled')}</span><span><i className="campaign" />{t('Live campaign')}</span></div>
+          <div className="db-calendar-legend"><span><i className="lime" />{t('Published')}</span><span><i className="blue" />{t('Scheduled')}</span><span><i className="review" />{t('Awaiting approval')}</span><span><i className="campaign" />{t('Live campaign')}</span></div>
         </header>
         <div className="db-weekdays">{weekdayShort().map((day) => <span key={day}>{day}</span>)}</div>
         <div className="db-month-grid">{cells.map(({ date: cellDate, muted }, index) => {
@@ -406,7 +417,7 @@ export function ContentCalendar({ notify, onGo, adsConnected = false }) {
       {selected && <Modal title={selected.title || selected.name} onClose={() => setSelected(null)} footer={<><Button variant="ghost" onClick={() => setSelected(null)}>{t('Close')}</Button>{campaignOpen ? <Button icon="arrow" onClick={() => { setSelected(null); onGo('campaigns') }}>{t('View campaign')}</Button> : <Button icon="edit" onClick={() => { setSelected(null); onGo('create', selected) }}>{t('Edit post')}</Button>}</>}>
         <div className="db-calendar-popover">
           {selected.image ? <img className="db-cal-modal-shot" src={selected.image} alt="" /> : <CreativeArt palette={selected.palette} theme={(selected.title || selected.name).toUpperCase().replace(' ', ' / ')} compact />}
-          <Badge tone={campaignOpen ? 'blue' : selected.status === 'published' ? 'lime' : selected.status === 'failed' ? 'orange' : 'blue'}>{campaignOpen ? selected.delivery : selected.status}</Badge>
+          <Badge tone={campaignOpen ? 'blue' : selected.status === 'published' ? 'lime' : selected.status === 'failed' ? 'orange' : 'blue'}>{campaignOpen ? t(selected.delivery) : statusLabel(selected.status)}</Badge>
           {campaignOpen ? <p>{prettyDay(selected.start)} – {selected.end ? prettyDay(selected.end) : t('ongoing')} · {money(selected.budget, currency, 0)}{t('/day')} · {selected.leads} {t('leads')}</p> : <p>{prettyDay(selected.date)} {t('at')} {selected.time}{selected.format ? ` · ${t(selected.format)}` : ''}</p>}
           {!campaignOpen && <div>{selected.platforms.map((platform) => <span key={platform}><img src={channelLogo(platform)} alt="" /> {platform}</span>)}</div>}
         </div>

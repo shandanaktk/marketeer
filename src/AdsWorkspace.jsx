@@ -158,18 +158,19 @@ export function AdsStudio(props) {
   return <StudioFlow {...props} vacancies={vacancies} templates={templates} brand={brand} initialForm={initialStudioForm({ knowledge, settings, brand: brand.data, vacancies: vacancies.data, preset })} />
 }
 
-function StudioFlow({ connected, status, onManage, notify, onGo, vacancies, templates, brand, initialForm }) {
-  const [stage, setStage] = useState(0)
+function StudioFlow({ connected, status, onManage, notify, onGo, vacancies, templates, brand, initialForm, preset }) {
+  // A vacancy's campaign is drafted automatically; opening it lands on the review step.
+  const [stage, setStage] = useState(preset?.jobId ? 1 : 0)
   const [form, setForm] = useState(initialForm)
   const [plan, setPlan] = useState(null)
   const [raw, setRaw] = useState(null)
-  const [jobId, setJobId] = useState(null)
+  const [jobId, setJobId] = useState(preset?.jobId || null)
   const [copies, setCopies] = useState([])
   const [creatives, setCreatives] = useState([])
   const [result, setResult] = useState(null)
   const [busy, setBusy] = useState(false)
   const [savingRules, setSavingRules] = useState(false)
-  const [progress, setProgress] = useState({ percent: 6, step: 0, label: '' })
+  const [progress, setProgress] = useState({ percent: 6, step: 0, label: preset?.jobId ? t('Opening the campaign the AI prepared…') : '' })
   const pageId = status?.page?.page_id
   const pagePosts = useResource(() => (pageId && form.kind === 'post' ? getPagePosts(pageId) : Promise.resolve([])), [pageId, form.kind === 'post'])
   const currency = status?.ad_account?.currency || 'CHF'
@@ -196,6 +197,16 @@ function StudioFlow({ connected, status, onManage, notify, onGo, vacancies, temp
       form: { name: generated.lead_form.name, privacy: generated.lead_form.privacy_policy_url, thanks: generated.lead_form.thank_you_message, questions: generated.lead_form.questions.map((question) => question.label || question.key) },
     })
   }
+
+  useEffect(() => {
+    if (!preset?.jobId) return undefined
+    let cancelled = false
+    pollStudioJob(preset.jobId, (update) => { if (!cancelled) setProgress({ percent: update.percent, step: GENERATE_STEPS[update.step] ?? 0, label: update.step_label ? `${t(update.step_label)}…` : t('Building your recruitment campaign…') }) })
+      .then((job) => { if (!cancelled) { adopt(job); setStage(2) } })
+      .catch((failure) => { if (!cancelled) { notify(failure.message, 'error'); setJobId(null); setStage(0) } })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preset?.jobId])
 
   const build = async () => {
     if (!status?.ad_account || !status?.page) { notify(t('Choose an ad account and a Facebook Page in Connections first.'), 'error'); return }

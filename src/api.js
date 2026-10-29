@@ -153,6 +153,16 @@ export const getOverview = () => get('/api/v1/dashboard/overview')
 // ── Vacancies ───────────────────────────────────────────────────────────────
 export const listVacancies = () => get('/api/v1/vacancies')
 export const createVacancy = (body) => post('/api/v1/vacancies', body)
+export const redraftVacancy = (id) => post(`/api/v1/vacancies/${id}/draft`)
+
+// ── The AI employee: autopilot status and the review inbox ───────────────────
+export const getAutopilot = () => get('/api/v1/autopilot')
+export const setAutopilot = (enabled) => put('/api/v1/autopilot', { enabled })
+export const runAutopilot = () => post('/api/v1/autopilot/run')
+export const approveAllPosts = () => post('/api/v1/autopilot/approve-all')
+export const getInbox = () => get('/api/v1/inbox')
+export const approvePost = (id) => post(`/api/v1/content/posts/${id}/approve`)
+export const regeneratePost = (id) => post(`/api/v1/content/posts/${id}/regenerate`)
 export const updateVacancy = (id, body) => put(`/api/v1/vacancies/${id}`, body)
 export const deleteVacancy = (id) => del(`/api/v1/vacancies/${id}`)
 

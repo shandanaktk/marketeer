@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { formatDate, formatDateTime, formatNumber, t } from './i18n.js'
-import { compact, createVacancy, currencySymbol, getAdsStatus, getKnowledge, getReporting, listVacancies, money, relativeTime, saveKnowledge, useResource } from './api.js'
+import { compact, createVacancy, redraftVacancy, currencySymbol, getAdsStatus, getKnowledge, getReporting, listVacancies, money, relativeTime, saveKnowledge, useResource } from './api.js'
 import { RADII } from './countries.js'
 import { Badge, Button, EmptyState, ErrorState, Field, Icon, LoadingState, PageIntro, Toggle } from './dashboardUI.jsx'
 
@@ -156,7 +156,13 @@ function KnowledgeEditor({ initial, notify, onSaved }) {
 }
 
 const EMPTY_VACANCY = { title: '', description: '', location: '', department: '', type: 'Full-time', requirements: '', benefits: '', application: '' }
-const vacancyTone = (status) => status === 'campaign live' ? 'lime' : status === 'in review' ? 'blue' : status === 'ready' ? 'orange' : status === 'paused' ? 'orange' : 'gray'
+function automationMessage(automation) {
+  if (automation?.reason === 'connect_meta') return t('Vacancy saved. Connect Meta Ads and the AI builds its campaign automatically.')
+  if (automation?.reason === 'ai_not_configured') return t('Vacancy saved. AI generation is not configured on the server.')
+  return automation?.reason ? t('Vacancy saved, but the campaign draft could not start: {reason}', { reason: automation.reason }) : t('Vacancy saved.')
+}
+
+const vacancyTone = (status) => status === 'campaign live' ? 'lime' : status === 'in review' || status === 'drafting' ? 'blue' : status === 'ready' ? 'orange' : status === 'paused' ? 'orange' : 'gray'
 
 export function VacanciesView({ notify, onGo }) {
   const vacancies = useResource(listVacancies)
@@ -166,6 +172,28 @@ export function VacanciesView({ notify, onGo }) {
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState(EMPTY_VACANCY)
   const field = (key, value) => setForm((current) => ({ ...current, [key]: value }))
+  const [drafting, setDrafting] = useState('')
+  const list = vacancies.data || []
+  const working = list.some((vacancy) => vacancy.status === 'drafting')
+  const { reload } = vacancies
+  // Follow the AI while it drafts campaigns.
+  useEffect(() => {
+    if (!working) return undefined
+    const timer = window.setInterval(() => reload(), 5000)
+    return () => window.clearInterval(timer)
+  }, [working, reload])
+  const redraft = async (vacancy) => {
+    setDrafting(vacancy.id)
+    try {
+      const updated = await redraftVacancy(vacancy.id)
+      vacancies.setData((current) => current.map((item) => (item.id === vacancy.id ? updated : item)))
+      notify(updated.automation?.auto ? t('The AI is building the campaign for {title}.', { title: vacancy.title }) : automationMessage(updated.automation))
+    } catch (failure) {
+      notify(failure.message, 'error')
+    } finally {
+      setDrafting('')
+    }
+  }
   const create = async (event) => {
     event.preventDefault()
     if (!form.title.trim() || !form.description.trim() || !form.location.trim()) { notify(t('Add a title, description, and location first.'), 'error'); return }
@@ -175,20 +203,29 @@ export function VacanciesView({ notify, onGo }) {
       vacancies.setData((current) => [created, ...(current || [])])
       setCreating(false)
       setForm(EMPTY_VACANCY)
-      notify(created.automation?.auto ? t('Vacancy saved. Its campaign is being generated and launched automatically.') : t('Vacancy saved and ready for campaign generation.'))
+      notify(created.automation?.auto
+        ? (created.automation.launch ? t('Vacancy saved. The AI is building its campaign and will launch it automatically.') : t('Vacancy saved. The AI is building its campaign — it appears in your review queue in about a minute.'))
+        : automationMessage(created.automation))
     } catch (failure) {
       notify(failure.message, 'error')
     } finally {
       setSaving(false)
     }
   }
-  const list = vacancies.data || []
 
   return <div className="db-page db-srs-page">
     <PageIntro eyebrow={t('Vacancy input')} icon="file" title={t('Turn every open role into a campaign-ready brief.')} description={t('Add the role once. Marketeer combines it with the Knowledge Base to generate the complete Meta recruitment campaign.')} actions={<Button icon="plus" onClick={() => setCreating((value) => !value)}>{creating ? t('Close form') : t('Add vacancy')}</Button>} />
-    {creating && <form className="db-card db-vacancy-form" onSubmit={create}><SectionHeading icon="file" title={t('New vacancy')} copy={t('These fields form the standard vacancy payload for future recruiting-system integrations.')} /><div className="db-form-grid two"><Field label={t('Job title')}><input value={form.title} onChange={(event) => field('title', event.target.value)} placeholder={t('Polymechaniker/in EFZ')} autoFocus /></Field><Field label={t('Location')}><input value={form.location} onChange={(event) => field('location', event.target.value)} placeholder={t('Schwyz · On-site')} /></Field><Field label={t('Department')}><input value={form.department} onChange={(event) => field('department', event.target.value)} placeholder={t('Technology')} /></Field><Field label={t('Employment type')}><select value={form.type} onChange={(event) => field('type', event.target.value)}><option value="Full-time">{t('Full-time')}</option><option value="Part-time">{t('Part-time')}</option><option value="Contract">{t('Contract')}</option><option value="Internship">{t('Internship')}</option></select></Field><Field label={t('Job description')} className="span-two"><textarea rows="5" value={form.description} onChange={(event) => field('description', event.target.value)} placeholder={t('What will this person own and why does the role matter?')} /></Field><Field label={t('Requirements')}><textarea rows="5" value={form.requirements} onChange={(event) => field('requirements', event.target.value)} placeholder={t('Skills, experience, and essential criteria')} /></Field><Field label={t('Benefits')}><textarea rows="5" value={form.benefits} onChange={(event) => field('benefits', event.target.value)} placeholder={t('Compensation, benefits, and what makes the opportunity special')} /></Field><Field label={t('Application details')} className="span-two"><input value={form.application} onChange={(event) => field('application', event.target.value)} placeholder={t('Application URL or instructions')} /></Field></div><footer><p><Icon name="spark" size={14} /> {t('Brand context and Meta rules will be applied automatically.')}</p><Button variant="secondary" onClick={() => setCreating(false)}>{t('Cancel')}</Button><Button type="submit" icon="check" disabled={saving}>{saving ? t('Saving…') : t('Save vacancy')}</Button></footer></form>}
+    {creating && <form className="db-card db-vacancy-form" onSubmit={create}><SectionHeading icon="file" title={t('New vacancy')} copy={t('These fields form the standard vacancy payload for future recruiting-system integrations.')} /><div className="db-form-grid two"><Field label={t('Job title')}><input value={form.title} onChange={(event) => field('title', event.target.value)} placeholder={t('Polymechaniker/in EFZ')} autoFocus /></Field><Field label={t('Location')}><input value={form.location} onChange={(event) => field('location', event.target.value)} placeholder={t('Schwyz · On-site')} /></Field><Field label={t('Department')}><input value={form.department} onChange={(event) => field('department', event.target.value)} placeholder={t('Technology')} /></Field><Field label={t('Employment type')}><select value={form.type} onChange={(event) => field('type', event.target.value)}><option value="Full-time">{t('Full-time')}</option><option value="Part-time">{t('Part-time')}</option><option value="Contract">{t('Contract')}</option><option value="Internship">{t('Internship')}</option></select></Field><Field label={t('Job description')} className="span-two"><textarea rows="5" value={form.description} onChange={(event) => field('description', event.target.value)} placeholder={t('What will this person own and why does the role matter?')} /></Field><Field label={t('Requirements')}><textarea rows="5" value={form.requirements} onChange={(event) => field('requirements', event.target.value)} placeholder={t('Skills, experience, and essential criteria')} /></Field><Field label={t('Benefits')}><textarea rows="5" value={form.benefits} onChange={(event) => field('benefits', event.target.value)} placeholder={t('Compensation, benefits, and what makes the opportunity special')} /></Field><Field label={t('Application details')} className="span-two"><input value={form.application} onChange={(event) => field('application', event.target.value)} placeholder={t('Application URL or instructions')} /></Field></div><footer><p><Icon name="spark" size={14} /> {t('Saving starts the AI: it drafts the complete Meta campaign from this vacancy and your Knowledge Base.')}</p><Button variant="secondary" onClick={() => setCreating(false)}>{t('Cancel')}</Button><Button type="submit" icon="check" disabled={saving}>{saving ? t('Saving…') : t('Save vacancy')}</Button></footer></form>}
     <section className="db-card db-vacancy-table"><header><div><h2>{t('Vacancy pipeline')}</h2><p>{t('Each vacancy stays linked to its generated campaign and results.')}</p></div><Badge tone="blue">{list.length === 1 ? t('1 role') : t('{n} roles', { n: list.length })}</Badge></header>
-      {vacancies.loading && !vacancies.data ? <LoadingState label={t('Loading vacancies…')} /> : vacancies.error && !vacancies.data ? <ErrorState error={vacancies.error} onRetry={vacancies.reload} /> : list.length ? <div className="db-table-wrap"><table className="db-table"><thead><tr><th>{t('Vacancy')}</th><th>{t('Status')}</th><th>{t('Campaign')}</th><th>{t('Applicants')}</th><th>{t('CPL')}</th><th>{t('Updated')}</th><th aria-label={t('Actions')} /></tr></thead><tbody>{list.map((vacancy) => <tr key={vacancy.id}><td><div className="db-vacancy-title"><span>{vacancy.title.split(' ').slice(0, 2).map((word) => word[0]).join('')}</span><p><b>{vacancy.title}</b><small>{vacancy.location} · {t(vacancy.type)}</small></p></div></td><td><Badge tone={vacancyTone(vacancy.status)}>{t(vacancy.status)}</Badge></td><td><b>{vacancy.campaign}</b></td><td>{vacancy.applicants || '—'}</td><td>{vacancy.cpl ? money(vacancy.cpl, currency) : '—'}</td><td>{relativeTime(vacancy.updated_at)}</td><td>{vacancy.status === 'ready' || vacancy.status === 'in review' ? <Button variant="soft" icon="spark" onClick={() => { notify(t('Opening campaign builder for {title}.', { title: vacancy.title })); onGo('adstudio', { vacancyId: vacancy.id }) }}>{t('Build campaign')}</Button> : <button className="db-icon-action" onClick={() => onGo('reporting')} aria-label={t('View reporting')}><Icon name="arrow" size={15} /></button>}</td></tr>)}</tbody></table></div> : <EmptyState icon="file" title={t('No vacancies yet')} body={t('Add a role to turn it into a Meta recruitment campaign.')} action={<Button icon="plus" onClick={() => setCreating(true)}>{t('Add vacancy')}</Button>} />}
+      {vacancies.loading && !vacancies.data ? <LoadingState label={t('Loading vacancies…')} /> : vacancies.error && !vacancies.data ? <ErrorState error={vacancies.error} onRetry={vacancies.reload} /> : list.length ? <div className="db-table-wrap"><table className="db-table"><thead><tr><th>{t('Vacancy')}</th><th>{t('Status')}</th><th>{t('Campaign')}</th><th>{t('Applicants')}</th><th>{t('CPL')}</th><th>{t('Updated')}</th><th aria-label={t('Actions')} /></tr></thead><tbody>{list.map((vacancy) => <tr key={vacancy.id}><td><div className="db-vacancy-title"><span>{vacancy.title.split(' ').slice(0, 2).map((word) => word[0]).join('')}</span><p><b>{vacancy.title}</b><small>{vacancy.location} · {t(vacancy.type)}</small></p></div></td><td><Badge tone={vacancyTone(vacancy.status)}>{t(vacancy.status)}</Badge></td><td><b>{t(vacancy.campaign)}</b>{vacancy.status === 'drafting' && <small>{t(vacancy.draft?.step_label || 'Starting')} · {vacancy.draft?.percent || 0}%</small>}{vacancy.status === 'ready' && vacancy.draft?.error && <small className="db-warning">{vacancy.draft.error}</small>}</td><td>{vacancy.applicants || '—'}</td><td>{vacancy.cpl ? money(vacancy.cpl, currency) : '—'}</td><td>{relativeTime(vacancy.updated_at)}</td><td>{vacancy.status === 'drafting'
+          ? <span className="db-ai-working small"><i /> {t('AI working')}</span>
+          : vacancy.status === 'in review' && vacancy.draft?.job_id
+            ? <Button icon="arrow" onClick={() => onGo('adstudio', { vacancyId: vacancy.id, jobId: vacancy.draft.job_id })}>{t('Review & launch')}</Button>
+            : vacancy.status === 'ready' && vacancy.draft?.waiting_for_meta
+              ? <Button variant="soft" icon="link" onClick={() => onGo('connections')}>{t('Connect Meta')}</Button>
+              : vacancy.status === 'ready' || vacancy.status === 'in review'
+                ? <Button variant="soft" icon="spark" disabled={drafting === vacancy.id} onClick={() => redraft(vacancy)}>{drafting === vacancy.id ? t('Starting…') : t('Generate campaign')}</Button>
+                : <button className="db-icon-action" onClick={() => onGo('reporting')} aria-label={t('View reporting')}><Icon name="arrow" size={15} /></button>}</td></tr>)}</tbody></table></div> : <EmptyState icon="file" title={t('No vacancies yet')} body={t('Add a role to turn it into a Meta recruitment campaign.')} action={<Button icon="plus" onClick={() => setCreating(true)}>{t('Add vacancy')}</Button>} />}
     </section>
   </div>
 }

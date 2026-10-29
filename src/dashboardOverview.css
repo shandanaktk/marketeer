@@ -15,3 +15,55 @@
 .db-upcoming > button,.db-lead-pulse > button:not(.db-button) { display: flex; width: 100%; align-items: center; gap: 11px; padding: 10px 0; border: 0; border-bottom: 1px solid var(--db-stroke); text-align: left; background: transparent; }.db-date-tile { display: grid; width: 42px; height: 46px; flex: 0 0 auto; place-content: center; border-radius: 10px; color: #111; text-align: center; background: var(--db-lime); }.db-date-tile.blue { color: var(--app-ink); background: var(--db-blue); }.db-date-tile.orange { background: var(--db-orange); }.db-date-tile.violet { color: var(--app-ink); background: #9270e8; }.db-date-tile b,.db-date-tile small { display: block; }.db-date-tile b { font-size: 16px; line-height: 1; }.db-date-tile small { margin-top: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; }
 .db-upcoming button > div,.db-lead-pulse button > div { min-width: 0; flex: 1; }.db-upcoming button > div > b,.db-upcoming button > div > small,.db-lead-pulse button > div > b,.db-lead-pulse button > div > small { display: block; }.db-upcoming button > div > b,.db-lead-pulse button > div > b { font-size: 13px; }.db-upcoming button > div > small,.db-lead-pulse button > div > small { margin-top: 3px; color: var(--db-copy-faint); font-size: 11.5px; }.db-upcoming button > div > span { display: flex; gap: 3px; margin-top: 5px; }.db-upcoming .db-platform { width: 16px; height: 16px; border-radius: 5px; font-size: 8px; }
 .db-lead-pulse > button:not(.db-button) > span { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 50%; color: #111; font-size: 11px; font-weight: 800; background: #aebdff; }.db-lead-pulse > .db-button { margin-top: 13px; }
+
+/* ── AI employee: autopilot lanes and the review queue ─────────────────────── */
+.db-ai-employee { margin-top: 12px; padding: 22px; }
+.db-ai-employee > header h2 { margin: 7px 0 6px; font-size: 22px; letter-spacing: -.03em; }
+.db-ai-employee > header p { max-width: 760px; margin: 0; color: var(--db-copy-soft); font-size: 14px; line-height: 1.55; }
+.db-ai-lanes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+.db-ai-lane { display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid var(--db-stroke); border-radius: 14px; background: var(--db-panel-soft); }
+.db-ai-lane > header { display: flex; align-items: center; gap: 12px; }
+.db-ai-lane > header > div { min-width: 0; flex: 1; }
+.db-ai-lane > header b, .db-ai-lane > header small { display: block; }
+.db-ai-lane > header b { font-size: 15px; }
+.db-ai-lane > header small { margin-top: 3px; color: var(--db-copy-faint); font-size: 12px; line-height: 1.4; }
+.db-ai-lane > header .db-toggle-row { width: auto; padding: 0; border: 0; background: transparent; }
+.db-ai-icon { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border-radius: 11px; color: #fff; background: var(--db-blue); }
+.db-ai-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.db-ai-facts div { padding: 10px; border: 1px solid var(--db-stroke); border-radius: 10px; }
+.db-ai-facts dt { color: var(--db-copy-faint); font-size: 10.5px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; }
+.db-ai-facts dd { margin: 4px 0 0; font-size: 18px; font-weight: 650; }
+.db-ai-lane > footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 4px; }
+.db-ai-lane > footer span { color: var(--db-copy-faint); font-size: 12px; }
+.db-ai-lane .db-helper, .db-ai-lane .db-warning { margin: 0; }
+.db-ai-working { display: flex; align-items: center; gap: 9px; margin: 0; font-weight: 600; }
+.db-ai-working i { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; background: var(--db-blue); animation: db-ai-pulse 1.2s ease-in-out infinite; }
+.db-ai-working.small { font-size: 12.5px; font-weight: 500; color: var(--db-copy-soft); }
+@keyframes db-ai-pulse { 0%, 100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
+.db-review-queue { margin-top: 12px; padding: 22px; }
+.db-review-queue > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.db-review-queue > header h2 { margin: 7px 0 0; font-size: 20px; letter-spacing: -.03em; }
+.db-review-queue > header > div:last-child { display: flex; align-items: center; gap: 10px; }
+.db-review-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid var(--db-stroke); }
+.db-review-thumb { position: relative; width: 72px; height: 88px; overflow: hidden; border-radius: 10px; background: var(--db-panel-soft); }
+.db-review-row.campaign .db-review-thumb { display: grid; height: 72px; place-items: center; }
+.db-review-thumb > img { width: 100%; height: 100%; object-fit: cover; }
+.db-review-thumb > .db-creative-art { min-height: 88px; padding: 6px; }
+.db-review-thumb > .db-creative-art > span, .db-review-thumb > .db-creative-art > small, .db-review-thumb .orbit { display: none; }
+.db-review-thumb > .db-creative-art > b { font-size: 10px; }
+.db-review-thumb > i { position: absolute; right: 6px; bottom: 6px; display: grid; width: 22px; height: 22px; place-items: center; border-radius: 50%; color: #fff; background: rgba(0, 0, 0, .6); }
+.db-review-body { min-width: 0; }
+.db-review-body > b { display: block; margin-top: 6px; font-size: 14.5px; }
+.db-review-body > p { margin: 4px 0 0; color: var(--db-copy-soft); font-size: 13px; line-height: 1.45; }
+.db-review-body .db-progress { margin-top: 8px; }
+.db-review-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--db-copy-faint); font-size: 12px; }
+.db-review-meta .db-channel-logo { width: 16px; height: 16px; }
+.db-review-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.db-review-empty { display: flex; align-items: center; gap: 8px; padding: 14px 0 4px; border-top: 1px solid var(--db-stroke); }
+.db-calendar-legend i.review, .db-cal-post.review::after { background: #f2a33a; }
+.db-cal-post.review { opacity: .9; outline: 1px dashed rgba(242, 163, 58, .7); outline-offset: -1px; }
+@media (max-width: 980px) {
+  .db-ai-lanes { grid-template-columns: 1fr; }
+  .db-review-row { grid-template-columns: 60px minmax(0, 1fr); }
+  .db-review-actions { grid-column: 1 / -1; justify-content: flex-start; }
+}
