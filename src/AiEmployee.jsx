@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { formatDate, formatDateTime, t } from './i18n.js'
 import {
-  approveAllPosts, approvePost, getAutopilot, getInbox, redraftVacancy, regeneratePost, relativeTime, runAutopilot,
+  approveAllPosts, approvePost, getAutopilot, getInbox, redraftVacancy, regeneratePost, relativeTime, relaunchVacancy, runAutopilot,
   setAutopilot, toPostRecord, useResource,
 } from './api.js'
 import { Badge, Button, ChannelLogo, CreativeArt, Icon, LoadingState, Toggle } from './dashboardUI.jsx'
@@ -33,13 +33,13 @@ function ContentLane({ status, onToggle, onRun, busy }) {
 function RecruitmentLane({ status, onGo }) {
   const recruitment = status.recruitment
   return <article className="db-ai-lane">
-    <header><span className="db-ai-icon"><Icon name="ads" size={19} /></span><div><b>{t('Recruitment campaigns')}</b><small>{t('Every new vacancy becomes a complete Meta campaign draft.')}</small></div><Badge tone={recruitment.meta_connected ? 'lime' : 'orange'}>{recruitment.meta_connected ? t('Automatic') : t('Meta not connected')}</Badge></header>
+    <header><span className="db-ai-icon"><Icon name="ads" size={19} /></span><div><b>{t('Recruitment campaigns')}</b><small>{t('Every imported vacancy becomes a live Meta campaign.')}</small></div><Badge tone={recruitment.meta_connected ? 'lime' : 'orange'}>{recruitment.meta_connected ? t('Automatic') : t('Meta not connected')}</Badge></header>
     {recruitment.drafting > 0
-      ? <p className="db-ai-working"><i /> {t('Building {n} campaign drafts…', { n: recruitment.drafting })}</p>
-      : <dl className="db-ai-facts"><div><dt>{t('Being drafted')}</dt><dd>{recruitment.drafting}</dd></div><div><dt>{t('Ready for review')}</dt><dd>{recruitment.ready_for_review}</dd></div><div><dt>{t('Live')}</dt><dd>{recruitment.live}</dd></div></dl>}
-    <p className="db-helper">{recruitment.review_before_launch ? t('You approve each campaign before it goes live in Meta.') : t('Campaigns launch in Meta automatically after drafting.')}</p>
-    {!recruitment.meta_connected && <p className="db-warning">{t('Connect Meta Ads and every saved vacancy is drafted automatically.')}</p>}
-    <footer><span>{t('Campaign, ad set, ads, creatives, lead form and budget.')}</span>{recruitment.meta_connected ? <Button variant="secondary" icon="plus" onClick={() => onGo('vacancies')}>{t('Add vacancy')}</Button> : <Button variant="secondary" icon="link" onClick={() => onGo('connections')}>{t('Connect Meta')}</Button>}</footer>
+      ? <p className="db-ai-working"><i /> {t('Building and launching {n} campaigns…', { n: recruitment.drafting })}</p>
+      : <dl className="db-ai-facts"><div><dt>{t('In progress')}</dt><dd>{recruitment.drafting}</dd></div><div><dt>{t('Needs attention')}</dt><dd>{recruitment.needs_attention}</dd></div><div><dt>{t('Live')}</dt><dd>{recruitment.live}</dd></div></dl>}
+    <p className="db-helper">{t('Paste a vacancy link: it is read, anonymised if it is a client’s, and launched in Meta. Edit live campaigns any time.')}</p>
+    {!recruitment.meta_connected && <p className="db-warning">{t('Connect Meta Ads and every imported vacancy is launched automatically.')}</p>}
+    <footer><span>{t('Campaign, ad set, ads, creatives, lead form and budget.')}</span>{recruitment.meta_connected ? <Button variant="secondary" icon="link" onClick={() => onGo('vacancies')}>{t('Import vacancy')}</Button> : <Button variant="secondary" icon="link" onClick={() => onGo('connections')}>{t('Connect Meta')}</Button>}</footer>
   </article>
 }
 
@@ -62,24 +62,21 @@ function PostRow({ post, onApprove, onEdit, onRegenerate, busy }) {
   </article>
 }
 
-function CampaignRow({ vacancy, onGo, onRetry, busy }) {
+function CampaignRow({ vacancy, onRetry, onRelaunch, busy }) {
   const draft = vacancy.draft || {}
   const drafting = vacancy.status === 'drafting'
+  const relaunch = vacancy.launch_failed || vacancy.status === 'in review'
   return <article className="db-review-row campaign">
     <div className="db-review-thumb"><span className="db-ai-icon"><Icon name="ads" size={20} /></span></div>
     <div className="db-review-body">
-      <span className="db-review-meta"><Badge tone={drafting ? 'blue' : draft.error ? 'orange' : 'lime'}>{drafting ? t('Drafting') : draft.error ? t('Needs attention') : t('Campaign ready')}</Badge>{vacancy.location}</span>
+      <span className="db-review-meta"><Badge tone={drafting ? 'blue' : 'orange'}>{drafting ? t('Building & launching') : t('Needs attention')}</Badge>{vacancy.location}</span>
       <b>{vacancy.title}</b>
-      <p>{drafting
-        ? t('The AI is building the campaign · {step}', { step: t(draft.step_label || 'Starting') })
-        : draft.error
-          ? draft.error
-          : t('Copy, creatives, Employment audience, lead form and budget are ready for your review.')}</p>
+      <p>{drafting ? t('The AI is building the campaign · {step}', { step: t(draft.step_label || 'Starting') }) : draft.error || t('The campaign is generated and ready to launch.')}</p>
       {drafting && <div className="db-progress"><i style={{ width: `${draft.percent || 8}%` }} /></div>}
     </div>
     <div className="db-review-actions">
-      {vacancy.status === 'in review' && draft.job_id && <Button icon="arrow" onClick={() => onGo('adstudio', { vacancyId: vacancy.id, jobId: draft.job_id })}>{t('Review & launch')}</Button>}
-      {vacancy.status === 'ready' && <Button variant="secondary" icon="refresh" disabled={busy} onClick={onRetry}>{busy ? t('Starting…') : t('Try again')}</Button>}
+      {!drafting && relaunch && <Button icon="refresh" disabled={busy} onClick={onRelaunch}>{busy ? t('Starting…') : vacancy.launch_failed ? t('Retry launch') : t('Launch')}</Button>}
+      {!drafting && !relaunch && <Button variant="secondary" icon="refresh" disabled={busy} onClick={onRetry}>{busy ? t('Starting…') : t('Try again')}</Button>}
     </div>
   </article>
 }
@@ -136,6 +133,7 @@ export function AiEmployee({ onGo, notify }) {
     return result
   }, (result) => t('{n} posts approved.', { n: result.approved }))
   const retry = (vacancy) => act(`draft-${vacancy.id}`, async () => { await redraftVacancy(vacancy.id); await Promise.all([reloadInbox(), reloadStatus()]) }, t('The AI is building the campaign again.'))
+  const relaunch = (vacancy) => act(`draft-${vacancy.id}`, async () => { await relaunchVacancy(vacancy.id); await Promise.all([reloadInbox(), reloadStatus()]) }, t('Launching the campaign again.'))
 
   if (!autopilot.data || !inbox.data) return <LoadingState label={t('Checking what the AI has prepared…')} />
   const { posts, campaigns, failed_posts: failed } = inbox.data
@@ -143,15 +141,15 @@ export function AiEmployee({ onGo, notify }) {
 
   return <>
     <section className="db-card db-ai-employee">
-      <header><div><span className="db-eyebrow"><Icon name="spark" size={14} /> {t('Your AI employee')}</span><h2>{t('Set up once. The work runs in the background.')}</h2><p>{t('Marketeer plans the calendar, creates and schedules posts, and turns every vacancy into a Meta campaign. You review, approve and handle exceptions.')}</p></div></header>
+      <header><div><span className="db-eyebrow"><Icon name="spark" size={14} /> {t('Your AI employee')}</span><h2>{t('Set up once. The work runs in the background.')}</h2><p>{t('Marketeer plans the calendar, creates and schedules posts, and turns every imported vacancy into a live Meta campaign. You approve posts and handle exceptions.')}</p></div></header>
       <div className="db-ai-lanes"><ContentLane status={autopilot.data} onToggle={toggle} onRun={run} busy={busy} /><RecruitmentLane status={autopilot.data} onGo={onGo} /></div>
     </section>
     <section className="db-card db-review-queue">
       <header><div><span className="db-eyebrow">{t('Review queue')}</span><h2>{t('Needs your approval')}</h2></div><div>{waiting > 0 && <Badge tone="blue">{t('{n} waiting', { n: waiting })}</Badge>}{posts.length > 1 && <Button icon="check" disabled={Boolean(busy)} onClick={approveAll}>{busy === 'all' ? t('Approving…') : t('Approve all posts')}</Button>}</div></header>
-      {campaigns.map((vacancy) => <CampaignRow key={vacancy.id} vacancy={vacancy} onGo={onGo} onRetry={() => retry(vacancy)} busy={busy === `draft-${vacancy.id}`} />)}
+      {campaigns.map((vacancy) => <CampaignRow key={vacancy.id} vacancy={vacancy} onRetry={() => retry(vacancy)} onRelaunch={() => relaunch(vacancy)} busy={busy === `draft-${vacancy.id}`} />)}
       {posts.map((post) => <PostRow key={post.id} post={post} busy={busy === `approve-${post.id}` ? 'approve' : busy === `regen-${post.id}` ? 'regen' : ''} onApprove={() => approve(post)} onEdit={() => onGo('create', toPostRecord(post))} onRegenerate={() => regenerate(post)} />)}
       {failed.map((post) => <article className="db-review-row" key={post.id}><div className="db-review-thumb">{post.image ? <img src={post.image} alt="" /> : <CreativeArt compact palette={post.palette} theme={post.title.toUpperCase()} />}</div><div className="db-review-body"><span className="db-review-meta"><Badge tone="orange">{t('Publishing failed')}</Badge>{formatDate(post.updated_at)}</span><b>{post.title}</b><small className="db-warning">{post.error}</small></div><div className="db-review-actions"><Button variant="secondary" icon="edit" onClick={() => onGo('create', toPostRecord(post))}>{t('Fix & publish')}</Button></div></article>)}
-      {!campaigns.length && !posts.length && !failed.length && <p className="db-helper db-review-empty"><Icon name="check" size={15} /> {t('All caught up. New posts and campaign drafts appear here for your approval.')}</p>}
+      {!campaigns.length && !posts.length && !failed.length && <p className="db-helper db-review-empty"><Icon name="check" size={15} /> {t('All caught up. New posts for approval and campaigns that need you appear here.')}</p>}
     </section>
   </>
 }

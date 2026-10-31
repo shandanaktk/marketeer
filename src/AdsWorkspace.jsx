@@ -298,7 +298,7 @@ const deltaNote = (value, { suffix = '%', lowerIsBetter = false } = {}) => {
   return { text: `${value >= 0 ? '+' : '−'}${Math.abs(value).toFixed(suffix === '%' ? 1 : 2)}${suffix === ' pts' ? t(' pts') : suffix} ${t('vs previous')}`, good }
 }
 
-export function CampaignsView({ connected, status, onManage, notify, datePreset = 'last_14d', setDatePreset }) {
+export function CampaignsView({ connected, status, onManage, notify, datePreset = 'last_14d', setDatePreset, focus }) {
   const [preset, setPreset] = useState(datePreset)
   const [level, setLevel] = useState('campaign')
   const table = useResource((options) => (connected ? getCampaignTable({ level, datePreset: preset, refresh: options?.refresh }) : Promise.resolve(null)), [connected, level, preset])
@@ -344,6 +344,14 @@ export function CampaignsView({ connected, status, onManage, notify, datePreset 
       table.reload({ refresh: true })
     } catch (failure) { notify(failure.message, 'error') } finally { setBusy('') }
   }
+  // "Edit campaign" from a vacancy: open that campaign once the table has loaded.
+  const focused = useRef(false)
+  useEffect(() => {
+    if (focused.current || !focus || level !== 'campaign' || !items.length) return
+    const match = items.find((row) => row.id === focus.campaignId || row.campaign_id === focus.campaignId) || items.find((row) => focus.name && row.name === focus.name)
+    const timer = window.setTimeout(() => { focused.current = true; return match ? open(match) : notify(t('That campaign is not in this reporting window yet — it can take a few minutes to appear after launch.'), 'error') }, 0)
+    return () => window.clearTimeout(timer)
+  }, [focus, items, level]) // eslint-disable-line react-hooks/exhaustive-deps
   const refresh = async () => { const result = await table.reload({ refresh: true }); if (result) notify(t('Campaign data refreshed.')) }
   const totals = table.data?.totals
   const deltas = table.data?.deltas || {}

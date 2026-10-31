@@ -76,7 +76,7 @@ function Overview({ firstName, onGo, onLeadCount, notify }) {
   useEffect(() => { if (data) onLeadCount?.(data.new_leads) }, [data, onLeadCount])
   const upcoming = (data?.upcoming || []).map(toPostRecord)
   return <div className="db-page db-overview">
-    <section className="db-overview-hero"><div><span className="db-eyebrow"><Icon name="spark" size={14} /> {today}</span><h1>{greeting()}, {firstName}.<br /><em>{t('Let’s make something matter.')}</em></h1><p>{data?.ads_error ? t('Your content is up to date. Meta Ads needs attention in Connections.') : t('Here is where your paid and organic work stands, and where to focus next.')}</p><div><Button icon="plus" onClick={() => onGo('vacancies')}>{t('Add a vacancy')}</Button><Button variant="secondary" icon="calendar" onClick={() => onGo('calendar')}>{t('See the content plan')}</Button></div></div><GreetingMark /></section>
+    <section className="db-overview-hero"><div><span className="db-eyebrow"><Icon name="spark" size={14} /> {today}</span><h1>{greeting()}, {firstName}.<br /><em>{t('Let’s make something matter.')}</em></h1><p>{data?.ads_error ? t('Your content is up to date. Meta Ads needs attention in Connections.') : t('Here is where your paid and organic work stands, and where to focus next.')}</p><div><Button icon="link" onClick={() => onGo('vacancies')}>{t('Import a vacancy')}</Button><Button variant="secondary" icon="calendar" onClick={() => onGo('calendar')}>{t('See the content plan')}</Button></div></div><GreetingMark /></section>
     <AiEmployee onGo={onGo} notify={notify} />
     {loading && !data ? <LoadingState label={t('Loading your command center…')} /> : error && !data ? <ErrorState error={error} onRetry={reload} /> : <>
       <section className="db-metric-grid four overview">{data.metrics.map((metric) => <article className={`db-card ${metric.tone}`} key={metric.label}><span className="db-metric-icon"><Icon name={metric.icon} size={18} /></span><small>{t('Last 30 days')}</small><p>{t(metric.label)}</p><strong>{metric.value}</strong><em>{metric.delta}</em><Sparkline id={`spark-${metric.label.replace(/\s+/g, '-')}`} values={metric.series} /></article>)}</section>
@@ -302,7 +302,7 @@ function Dashboard({ account, onNavigate, theme, onToggleTheme }) {
         {section === 'content' && <ContentLibrary notify={notify} onGo={go} />}
         {section === 'calendar' && <ContentCalendar notify={notify} onGo={go} adsConnected={Boolean(ads.data?.connected)} />}
         {section === 'adstudio' && <AdsStudio {...sharedAds} onGo={go} preset={contextFor('adstudio')} />}
-        {section === 'campaigns' && <CampaignsView {...sharedAds} />}
+        {section === 'campaigns' && <CampaignsView {...sharedAds} focus={contextFor('campaigns')} />}
         {section === 'reporting' && <ReportingView notify={notify} connected={sharedAds.connected} loadingStatus={ads.loading} onManage={sharedAds.onManage} />}
         {section === 'leads' && <LeadsView {...sharedAds} onNewCount={setNewLeads} />}
         {section === 'optimize' && <OptimizeView {...sharedAds} />}

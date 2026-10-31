@@ -154,6 +154,9 @@ export const getOverview = () => get('/api/v1/dashboard/overview')
 export const listVacancies = () => get('/api/v1/vacancies')
 export const createVacancy = (body) => post('/api/v1/vacancies', body)
 export const redraftVacancy = (id) => post(`/api/v1/vacancies/${id}/draft`)
+export const relaunchVacancy = (id) => post(`/api/v1/vacancies/${id}/launch`)
+// URL → vacancy (anonymised when it is a client's) → campaign generated and launched.
+export const importVacancy = (body) => post('/api/v1/vacancies/import', body)
 
 // ── The AI employee: autopilot status and the review inbox ───────────────────
 export const getAutopilot = () => get('/api/v1/autopilot')

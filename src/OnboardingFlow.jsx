@@ -52,7 +52,7 @@ const platforms = [
 ]
 
 // Answers saved to the server between steps (credentials never are).
-const SAVED_KEYS = ['role', 'provider', 'businessName', 'industry', 'website', 'goals', 'logo', 'colors', 'voice', 'customVoice', 'description', 'postingPlatforms', 'postingFrequency', 'timezone', 'metaBudget', 'metaDuration', 'metaCountry', 'metaCity', 'metaRadius', 'reviewMode', 'connected', 'workspaceName', 'invites']
+const SAVED_KEYS = ['role', 'provider', 'businessName', 'industry', 'website', 'goals', 'logo', 'colors', 'voice', 'customVoice', 'description', 'postingPlatforms', 'postingFrequency', 'timezone', 'metaBudget', 'metaDuration', 'metaCountry', 'metaCity', 'metaRadius', 'connected', 'workspaceName', 'invites', 'logoPosition', 'logoSize', 'logoOnPosts']
 const savable = (data) => Object.fromEntries(SAVED_KEYS.filter((key) => data[key] !== undefined).map((key) => [key, data[key]]))
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
 
@@ -424,10 +424,7 @@ function GoalsStep({ data, setData, onBack, onContinue, busy }) {
 }
 
 function BrandStep({ data, setData, onBack, onContinue, busy }) {
-  const uploadRef = useRef(null)
   const paletteRef = useRef(null)
-  const [logoName, setLogoName] = useState('')
-  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [paletteFor, setPaletteFor] = useState(null)
   const updateColor = (index, value) => {
@@ -453,22 +450,6 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
     }
     if (typeof paletteFor === 'number') updateColor(paletteFor, next)
   }
-  const handleLogo = async (event) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-    setLogoName(file.name)
-    setUploading(true)
-    setError('')
-    try {
-      const stored = await uploadMedia(file)
-      setData({ ...data, logo: stored.url })
-    } catch (failure) {
-      setError(failure.message)
-      setLogoName('')
-    } finally {
-      setUploading(false)
-    }
-  }
   const submit = (event) => {
     event.preventDefault()
     if (data.colors.some((color) => !/^#[0-9a-fA-F]{6}$/.test(color))) { setError(t('Use six-digit hex colors, like #B3DC1F.')); return }
@@ -479,12 +460,6 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
       <ScreenHeading index={4} eyebrow={t('Brand identity')} title={<>{t('Let’s set up')}<br /><em>{t('your brand.')}</em></>} subtitle={data.scanned ? t('We pulled a starting point from your website—feel free to adjust anything.') : t('Give Marketeer a feel for your look, sound, and story.')} />
       <div className="ob-brand-layout">
         <div className="ob-brand-left">
-          <div className="ob-field-label">{t('Logo')} <small>{t('PNG, JPG or SVG')}</small></div>
-          <button className="ob-upload" type="button" onClick={() => uploadRef.current?.click()}>
-            <input ref={uploadRef} type="file" accept="image/png,image/jpeg,image/svg+xml" onChange={handleLogo} tabIndex="-1" />
-            {data.logo ? <img src={data.logo} alt={t('Uploaded logo preview')} /> : <span>{initialsOf(data.businessName || data.name)}</span>}
-            <p><b>{uploading ? t('Uploading…') : logoName || (data.logo ? t('Your logo') : t('Upload your logo'))}</b><small>{data.logo ? t('Click to replace') : t('or drag and drop here')}</small></p><i>↑</i>
-          </button>
           <div className="ob-color-block">
             <div className="ob-field-label">{t('Brand colors')} <small>{t('Pick from the palette or type a hex')}</small></div>
             <div className="ob-color-strip">
@@ -530,7 +505,63 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
         </div>
       </div>
       {error && <p className="ob-form-error" role="alert">{error}</p>}
-      <FooterActions onBack={onBack} busy={busy || uploading} />
+      <FooterActions onBack={onBack} busy={busy} />
+    </form>
+  )
+}
+
+const LOGO_POSITIONS = [['top-left', 'Top left'], ['top-right', 'Top right'], ['bottom-left', 'Bottom left'], ['bottom-right', 'Bottom right']]
+const LOGO_WIDTH = { Small: 24, Medium: 33, Large: 44 }
+
+function LogoStep({ data, setData, onBack, onContinue, busy }) {
+  const uploadRef = useRef(null)
+  const [logoName, setLogoName] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
+  const handleLogo = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setLogoName(file.name)
+    setUploading(true)
+    setError('')
+    try {
+      const stored = await uploadMedia(file)
+      setData({ ...data, logo: stored.url, logoOnPosts: true })
+    } catch (failure) {
+      setError(failure.message)
+      setLogoName('')
+    } finally {
+      setUploading(false)
+    }
+  }
+  const [primary = '#0A2463', accent = '#3E92CC'] = data.colors
+  return (
+    <form className="ob-step" onSubmit={(event) => { event.preventDefault(); onContinue() }}>
+      <ScreenHeading index={5} eyebrow={t('Your logo')} title={<>{t('Sign every post')}<br /><em>{t('with your logo.')}</em></>} subtitle={t('Upload it once. Marketeer places it on every post, story, reel and ad image it creates.')} />
+      <div className="ob-logo-layout">
+        <div className="ob-logo-controls">
+          <div className="ob-field-label">{t('Logo')} <small>{t('PNG with a transparent background works best')}</small></div>
+          <button className="ob-upload" type="button" onClick={() => uploadRef.current?.click()}>
+            <input ref={uploadRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleLogo} tabIndex="-1" />
+            {data.logo ? <img src={data.logo} alt={t('Uploaded logo preview')} /> : <span>{initialsOf(data.businessName || data.name)}</span>}
+            <p><b>{uploading ? t('Uploading…') : logoName || (data.logo ? t('Your logo') : t('Upload your logo'))}</b><small>{data.logo ? t('Click to replace') : t('PNG, JPG or WebP')}</small></p><i>↑</i>
+          </button>
+          <button type="button" className={`ob-rule-toggle ${data.logoOnPosts ? 'on' : ''}`} disabled={!data.logo} onClick={() => setData({ ...data, logoOnPosts: !data.logoOnPosts })}><span><i /></span><p><b>{t('Add my logo to every post')}</b><small>{t('You can switch it off or move it later in the Knowledge Base.')}</small></p></button>
+          <div className="ob-field-label">{t('Position')}</div>
+          <div className="ob-logo-corners">{LOGO_POSITIONS.map(([id, label]) => <button type="button" key={id} className={data.logoPosition === id ? 'selected' : ''} onClick={() => setData({ ...data, logoPosition: id })}><i className={id} />{t(label)}</button>)}</div>
+          <div className="ob-field-label">{t('Size')}</div>
+          <div className="ob-voice-options">{['Small', 'Medium', 'Large'].map((size) => <button type="button" key={size} className={data.logoSize === size ? 'selected' : ''} onClick={() => setData({ ...data, logoSize: size })}>{t(size)}</button>)}</div>
+        </div>
+        <div className="ob-logo-preview" style={{ '--logo-a': primary, '--logo-b': accent }}>
+          <div className={`ob-logo-canvas ${data.logoPosition}`}>
+            {data.logo && data.logoOnPosts ? <img src={data.logo} alt="" style={{ width: `${LOGO_WIDTH[data.logoSize] || 33}%` }} /> : <span className="ob-logo-name">{(data.businessName || t('Your brand')).toUpperCase()}</span>}
+            <strong>{t('YOUR NEXT')}<br /><em>{t('BIG MESSAGE')}</em></strong>
+          </div>
+          <small>{t('Preview of a generated feed post')}</small>
+        </div>
+      </div>
+      {error && <p className="ob-form-error" role="alert">{error}</p>}
+      <FooterActions onBack={onBack} skipLabel={data.logo ? '' : t('I’ll add it later')} onSkip={onContinue} busy={busy || uploading} />
     </form>
   )
 }
@@ -554,7 +585,7 @@ function AutomationStep({ data, setData, onBack, onContinue, busy }) {
 
   return (
     <form className="ob-step" onSubmit={submit}>
-      <ScreenHeading index={5} eyebrow={t('Automation rules')} title={<>{t('Set the rhythm.')}<br /><em>{t('We’ll run it.')}</em></>} subtitle={t('Choose the publishing cadence and recruitment ad defaults Marketeer should apply automatically.')} />
+      <ScreenHeading index={6} eyebrow={t('Automation rules')} title={<>{t('Set the rhythm.')}<br /><em>{t('We’ll run it.')}</em></>} subtitle={t('Choose the publishing cadence and recruitment ad defaults Marketeer should apply automatically.')} />
       <div className="ob-automation-layout">
         <section>
           <header className="ob-rule-head"><b>{t('Organic publishing')}</b><small>{t('Select every channel Marketeer should post to')}</small></header>
@@ -579,7 +610,7 @@ function AutomationStep({ data, setData, onBack, onContinue, busy }) {
           </div>
           <datalist id="ob-country-list">{COUNTRIES.map((country) => <option value={country.name} key={country.code} />)}</datalist>
           {data.metaCity.trim() && <div className="ob-field"><span className="ob-field-label">{t('Reach around the city')}</span><MenuField label={t('Radius')} value={String(data.metaRadius)} options={RADII.map((km) => ({ value: String(km), label: `${km} km` }))} onChange={(metaRadius) => setData({ ...data, metaRadius })} /></div>}
-          <button type="button" className={`ob-rule-toggle ${data.reviewMode ? 'on' : ''}`} onClick={() => setData({ ...data, reviewMode: !data.reviewMode })}><span><i /></span><p><b>{t('Review campaigns before launch')}</b><small>{t('Hold generated campaigns for edits and approval.')}</small></p></button>
+          <div className="ob-ai-note"><span>✦</span><p>{t('Every imported vacancy is turned into a complete campaign and launched automatically. You can edit it any time afterwards.')}</p></div>
           <div className="ob-employment-lock"><span>!</span><p><b>{t('Employment targeting stays compliant.')}</b> {t('Age, gender, and detailed-targeting limitations are locked automatically.')}</p></div>
         </section>
       </div>
@@ -609,7 +640,7 @@ function ConnectStep({ data, setData, onBack, onContinue, busy, notice }) {
         setData({ ...data, connected: list.filter((item) => item.connected).map((item) => item.id) })
         setWorking('')
       } else {
-        await saveOnboarding(6, savable(data))
+        await saveOnboarding(7, savable(data))
         await connectChannel(id, 'onboarding')
       }
     } catch (failure) {
@@ -619,7 +650,7 @@ function ConnectStep({ data, setData, onBack, onContinue, busy, notice }) {
   }
   return (
     <form className="ob-step" onSubmit={(event) => { event.preventDefault(); onContinue() }}>
-      <ScreenHeading index={6} eyebrow={t('Your platforms')} title={<>{t('Connect your')}<br /><em>{t('accounts.')}</em></>} subtitle={t('Link your platforms so Marketeer can publish on your behalf. You can always do this later.')} />
+      <ScreenHeading index={7} eyebrow={t('Your platforms')} title={<>{t('Connect your')}<br /><em>{t('accounts.')}</em></>} subtitle={t('Link your platforms so Marketeer can publish on your behalf. You can always do this later.')} />
       <div className="ob-connect-list">
         {platforms.map((platform) => {
           const channel = channels.find((item) => item.id === platform.id)
@@ -653,7 +684,7 @@ function WorkspaceStep({ data, setData, onBack, onContinue, busy }) {
   }
   return (
     <form className="ob-step" onSubmit={(event) => { event.preventDefault(); onContinue() }}>
-      <ScreenHeading index={7} eyebrow={t('Your workspace')} title={<>{t('Set up your')}<br /><em>{t('workspace.')}</em></>} subtitle={t('Invite your team or set up separate spaces for each client.')} />
+      <ScreenHeading index={8} eyebrow={t('Your workspace')} title={<>{t('Set up your')}<br /><em>{t('workspace.')}</em></>} subtitle={t('Invite your team or set up separate spaces for each client.')} />
       <div className="ob-workspace-fields">
         <Field label={t('Workspace name')}>
           <input value={data.workspaceName} onChange={(event) => setData({ ...data, workspaceName: event.target.value })} placeholder={data.role === 'Agency' ? t('My Agency') : t('My Client Workspace')} autoFocus />
@@ -681,7 +712,7 @@ function CompleteStep({ data, onBack, onDashboard, busy, error }) {
     <section className="ob-step ob-complete-step">
       <div className="ob-confetti" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /></div>
       <div className="ob-success-mark"><CheckIcon /></div>
-      <ScreenHeading index={8} eyebrow={t('Setup complete')} title={<>{t('You’re all set,')}<br /><em>{displayName}!</em> 🎉</>} subtitle={t('Your creative command center is ready to go.')} />
+      <ScreenHeading index={9} eyebrow={t('Setup complete')} title={<>{t('You’re all set,')}<br /><em>{displayName}!</em> 🎉</>} subtitle={t('Your creative command center is ready to go.')} />
       <div className="ob-summary-card">
         <div className="ob-summary-band">
           <div>
@@ -691,9 +722,10 @@ function CompleteStep({ data, onBack, onDashboard, busy, error }) {
           <em>{t('Ready')}</em>
         </div>
         <ul>
+          <li><span>{t('Logo')}</span>{data.logo ? <b className="ob-summary-logo"><img src={data.logo} alt="" /> {data.logoOnPosts ? t('on every post · {where}', { where: t(LOGO_POSITIONS.find(([id]) => id === data.logoPosition)?.[1] || 'Top right').toLowerCase() }) : t('not added to posts')}</b> : <b>{t('Add it in the Knowledge Base')}</b>}</li>
           <li><span>{t('Rhythm')}</span><b>{t(data.postingFrequency)}</b></li>
           <li><span>{t('Timezone')}</span><b>{data.timezone.replace('_', ' ')}</b></li>
-          <li><span>{t('Meta ads')}</span><b>{currencySymbol()} {data.metaBudget}{t('/day')} · {t('{n} days', { n: data.metaDuration })}{data.reviewMode ? t(' · review on') : ''}</b></li>
+          <li><span>{t('Meta ads')}</span><b>{currencySymbol()} {data.metaBudget}{t('/day')} · {t('{n} days', { n: data.metaDuration })} · {t('launches automatically')}</b></li>
           {data.metaCountry && <li><span>{t('Hiring area')}</span><b>{data.metaCity.trim() ? `${data.metaCity.trim()} + ${data.metaRadius} km, ` : t('All of ')}{data.metaCountry}</b></li>}
           <li><span>{t('Channels')}</span>{channels.length > 0 ? <div className="ob-summary-logos">{channels.map((channel) => <img key={channel.name} src={channel.src} alt={channel.name} />)}</div> : <b>{t('Add these in Settings')}</b>}</li>
           {(data.role === 'Agency' || data.role === 'Freelancer') && <li><span>{t('Workspace')}</span><b>{data.workspaceName || t('Personal workspace')} · {data.invites.length ? t('{n} members', { n: data.invites.length + 1 }) : t('1 member')}</b></li>}
@@ -710,13 +742,13 @@ function CompleteStep({ data, onBack, onDashboard, busy, error }) {
 }
 
 function ProgressRail({ step, role }) {
-  const sequence = (role === 'Agency' || role === 'Freelancer') ? [1, 2, 3, 4, 5, 6, 7, 8] : [1, 2, 3, 4, 5, 6, 8]
+  const sequence = (role === 'Agency' || role === 'Freelancer') ? [1, 2, 3, 4, 5, 6, 7, 8, 9] : [1, 2, 3, 4, 5, 6, 7, 9]
   const active = Math.max(0, sequence.indexOf(step))
   return (
     <aside className="ob-progress-rail">
       <div className="ob-progress-count"><span>{String(active + 1).padStart(2, '0')}</span><i>/</i><em>{String(sequence.length).padStart(2, '0')}</em></div>
       <div className="ob-progress-bars">{sequence.map((screen, index) => <span key={screen} className={index <= active ? 'active' : ''}><i /></span>)}</div>
-      <p>{step === 8 ? t('Your setup is complete.') : t('Your progress is saved automatically.')}</p>
+      <p>{step === 9 ? t('Your setup is complete.') : t('Your progress is saved automatically.')}</p>
     </aside>
   )
 }
@@ -747,7 +779,9 @@ function initialData(account) {
     metaCountry: DEFAULT_COUNTRY,
     metaCity: 'Schwyz',
     metaRadius: '40',
-    reviewMode: true,
+    logoPosition: 'top-right',
+    logoSize: 'Medium',
+    logoOnPosts: true,
     connected: [],
     workspaceName: '',
     invites: [],
@@ -780,12 +814,12 @@ function OnboardingFlow({ initialView, account, setAccount, onNavigate, theme, o
         providers: state.account?.providers || [],
       }))
       if (params.get('social')) {
-        setStep(6)
+        setStep(7)
         setNotice(params.get('social') === 'error' ? { type: 'error', message: params.get('message') || t('The connection did not complete.') } : { type: 'success' })
       } else if (params.get('linked')) {
         setStep(1)
       } else {
-        setStep(state.completed ? 8 : Math.min(8, Math.max(1, state.step || 1)))
+        setStep(state.completed ? 9 : Math.min(9, Math.max(1, state.step || 1)))
       }
       if (params.get('social') || params.get('linked')) window.history.replaceState({}, '', `${window.location.pathname}?view=onboarding`)
       setLoaded(true)
@@ -822,7 +856,7 @@ function OnboardingFlow({ initialView, account, setAccount, onNavigate, theme, o
   }
   const next = async (snapshot) => {
     const current = snapshot && snapshot.businessName !== undefined ? snapshot : data
-    const target = step === 6 && !agencyFlow ? 8 : Math.min(step + 1, 8)
+    const target = step === 7 && !agencyFlow ? 9 : Math.min(step + 1, 9)
     if (await persist(target, current)) setStep(target)
   }
   const back = () => {
@@ -830,7 +864,7 @@ function OnboardingFlow({ initialView, account, setAccount, onNavigate, theme, o
       onNavigate('home')
       return
     }
-    setStep((current) => current === 8 && !agencyFlow ? 6 : Math.max(current - 1, 1))
+    setStep((current) => current === 9 && !agencyFlow ? 7 : Math.max(current - 1, 1))
   }
   const finish = async () => {
     setFinishing(true)
@@ -861,8 +895,8 @@ function OnboardingFlow({ initialView, account, setAccount, onNavigate, theme, o
       <div className="ob-onboarding-wrap">
         <aside className="ob-side-note">
           <span>{t('MARKETEER / SETUP')}</span>
-          <p>{step === 8 ? t('Ready when you are.') : t('A better campaign starts with a little context.')}</p>
-          <div><i>✦</i><small>{step === 4 ? t('Your brand settings guide every AI-generated ad and post.') : step === 5 ? t('These defaults power both automatic pipelines.') : step === 6 ? t('Connect once, then publish everywhere from one place.') : t('About 2 minutes to your first AI-powered workspace.')}</small></div>
+          <p>{step === 9 ? t('Ready when you are.') : t('A better campaign starts with a little context.')}</p>
+          <div><i>✦</i><small>{step === 4 ? t('Your brand settings guide every AI-generated ad and post.') : step === 5 ? t('Your logo goes on every post the AI creates.') : step === 6 ? t('These defaults power both automatic pipelines.') : step === 7 ? t('Connect once, then publish everywhere from one place.') : t('About 2 minutes to your first AI-powered workspace.')}</small></div>
         </aside>
         <div className="ob-glass ob-flow-card" key={step}>
           <div className="ob-card-glint" />
@@ -871,11 +905,12 @@ function OnboardingFlow({ initialView, account, setAccount, onNavigate, theme, o
             {step === 2 && <BusinessStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
             {step === 3 && <GoalsStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
             {step === 4 && <BrandStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
-            {step === 5 && <AutomationStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
-            {step === 6 && <ConnectStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} notice={notice} />}
-            {step === 7 && <WorkspaceStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
-            {step === 8 && <CompleteStep data={data} onBack={back} onDashboard={finish} busy={finishing} error={error} />}
-            {error && step !== 8 && <p className="ob-form-error" role="alert">{error}</p>}
+            {step === 5 && <LogoStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
+            {step === 6 && <AutomationStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
+            {step === 7 && <ConnectStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} notice={notice} />}
+            {step === 8 && <WorkspaceStep data={data} setData={setData} onBack={back} onContinue={next} busy={saving} />}
+            {step === 9 && <CompleteStep data={data} onBack={back} onDashboard={finish} busy={finishing} error={error} />}
+            {error && step !== 9 && <p className="ob-form-error" role="alert">{error}</p>}
           </>}
         </div>
       </div>
