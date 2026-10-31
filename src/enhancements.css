@@ -408,3 +408,5 @@ button.db-vacancy-title:hover b { text-decoration: underline; }
 .db-vacancy-table td > small { display: block; margin-top: 4px; color: var(--db-copy-faint); font-size: 11.5px; }
 .db-vacancy-import .db-text-link, .db-vacancy-detail .db-text-link { color: var(--db-blue); font-size: 12.5px; }
 .db-vacancy-import .db-text-link:disabled { opacity: .5; }
+.db-vacancy-table td > small.db-ai-fixed { display: flex; max-width: 520px; align-items: flex-start; gap: 5px; color: var(--db-blue); line-height: 1.45; }
+.db-vacancy-table td > small.db-ai-fixed svg { flex: 0 0 auto; margin-top: 2px; }

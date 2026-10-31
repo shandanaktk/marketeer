@@ -1454,4 +1454,6 @@ export default {
   'on every post · {where}': 'auf jedem Beitrag · {where}',
   'not added to posts': 'nicht auf Beiträgen',
   'Add it in the Knowledge Base': 'In der Knowledge Base hinzufügen',
+  'Fix it in Meta — the AI retries automatically at {when}.': 'Beheben Sie es in Meta – die KI versucht es automatisch erneut um {when}.',
+  'The AI fixed what Meta refused: {list}': 'Die KI hat behoben, was Meta abgelehnt hat: {list}',
 }
