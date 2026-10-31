@@ -1455,5 +1455,10 @@ export default {
   'not added to posts': 'nicht auf Beiträgen',
   'Add it in the Knowledge Base': 'In der Knowledge Base hinzufügen',
   'Fix it in Meta — the AI retries automatically at {when}.': 'Beheben Sie es in Meta – die KI versucht es automatisch erneut um {when}.',
+  'needs you': 'braucht Sie',
+  'Needs one step in Meta': 'Ein Schritt in Meta nötig',
+  'AI retrying the launch': 'KI startet erneut',
+  'Only this step needs you; the AI launches by itself once it is done (next check {when}).': 'Nur dieser Schritt braucht Sie; danach startet die KI von selbst (nächste Prüfung {when}).',
+  'The AI is still fixing what Meta refused — next try {when}.': 'Die KI behebt noch, was Meta abgelehnt hat – nächster Versuch {when}.',
   'The AI fixed what Meta refused: {list}': 'Die KI hat behoben, was Meta abgelehnt hat: {list}',
 }

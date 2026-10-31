@@ -72,7 +72,7 @@ function CampaignRow({ vacancy, onRetry, onRelaunch, busy }) {
       <span className="db-review-meta"><Badge tone={drafting ? 'blue' : 'orange'}>{drafting ? t('Building & launching') : t('Needs attention')}</Badge>{vacancy.location}</span>
       <b>{vacancy.title}</b>
       <p>{drafting ? t('The AI is building the campaign · {step}', { step: t(draft.step_label || 'Starting') }) : draft.error || t('The campaign is generated and ready to launch.')}</p>
-      {!drafting && vacancy.launch_retry_at && <small className="db-helper">{t('Fix it in Meta — the AI retries automatically at {when}.', { when: formatDateTime(vacancy.launch_retry_at) })}</small>}
+      {!drafting && vacancy.launch_retry_at && <small className="db-helper">{t(vacancy.launch_needs_person ? 'Only this step needs you; the AI launches by itself once it is done (next check {when}).' : 'The AI is still fixing what Meta refused — next try {when}.', { when: formatDateTime(vacancy.launch_retry_at) })}</small>}
       {drafting && <div className="db-progress"><i style={{ width: `${draft.percent || 8}%` }} /></div>}
     </div>
     <div className="db-review-actions">
