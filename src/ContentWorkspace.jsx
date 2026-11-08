@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { formatDate, t, weekdayShort } from './i18n.js'
+import { formatDate, stepLabel, t, weekdayShort } from './i18n.js'
 import {
   approvePost, deletePost, fixPrompt, generateContent, getCampaignTable, getChannels, getKnowledge, getSettings, isoDay, listPosts,
   money, newBackground, publishPost, renderCreative, rewriteCaption, savePost, suggestHashtags, toPostRecord, uploadMedia, useResource,
@@ -36,6 +36,16 @@ function AssetRow({ asset, onChange, onRemove }) {
   )
 }
 
+// Resolves once the browser has the picture, so the preview never flashes an empty or old frame.
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(url)
+    image.onerror = () => reject(new Error(t('The new background could not be loaded. The current one is kept.')))
+    image.src = url
+  })
+}
+
 function DesignEditor({ variant, format, onClose, onSave }) {
   const [theme, setTheme] = useState(variant.theme || '')
   const [palette, setPalette] = useState(variant.palette || 'lime')
@@ -43,11 +53,25 @@ function DesignEditor({ variant, format, onClose, onSave }) {
   const [size, setSize] = useState(variant.design?.size || 64)
   const [align, setAlign] = useState(variant.design?.align || 'Left')
   const [base, setBase] = useState(variant.base_image || '')
+  const [baseId, setBaseId] = useState('')
+  const [variation, setVariation] = useState(null)
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
+  // Every click asks for a new variation; the preview swaps only once the new picture has loaded.
+  // A missing, failed or identical result keeps the current background and says so.
   const regenerate = async () => {
     setBusy('background'); setError('')
-    try { setBase((await newBackground({ palette, format, theme })).base_image) } catch (failure) { setError(failure.message) } finally { setBusy('') }
+    try {
+      const result = await newBackground({ palette, format, theme, previous: baseId || base || null, variation })
+      if (!result?.base_image) throw new Error(t('No new background came back. The current one is kept.'))
+      if (result.base_image === base || (result.asset_id && result.asset_id === baseId)) throw new Error(t('The new background was identical to the current one. The current one is kept — try again.'))
+      await loadImage(result.base_image)
+      setBase(result.base_image); setBaseId(result.asset_id || ''); setVariation(result.variation ?? null)
+    } catch (failure) {
+      setError(failure.message || t('The background could not be regenerated. The current one is kept.'))
+    } finally {
+      setBusy('')
+    }
   }
   const apply = async () => {
     setBusy('apply'); setError('')
@@ -63,7 +87,7 @@ function DesignEditor({ variant, format, onClose, onSave }) {
   return (
     <Modal title={t('Edit generated creative')} onClose={onClose} wide footer={<><Button variant="ghost" onClick={onClose}>{t('Cancel')}</Button><Button icon="check" disabled={Boolean(busy)} onClick={apply}>{busy === 'apply' ? t('Applying…') : t('Apply changes')}</Button></>}>
       <div className="db-design-editor">
-        <CreativeArt palette={palette} theme={theme} imageUrl={base || undefined} />
+        <CreativeArt palette={palette} theme={theme} imageUrl={base || undefined} loadingLabel={busy === 'background' ? t('Painting a new scene…') : ''} />
         <div className="db-design-controls">
           <span className="db-eyebrow"><Icon name="edit" size={14} /> {t('Creative controls')}</span>
           <Field label={t('On-image message')} hint={t('Separate the two lines with “ / ”.')}><textarea rows="3" value={theme} onChange={(event) => setTheme(event.target.value.toUpperCase())} /></Field>
@@ -166,7 +190,7 @@ export function ContentCreate({ notify, onGo, draft = null }) {
     try {
       const result = await generateContent(
         { prompt, format, platforms, assets: assets.filter((asset) => asset.id).map(({ id, role, note }) => ({ id, role, note })) },
-        (status) => setProgress({ percent: status.percent, label: status.status === 'running' ? `${status.step_label}…` : 'Ready' }),
+        (status) => setProgress({ percent: status.percent, label: status.status === 'running' ? `${stepLabel(status.step_label)}…` : t('Ready') }),
       )
       setVariants(result.variants)
       setSuggestions(result.suggested_hashtags || [])

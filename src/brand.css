@@ -563,6 +563,8 @@ html[data-theme='light'] .ob-onboarding-page :is(.ob-choice-card.selected>em,.ob
 .db-creative-art::before { background: linear-gradient(155deg, #b3dc1f 0%, #111 78%); }
 .db-creative-art.blue::before { background: linear-gradient(155deg, #00b2ff, #111 82%); }
 .db-creative-art.violet::before { background: linear-gradient(155deg, #b3dc1f, #111 72%); }
+/* A generated image is shown, not covered: no colour plate when the creative has a photo. */
+.db-creative-art.has-image::before { content: none; display: none; background: none; }
 .db-optimize-page { --db-lime: #b3dc1f; --db-blue: #00b2ff; }
 .db-optimize-page .db-mode-switch button.active,
 .db-optimize-page .db-scope-bar > button.active,

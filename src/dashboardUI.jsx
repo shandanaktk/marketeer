@@ -89,12 +89,17 @@ export function Toggle({ checked, onChange, label, hint }) {
   return <button type="button" className={`db-toggle-row ${checked ? 'on' : ''}`} onClick={() => onChange(!checked)}><span className="db-toggle"><i /></span><span><b>{label}</b>{hint && <small>{hint}</small>}</span></button>
 }
 
-export function CreativeArt({ palette = 'lime', theme, compact = false, imageUrl }) {
+// A generated photo is a real image layer under a light scrim (`has-image` removes the colour plate in every
+// stylesheet); a CSS background here was painted under the plate and stayed invisible.
+export function CreativeArt({ palette = 'lime', theme, compact = false, imageUrl, loadingLabel }) {
   const brand = useBrand()
   const [first, ...rest] = (theme || t('YOUR / MESSAGE')).split(' / ')
   return (
-    <div className={`db-creative-art ${palette} ${compact ? 'compact' : ''}`} style={imageUrl ? { backgroundImage: `linear-gradient(180deg, transparent, rgba(5,5,5,.45)), url(${imageUrl})` } : undefined}>
-      <span>{brand.name.toUpperCase()} / {new Date().getFullYear()}</span><i className="orbit one" /><i className="orbit two" /><b>{first}<em>{rest.join(' ') || t('CREATE')}</em></b><small>{t('MADE TO MOVE')}</small>
+    <div className={`db-creative-art ${palette} ${compact ? 'compact' : ''} ${imageUrl ? 'has-image' : ''} ${loadingLabel ? 'is-loading' : ''}`}>
+      {imageUrl && <img className="db-creative-photo" src={imageUrl} alt="" />}
+      {imageUrl && <i className="db-creative-scrim" aria-hidden="true" />}
+      <span>{brand.name.toUpperCase()} / {new Date().getFullYear()}</span>{!imageUrl && <><i className="orbit one" /><i className="orbit two" /></>}<b>{first}<em>{rest.join(' ') || t('CREATE')}</em></b><small>{t('MADE TO MOVE')}</small>
+      {loadingLabel && <p className="db-creative-loading" role="status"><i />{loadingLabel}</p>}
     </div>
   )
 }

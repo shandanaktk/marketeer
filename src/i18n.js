@@ -46,6 +46,23 @@ export function t(key, vars) {
   return interpolate(text, vars)
 }
 
+// Progress text the API sends (`step_label`): known labels are translated, counted ones
+// ("Created ad 2 of 6") keep their numbers. A raw English status is never shown as German progress.
+const STEP_PATTERNS = [
+  [/^Created ad (\d+) of (\d+)$/, (m) => t('Created ad {i} of {n}', { i: m[1], n: m[2] })],
+  [/^Creating (\d+) ads$/, (m) => t('Creating {n} ads…', { n: m[1] }).replace(/…$/, '')],
+  [/^Designed (\d+) of (\d+)$/, (m) => t('Designed {done} of {n}', { done: m[1], n: m[2] })],
+]
+export function stepLabel(label) {
+  if (label === undefined || label === null || label === '') return label
+  const text = String(label).trim().replace(/…$/, '')
+  for (const [pattern, render] of STEP_PATTERNS) {
+    const match = text.match(pattern)
+    if (match) return render(match)
+  }
+  return t(text) === text ? t(`${text}…`).replace(/…$/, '') : t(text)
+}
+
 // Plural helper: t2(count, 'one lead', '{n} leads').
 export const tn = (count, one, many) => t(count === 1 ? one : many, { n: formatNumber(count) })
 

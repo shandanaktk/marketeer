@@ -141,6 +141,8 @@ html[data-theme='light'] .db-filter-pills button.active{color:#fffaff;background
 .db-creative-art.violet::before{background:radial-gradient(circle at 76% 18%,rgba(62,146,204,.65),transparent 20%),linear-gradient(155deg,#3e92cc,#0a2463 72%)}
 .db-creative-art.orange::before{background:radial-gradient(circle at 78% 16%,rgba(255,250,255,.42),transparent 18%),linear-gradient(155deg,#d8315b,#5a1630 76%)}
 .db-creative-art.pink::before{background:radial-gradient(circle at 74% 16%,rgba(255,250,255,.48),transparent 20%),linear-gradient(155deg,#d8315b,#0a2463 82%)}
+/* A generated image is shown, not covered: no colour plate when the creative has a photo. */
+.db-creative-art.has-image::before { content: none; display: none; background: none; }
 .db-creative-art.blue>b em,.db-creative-art.violet>b em,.db-creative-art.orange>b em,.db-creative-art.pink>b em{color:#fffaff}
 html[data-theme] .ob-progress-count span{color:var(--app-ink)}
 html[data-theme] .ob-rule-platforms button.selected{color:var(--app-ink)}
