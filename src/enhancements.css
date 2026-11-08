@@ -410,3 +410,37 @@ button.db-vacancy-title:hover b { text-decoration: underline; }
 .db-vacancy-import .db-text-link:disabled { opacity: .5; }
 .db-vacancy-table td > small.db-ai-fixed { display: flex; max-width: 520px; align-items: flex-start; gap: 5px; color: var(--db-blue); line-height: 1.45; }
 .db-vacancy-table td > small.db-ai-fixed svg { flex: 0 0 auto; margin-top: 2px; }
+
+/* ── Campaign templates (Knowledge Base) and the template choice on import ── */
+.db-template-editor { display: grid; gap: 12px; }
+.db-template-list { display: grid; gap: 10px; }
+.db-template-card { border: 1px solid var(--db-stroke); border-radius: 12px; background: var(--db-panel-soft); }
+.db-template-card.open { border-color: rgba(62,146,204,.45); }
+.db-template-card > header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; }
+.db-template-toggle { display: flex; flex: 1; min-width: 0; align-items: center; gap: 10px; padding: 0; border: 0; color: var(--db-copy); text-align: left; background: transparent; cursor: pointer; }
+.db-template-toggle > span { display: grid; flex: 0 0 34px; width: 34px; height: 34px; place-items: center; border-radius: 10px; color: var(--db-blue); background: rgba(62,146,204,.14); }
+.db-template-toggle p { display: grid; min-width: 0; gap: 2px; margin: 0; }
+.db-template-toggle b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.db-template-toggle small { color: var(--db-copy-faint); font-size: 12px; }
+.db-template-card .db-icon-button { display: grid; width: 32px; height: 32px; place-items: center; border: 0; border-radius: 8px; color: var(--db-copy-faint); background: transparent; cursor: pointer; }
+.db-template-card .db-icon-button:hover { color: var(--db-copy); background: rgba(var(--app-contrast-rgb),.06); }
+.db-template-body { display: grid; gap: 14px; padding: 4px 14px 16px; border-top: 1px solid var(--db-stroke); }
+.db-template-body h4 { margin: 8px 0 0; color: var(--db-copy-soft); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+.db-template-choice { display: grid; gap: 8px; margin-top: 14px; padding: 12px; border: 1px solid var(--db-stroke); border-radius: 12px; }
+.db-template-choice.highlight { border-color: rgba(216,49,91,.55); box-shadow: 0 0 0 3px rgba(216,49,91,.12); }
+.db-template-choice > span { color: var(--db-copy-soft); font-size: 12px; font-weight: 700; }
+.db-template-choice > div { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.db-template-choice button { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid var(--db-stroke); border-radius: 10px; color: var(--db-copy); text-align: left; background: var(--db-panel-soft); cursor: pointer; }
+.db-template-choice button.active { border-color: rgba(62,146,204,.6); background: rgba(62,146,204,.13); }
+.db-template-choice button small { color: var(--db-copy-faint); font-size: 11.5px; }
+.db-template-choice.empty { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--db-copy-soft); }
+.db-template-choice.empty p { flex: 1; min-width: 200px; margin: 0; font-size: 13px; }
+/* The workspace logo: one file, edited on Identity, Look and in brand settings. */
+.db-logo-upload { display: flex; align-items: center; gap: 12px; }
+.db-logo-upload > div { display: grid; flex: 1; min-width: 0; gap: 2px; }
+.db-logo-upload > div small { color: var(--db-copy-faint); font-size: 11.5px; }
+.db-logo-thumb { display: grid; flex: 0 0 46px; width: 46px; height: 46px; place-items: center; overflow: hidden; border: 1px solid var(--db-stroke); border-radius: 10px; color: var(--db-copy-faint); background: #fff; }
+.db-logo-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.db-logo-upload.compact > div small:first-of-type { display: none; }
+.db-kb-name { display: flex; align-items: center; gap: 12px; }
+.db-kb-name-logo { width: auto; max-width: 120px; height: 40px; padding: 4px; border-radius: 8px; object-fit: contain; background: #fff; }

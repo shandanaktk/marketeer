@@ -17,7 +17,114 @@ const KNOWLEDGE_TABS = [
   ['visual', 'Look'],
   ['posting', 'Publishing'],
   ['metaRules', 'Ads'],
+  ['templates', 'Campaign templates'],
 ]
+
+const MARKET_STYLES = [
+  ['swiss', 'Swiss Standard German (Sie, ss, CHF)'],
+  ['germany', 'German as written in Germany'],
+  ['english', 'English'],
+  ['custom', 'Custom (describe below)'],
+]
+const marketStyleLabel = (id) => t((MARKET_STYLES.find(([key]) => key === id) || MARKET_STYLES[0])[1])
+
+function newTemplate(name) {
+  return {
+    id: `tpl-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, name, suggested: false, tone: '', structure: '',
+    anonymisation: { hideEmployer: true, hideSite: false, hideSalary: false, identifiers: '', employerPlaceholder: '', sitePlaceholder: '' },
+    wording: { required: '', forbidden: '', preferred: '' }, marketStyle: 'swiss', marketNotes: '',
+  }
+}
+
+// What a template hides, in one line: "Hides employer, workplace".
+function anonymisationSummary(template) {
+  const hidden = [['hideEmployer', 'employer'], ['hideSite', 'workplace'], ['hideSalary', 'salary']].filter(([key]) => template.anonymisation?.[key]).map(([, label]) => t(label))
+  return hidden.length ? t('Hides {list}', { list: hidden.join(', ') }) : t('Nothing hidden')
+}
+
+function CampaignTemplatesEditor({ templates, onChange }) {
+  const [openId, setOpenId] = useState(templates.find((item) => item.suggested)?.id || templates[0]?.id || '')
+  const [newName, setNewName] = useState('')
+  const setOne = (id, patch) => onChange(templates.map((item) => (item.id === id ? { ...item, ...patch } : item)))
+  const setPart = (id, part, key, value) => onChange(templates.map((item) => (item.id === id ? { ...item, [part]: { ...item[part], [key]: value } } : item)))
+  const add = () => {
+    if (!newName.trim()) return
+    const item = { ...newTemplate(newName.trim()), suggested: templates.length === 0 }
+    onChange([...templates, item]); setOpenId(item.id); setNewName('')
+  }
+  const duplicate = (item) => {
+    const copy = { ...JSON.parse(JSON.stringify(item)), id: newTemplate('').id, name: t('{name} (copy)', { name: item.name }).slice(0, 80), suggested: false }
+    onChange([...templates, copy]); setOpenId(copy.id)
+  }
+  const remove = (item) => {
+    const rest = templates.filter((entry) => entry.id !== item.id)
+    // The suggested template can go; another one becomes the suggestion.
+    onChange(item.suggested && rest.length ? rest.map((entry, index) => ({ ...entry, suggested: index === 0 })) : rest)
+  }
+  const suggest = (item) => onChange(templates.map((entry) => ({ ...entry, suggested: entry.id === item.id })))
+
+  return <div className="db-template-editor">
+    {templates.length === 0 && <p className="db-helper">{t('No templates yet. Add one — every vacancy import asks for a template before the campaign is generated.')}</p>}
+    <div className="db-template-list">{templates.map((item) => {
+      const open = openId === item.id
+      return <article className={`db-template-card ${open ? 'open' : ''}`} key={item.id}>
+        <header>
+          <button type="button" className="db-template-toggle" onClick={() => setOpenId(open ? '' : item.id)} aria-expanded={open}>
+            <span><Icon name="file" size={16} /></span>
+            <p><b>{item.name || t('Untitled template')}</b><small>{anonymisationSummary(item)} · {marketStyleLabel(item.marketStyle)}</small></p>
+          </button>
+          {item.suggested ? <Badge tone="blue">{t('Suggested')}</Badge> : <button type="button" className="db-text-link" onClick={() => suggest(item)}>{t('Make suggested')}</button>}
+          <button type="button" className="db-icon-button" onClick={() => duplicate(item)} aria-label={t('Duplicate {name}', { name: item.name })} title={t('Duplicate')}><Icon name="copy" size={15} /></button>
+          <button type="button" className="db-icon-button" onClick={() => remove(item)} aria-label={t('Delete {name}', { name: item.name })} title={t('Delete')}><Icon name="trash" size={15} /></button>
+        </header>
+        {open && <div className="db-template-body">
+          <div className="db-form-grid two">
+            <Field label={t('Name')} hint={t('Shown when a vacancy is imported, e.g. “Anonymised skilled trades”.')}><input value={item.name} maxLength={80} onChange={(event) => setOne(item.id, { name: event.target.value })} /></Field>
+            <Field label={t('Market style')}><select value={item.marketStyle} onChange={(event) => setOne(item.id, { marketStyle: event.target.value })}>{MARKET_STYLES.map(([id, label]) => <option value={id} key={id}>{t(label)}</option>)}</select></Field>
+            <Field label={t('Tone')} className="span-two" hint={t('How the ad should sound. Replaces the profile’s tone for these campaigns.')}><input value={item.tone} onChange={(event) => setOne(item.id, { tone: event.target.value })} placeholder={t('Direct, appreciative, formal “Sie”')} /></Field>
+            <Field label={t('Structure')} className="span-two" hint={t('Order and length of primary text, headline, description and call to action.')}><textarea rows="3" value={item.structure} onChange={(event) => setOne(item.id, { structure: event.target.value })} placeholder={t('Primary text: one opening sentence, three bullet points with tasks, one sentence call to action. Headline: up to 6 words.')} /></Field>
+            <Field label={t('Market style notes')} className="span-two" hint={t('Regional wording or anything the style above should add.')}><input value={item.marketNotes} onChange={(event) => setOne(item.id, { marketNotes: event.target.value })} placeholder={t('“Pensum” instead of “Arbeitszeit”, mention CHF, Central Switzerland')} /></Field>
+          </div>
+          <h4>{t('Anonymisation')}</h4>
+          <div className="db-settings-toggles">
+            <Toggle checked={item.anonymisation.hideEmployer} onChange={(value) => setPart(item.id, 'anonymisation', 'hideEmployer', value)} label={t('Hide the employer')} hint={t('The hiring company is never named, even if the vacancy names it.')} />
+            <Toggle checked={item.anonymisation.hideSite} onChange={(value) => setPart(item.id, 'anonymisation', 'hideSite', value)} label={t('Hide the exact workplace')} hint={t('No street, site or building — only the region.')} />
+            <Toggle checked={item.anonymisation.hideSalary} onChange={(value) => setPart(item.id, 'anonymisation', 'hideSalary', value)} label={t('Hide the salary')} hint={t('No pay figures in the ad, even if the vacancy has them.')} />
+          </div>
+          <div className="db-form-grid two">
+            <Field label={t('Employer placeholder')}><input value={item.anonymisation.employerPlaceholder} onChange={(event) => setPart(item.id, 'anonymisation', 'employerPlaceholder', event.target.value)} placeholder={t('an established industrial company')} /></Field>
+            <Field label={t('Workplace placeholder')}><input value={item.anonymisation.sitePlaceholder} onChange={(event) => setPart(item.id, 'anonymisation', 'sitePlaceholder', event.target.value)} placeholder={t('in the Schwyz region')} /></Field>
+            <Field label={t('Other names to hide')} className="span-two" hint={t('One per line: brands, products, project names, places.')}><textarea rows="2" value={item.anonymisation.identifiers} onChange={(event) => setPart(item.id, 'anonymisation', 'identifiers', event.target.value)} /></Field>
+          </div>
+          <h4>{t('Wording')}</h4>
+          <div className="db-form-grid two">
+            <Field label={t('Must appear')} hint={t('One phrase per line. Wins over “Always include”.')}><textarea rows="3" value={item.wording.required} onChange={(event) => setPart(item.id, 'wording', 'required', event.target.value)} placeholder={t('Jetzt bewerben')} /></Field>
+            <Field label={t('Must not appear')} hint={t('One phrase per line. Wins over “Never say”.')}><textarea rows="3" value={item.wording.forbidden} onChange={(event) => setPart(item.id, 'wording', 'forbidden', event.target.value)} placeholder={t('Traumjob')} /></Field>
+            <Field label={t('Preferred terms')} className="span-two"><input value={item.wording.preferred} onChange={(event) => setPart(item.id, 'wording', 'preferred', event.target.value)} placeholder={t('“Mitarbeitende” instead of “Mitarbeiter”')} /></Field>
+          </div>
+        </div>}
+      </article>
+    })}</div>
+    <div className="db-inline-add"><input value={newName} onChange={(event) => setNewName(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && (event.preventDefault(), add())} placeholder={t('Name of a new template, e.g. “Anonymised skilled trades”')} maxLength={80} /><Button icon="plus" onClick={add}>{t('Add template')}</Button></div>
+  </div>
+}
+
+// The workspace logo: one stored file, edited here, on the Look tab and in brand settings.
+export function LogoUpload({ value, onChange, compact = false }) {
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
+  const choose = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setUploading(true); setError('')
+    try { onChange((await uploadMedia(file)).url) } catch (failure) { setError(failure.message) } finally { setUploading(false); event.target.value = '' }
+  }
+  return <div className={`db-logo-upload ${compact ? 'compact' : ''}`}>
+    <span className="db-logo-thumb">{value ? <img src={value} alt={t('Your logo')} /> : <Icon name="image" size={18} />}</span>
+    <div><b>{value ? t('Your logo') : t('No logo yet')}</b><small>{t('Placed on every generated campaign and content image.')}</small>{error && <small className="db-warning">{error}</small>}</div>
+    <label className="db-file-button"><input type="file" accept="image/png,image/jpeg,image/webp" onChange={choose} disabled={uploading} />{uploading ? t('Uploading…') : value ? t('Replace logo') : t('Upload logo')}</label>
+  </div>
+}
 
 function knowledgeScore(data) {
   const values = [
@@ -55,7 +162,7 @@ function KnowledgePreview({ data, savedAt }) {
     <article className="db-card db-kb-cover">
       <div>
         <span className="db-eyebrow"><Icon name="spark" size={14} /> {savedWhen(savedAt)}</span>
-        <h2>{data.brand.name || t('Your brand')}</h2>
+        <h2 className="db-kb-name">{data.brand.logo && <img className="db-kb-name-logo" src={data.brand.logo} alt={t('Your logo')} />}{data.brand.name || t('Your brand')}</h2>
         {data.brand.tagline && <p className="db-kb-tagline">{data.brand.tagline}</p>}
         <div className="db-kb-meta">{[data.brand.industry, data.brand.location, data.brand.website].filter(Boolean).map((item) => <span key={item}>{item}</span>)}</div>
       </div>
@@ -87,9 +194,10 @@ function KnowledgePreview({ data, savedAt }) {
       <article className="db-card db-kb-publish">
         <small>{t('Meta ads')}</small>
         <strong>{money(data.metaRules.dailyBudget, undefined, 0)}{t('/day')} · {t('{n} days', { n: data.metaRules.duration })}</strong>
-        <ul>{[t(data.metaRules.objective), data.metaRules.city ? `${data.metaRules.city} + ${data.metaRules.radius} km` : '', data.metaRules.countries, data.metaRules.leadForm, data.metaRules.category, data.visual.imageStyle, data.visual.typeStyle, t('Launches automatically'), data.metaRules.optimize ? t('Budget pacing on') : ''].filter(Boolean).map((item) => <li key={item}>{item}</li>)}</ul>
+        <ul>{[t(data.metaRules.objective), data.metaRules.city ? `${data.metaRules.city} + ${data.metaRules.radius} km` : '', data.metaRules.countries, data.metaRules.leadForm, data.metaRules.category, data.visual.imageStyle, data.visual.typeStyle, t('Created paused — nothing spends until you activate it'), data.metaRules.optimize ? t('Budget pacing on') : ''].filter(Boolean).map((item) => <li key={item}>{item}</li>)}</ul>
       </article>
     </div>
+    <section className="db-kb-block"><header><h3>{t('Campaign templates')}</h3></header>{(data.campaignTemplates || []).length ? <div className="db-kb-offers">{data.campaignTemplates.map((item) => <article className="db-card" key={item.id}><b>{item.name}</b>{item.suggested && <em>{t('Suggested')}</em>}<p>{anonymisationSummary(item)} · {marketStyleLabel(item.marketStyle)}</p></article>)}</div> : <p className="db-helper">{t('No campaign templates yet. Vacancy imports need one — add it under Edit knowledge → Campaign templates.')}</p>}</section>
   </div>
 }
 
@@ -144,6 +252,7 @@ function KnowledgeEditor({ initial, notify, onSaved }) {
   }
   const save = async () => {
     if (!draft.brand.name.trim()) { notify(t('Add a brand name before saving.'), 'error'); setTab('brand'); return }
+    if ((draft.campaignTemplates || []).some((item) => !item.name.trim())) { notify(t('Give every campaign template a name before saving.'), 'error'); setTab('templates'); return }
     setSaving(true)
     try {
       const result = await saveKnowledge(draft)
@@ -166,7 +275,7 @@ function KnowledgeEditor({ initial, notify, onSaved }) {
     {mode === 'preview' ? <KnowledgePreview data={data} savedAt={savedAt} /> : <div className="db-srs-layout">
       <nav className="db-card db-srs-tabs" aria-label={t('Knowledge Base sections')}>{KNOWLEDGE_TABS.map(([id, label], index) => <button className={tab === id ? 'active' : ''} onClick={() => setTab(id)} key={id}><span>{String(index + 1).padStart(2, '0')}</span>{t(label)}<Icon name="arrow" size={14} /></button>)}</nav>
       <section className="db-card db-srs-editor">
-        {tab === 'brand' && <><SectionHeading icon="target" title={t('Identity')} copy={t('The facts a stranger should be able to repeat after one look at your work.')} /><div className="db-form-grid two"><Field label={t('Brand name')}><input value={draft.brand.name} onChange={(event) => update('brand', 'name', event.target.value)} /></Field><Field label={t('Website')}><input value={draft.brand.website} onChange={(event) => update('brand', 'website', event.target.value)} /></Field><Field label={t('Tagline')} className="span-two"><input value={draft.brand.tagline} onChange={(event) => update('brand', 'tagline', event.target.value)} placeholder={t('One line people should remember')} /></Field><Field label={t('Industry')}><input value={draft.brand.industry} onChange={(event) => update('brand', 'industry', event.target.value)} /></Field><Field label={t('Based in')}><input value={draft.brand.location} onChange={(event) => update('brand', 'location', event.target.value)} /></Field><Field label={t('What you do')} className="span-two"><textarea rows="4" value={draft.brand.description} onChange={(event) => update('brand', 'description', event.target.value)} /></Field><Field label={t('Mission')}><textarea rows="4" value={draft.brand.mission} onChange={(event) => update('brand', 'mission', event.target.value)} /></Field><Field label={t('Origin story')}><textarea rows="4" value={draft.brand.story} onChange={(event) => update('brand', 'story', event.target.value)} /></Field></div></>}
+        {tab === 'brand' && <><SectionHeading icon="target" title={t('Identity')} copy={t('The facts a stranger should be able to repeat after one look at your work.')} /><div className="db-form-grid two"><Field label={t('Brand name')}><input value={draft.brand.name} onChange={(event) => update('brand', 'name', event.target.value)} /></Field><Field label={t('Logo')}><LogoUpload compact value={draft.brand.logo} onChange={(url) => update('brand', 'logo', url)} /></Field><Field label={t('Website')}><input value={draft.brand.website} onChange={(event) => update('brand', 'website', event.target.value)} /></Field><Field label={t('Tagline')} className="span-two"><input value={draft.brand.tagline} onChange={(event) => update('brand', 'tagline', event.target.value)} placeholder={t('One line people should remember')} /></Field><Field label={t('Industry')}><input value={draft.brand.industry} onChange={(event) => update('brand', 'industry', event.target.value)} /></Field><Field label={t('Based in')}><input value={draft.brand.location} onChange={(event) => update('brand', 'location', event.target.value)} /></Field><Field label={t('What you do')} className="span-two"><textarea rows="4" value={draft.brand.description} onChange={(event) => update('brand', 'description', event.target.value)} /></Field><Field label={t('Mission')}><textarea rows="4" value={draft.brand.mission} onChange={(event) => update('brand', 'mission', event.target.value)} /></Field><Field label={t('Origin story')}><textarea rows="4" value={draft.brand.story} onChange={(event) => update('brand', 'story', event.target.value)} /></Field></div></>}
         {tab === 'audience' && <><SectionHeading icon="leads" title={t('Audience')} copy={t('Who the work is for, and what they are already frustrated by.')} /><div className="db-form-grid two"><Field label={t('Primary audience')} className="span-two"><textarea rows="3" value={draft.audience.primary} onChange={(event) => update('audience', 'primary', event.target.value)} /></Field><Field label={t('Secondary audience')} className="span-two"><textarea rows="3" value={draft.audience.secondary} onChange={(event) => update('audience', 'secondary', event.target.value)} /></Field><Field label={t('Pains')}><textarea rows="4" value={draft.audience.pains} onChange={(event) => update('audience', 'pains', event.target.value)} /></Field><Field label={t('Markets')}><textarea rows="4" value={draft.audience.markets} onChange={(event) => update('audience', 'markets', event.target.value)} /></Field></div></>}
         {tab === 'voice' && <><SectionHeading icon="content" title={t('Voice')} copy={t('How the brand should sound when nobody from the team is in the room.')} /><div className="db-form-grid two"><Field label={t('Tone')}><input value={draft.voice.tone} onChange={(event) => update('voice', 'tone', event.target.value)} /></Field><Field label={t('Personality')}><input value={draft.voice.personality} onChange={(event) => update('voice', 'personality', event.target.value)} placeholder={t('Warm, precise, confident')} /></Field><Field label={t('Languages')} className="span-two"><input value={draft.voice.languages} onChange={(event) => update('voice', 'languages', event.target.value)} /></Field><Field label={t('A line that sounds like you')} className="span-two"><textarea rows="4" value={draft.voice.sample} onChange={(event) => update('voice', 'sample', event.target.value)} /></Field></div></>}
         {tab === 'offerings' && <><SectionHeading icon="folder" title={t('Offerings')} copy={t('Each product or service the work is allowed to talk about.')} /><div className="db-offering-list">{draft.offerings.map((item) => <article key={item.id}><span><Icon name="spark" size={16} /></span><div><input value={item.name} aria-label={t('Offering name')} onChange={(event) => setDraft((current) => ({ ...current, offerings: current.offerings.map((entry) => entry.id === item.id ? { ...entry, name: event.target.value } : entry) }))} /><input value={item.who || ''} aria-label={t('Who it is for')} placeholder={t('Who it is for')} onChange={(event) => setDraft((current) => ({ ...current, offerings: current.offerings.map((entry) => entry.id === item.id ? { ...entry, who: event.target.value } : entry) }))} /><textarea rows="2" aria-label={t('Offering detail')} value={item.detail} onChange={(event) => setDraft((current) => ({ ...current, offerings: current.offerings.map((entry) => entry.id === item.id ? { ...entry, detail: event.target.value } : entry) }))} /></div><button onClick={() => setDraft((current) => ({ ...current, offerings: current.offerings.filter((entry) => entry.id !== item.id) }))} aria-label={t('Remove {name}', { name: item.name })}><Icon name="trash" size={16} /></button></article>)}</div><div className="db-inline-add"><input value={newOffering} onChange={(event) => setNewOffering(event.target.value)} onKeyDown={(event) => event.key === 'Enter' && addOffering()} placeholder={t('Add another product or service')} /><Button icon="plus" onClick={addOffering}>{t('Add')}</Button></div></>}
@@ -174,21 +283,36 @@ function KnowledgeEditor({ initial, notify, onSaved }) {
         {tab === 'visual' && <><SectionHeading icon="image" title={t('Look')} copy={t('Color, photography, and type so generated visuals stay in the same family.')} /><div className="db-kb-colors">{draft.visual.colors.map((color, index) => <label key={`${color}-${index}`}><input type="color" value={color} aria-label={t('Brand color {n}', { n: index + 1 })} onChange={(event) => update('visual', 'colors', draft.visual.colors.map((entry, entryIndex) => entryIndex === index ? event.target.value.toUpperCase() : entry))} /><b>{color}</b>{draft.visual.colors.length > 1 && <button type="button" aria-label={t('Remove color {color}', { color })} onClick={() => update('visual', 'colors', draft.visual.colors.filter((_, entryIndex) => entryIndex !== index))}><Icon name="close" size={12} /></button>}</label>)}{draft.visual.colors.length < 6 && <button type="button" className="db-kb-add-color" onClick={() => update('visual', 'colors', [...draft.visual.colors, '#B3DC1F'])}><Icon name="plus" size={14} />{t('Add color')}</button>}</div><LogoSettings draft={draft} update={update} /><div className="db-form-grid two"><Field label={t('Photography')}><textarea rows="3" value={draft.visual.imageStyle} onChange={(event) => update('visual', 'imageStyle', event.target.value)} /></Field><Field label={t('Typography')}><textarea rows="3" value={draft.visual.typeStyle} onChange={(event) => update('visual', 'typeStyle', event.target.value)} /></Field></div></>}
         {tab === 'posting' && <><SectionHeading icon="calendar" title={t('Publishing')} copy={t('Where, how often, and in what rhythm the content should go out.')} /><div className="db-kb-platforms">{['Instagram', 'Facebook'].map((platform) => <button className={draft.posting.platforms.includes(platform) ? 'active' : ''} key={platform} onClick={() => update('posting', 'platforms', draft.posting.platforms.includes(platform) ? draft.posting.platforms.filter((item) => item !== platform) : [...draft.posting.platforms, platform])}><img src={`/social_logos/${platform.toLowerCase()}.png`} alt="" />{platform}<Icon name="check" size={14} /></button>)}</div><div className="db-form-grid two"><Field label={t('Frequency')}><select value={draft.posting.frequency} onChange={(event) => update('posting', 'frequency', event.target.value)}><option value="3 posts per week">{t('3 posts per week')}</option><option value="4 posts per week">{t('4 posts per week')}</option><option value="5 posts per week">{t('5 posts per week')}</option><option value="Daily">{t('Daily')}</option></select></Field><Field label={t('Timezone')}><input value={draft.posting.timezone} onChange={(event) => update('posting', 'timezone', event.target.value)} /></Field><Field label={t('Best window')}><input value={draft.posting.bestTimes} onChange={(event) => update('posting', 'bestTimes', event.target.value)} placeholder={t('Tuesday to Thursday, 5–7 PM')} /></Field><Field label={t('Hashtags')}><input value={draft.posting.hashtags} onChange={(event) => update('posting', 'hashtags', event.target.value)} /></Field><Field label={t('Content mix')} className="span-two"><textarea rows="3" value={draft.posting.mix} onChange={(event) => update('posting', 'mix', event.target.value)} /></Field></div><Toggle checked={draft.posting.autoPublish} onChange={(value) => update('posting', 'autoPublish', value)} label={t('Automatic publishing')} hint={t('Publish approved calendar items at the scheduled time.')} /></>}
         {tab === 'metaRules' && <><SectionHeading icon="ads" title={t('Ads')} copy={t('Defaults applied whenever a vacancy becomes a Meta campaign.')} /><div className="db-form-grid two"><Field label={t('Daily budget')}><span className="db-input-prefix"><b>{currencySymbol()}</b><input type="number" min="5" value={draft.metaRules.dailyBudget} onChange={(event) => update('metaRules', 'dailyBudget', Number(event.target.value))} /></span></Field><Field label={t('Default duration')}><select value={draft.metaRules.duration} onChange={(event) => update('metaRules', 'duration', Number(event.target.value))}><option value="14">{t('14 days')}</option><option value="21">{t('21 days')}</option><option value="30">{t('30 days')}</option></select></Field><Field label={t('Objective')}><select value={draft.metaRules.objective} onChange={(event) => update('metaRules', 'objective', event.target.value)}><option value="Lead generation">{t('Lead generation')}</option><option value="Traffic">{t('Traffic')}</option><option value="Awareness">{t('Awareness')}</option></select></Field><Field label={t('Lead form')}><select value={draft.metaRules.leadForm} onChange={(event) => update('metaRules', 'leadForm', event.target.value)}><option value="Higher intent">{t('Higher intent')}</option><option value="More volume">{t('More volume')}</option></select></Field><Field label={t('Countries')} className="span-two" hint={t('Where you hire. Vacancies that name their own country override this.')}><input value={draft.metaRules.countries} onChange={(event) => update('metaRules', 'countries', event.target.value)} placeholder={t('Switzerland, Germany')} /></Field><Field label={t('City')} hint={t('Optional — leave empty to target the whole country.')}><input value={draft.metaRules.city} onChange={(event) => update('metaRules', 'city', event.target.value)} placeholder={t('e.g. Schwyz')} /></Field><Field label={t('Radius around the city')}><select value={draft.metaRules.radius} disabled={!draft.metaRules.city.trim()} onChange={(event) => update('metaRules', 'radius', Number(event.target.value))}>{RADII.map((km) => <option value={km} key={km}>{km} km</option>)}</select></Field><Field label={t('Special ad category')}><input value={draft.metaRules.category} readOnly /></Field></div><div className="db-settings-toggles"><Toggle checked={draft.metaRules.optimize} onChange={(value) => update('metaRules', 'optimize', value)} label={t('Automatic budget pacing')} hint={t('Use the saved daily budget and delivery window automatically.')} /></div><div className="db-employment-note"><Icon name="info" size={18} /><p><b>{t('Employment category is locked on.')}</b> {t('Recruitment campaigns use Meta’s Employment special ad category and its required targeting limitations.')}</p></div></>}
+        {tab === 'templates' && <><SectionHeading icon="file" title={t('Campaign templates')} copy={t('Your own rules for recruitment campaigns. One is chosen on every vacancy import; on tone, structure, anonymisation, wording and market style it wins over the profile.')} /><CampaignTemplatesEditor templates={draft.campaignTemplates || []} onChange={(list) => setDraft((current) => ({ ...current, campaignTemplates: list }))} /></>}
       </section>
     </div>}
   </div>
 }
 
 function automationMessage(automation) {
-  if (automation?.auto) return t('The AI is building the campaign and launches it automatically.')
-  if (automation?.reason === 'connect_meta') return t('Vacancy imported. Connect Meta Ads and the AI builds and launches its campaign automatically.')
+  if (automation?.auto) return t('The AI is building the campaign. It is created paused in Meta — nothing spends until you activate it.')
+  if (automation?.reason === 'connect_meta') return t('Vacancy imported. Connect Meta Ads and the AI builds its campaign (paused) automatically.')
   if (automation?.reason === 'ai_not_configured') return t('Vacancy imported. AI generation is not configured on the server.')
+  if (automation?.reason === 'already_running') return t('This vacancy’s campaign is already being built.')
   return automation?.reason ? t('Vacancy imported, but the campaign could not start: {reason}', { reason: automation.reason }) : t('Vacancy imported.')
 }
 
 const vacancyTone = (status) => status === 'campaign live' ? 'lime' : status === 'drafting' ? 'blue' : status === 'ready' || status === 'paused' || status === 'in review' ? 'orange' : 'gray'
 const SOURCES = [['auto', 'Detect automatically'], ['own', 'Our vacancy'], ['client', 'Client vacancy']]
-const IMPORT_STEPS = ['Reading the vacancy page…', 'Extracting the role, tasks and profile…', 'Writing it in your style…', 'Starting the campaign…']
+const IMPORT_STEPS = ['Reading the vacancy page…', 'Extracting the role, tasks and profile…', 'Writing it to your template…', 'Creating the campaign paused in Meta…']
+
+// The required template choice on the import step (a preselected suggestion counts: it is visible and can be changed).
+function TemplateChoice({ templates, value, onChange, disabled, highlight, onGo }) {
+  if (!templates.length) {
+    return <div className="db-template-choice empty"><Icon name="info" size={16} /><p>{t('Every imported vacancy follows a campaign template, and there is none yet.')}</p><Button variant="soft" icon="spark" onClick={() => onGo('knowledge')}>{t('Create one in the Knowledge Base')}</Button></div>
+  }
+  return <div className={`db-template-choice ${highlight ? 'highlight' : ''}`} role="radiogroup" aria-label={t('Campaign template')}>
+    <span>{t('Campaign template')}</span>
+    <div>{templates.map((item) => <button type="button" role="radio" aria-checked={value === item.id} className={value === item.id ? 'active' : ''} onClick={() => onChange(item.id)} disabled={disabled} key={item.id}>
+      <b>{item.name}</b><small>{anonymisationSummary(item)} · {marketStyleLabel(item.marketStyle)}</small>
+    </button>)}</div>
+  </div>
+}
 const LIVE = ['campaign live', 'paused', 'completed']
 
 function SourceBadge({ vacancy }) {
@@ -212,7 +336,12 @@ function VacancyDetail({ vacancy, onClose }) {
 export function VacanciesView({ notify, onGo }) {
   const vacancies = useResource(listVacancies)
   const ads = useResource(() => getAdsStatus().catch(() => null))
+  const knowledge = useResource(getKnowledge)
+  const templates = knowledge.data?.data?.campaignTemplates || []
+  const logo = knowledge.data?.data?.brand?.logo
   const currency = ads.data?.ad_account?.currency || 'CHF'
+  const [templateId, setTemplateId] = useState('')
+  const [askTemplate, setAskTemplate] = useState(false)
   const [url, setUrl] = useState('')
   const [source, setSource] = useState('auto')
   const [pasting, setPasting] = useState(false)
@@ -235,6 +364,9 @@ export function VacanciesView({ notify, onGo }) {
     const timer = window.setInterval(() => setImportStep((step) => Math.min(step + 1, IMPORT_STEPS.length - 1)), 4000)
     return () => window.clearInterval(timer)
   }, [importing])
+  // The suggested template is preselected; a choice that no longer exists falls back to it.
+  const chosenTemplate = templates.some((item) => item.id === templateId) ? templateId : ((templates.find((item) => item.suggested) || templates[0])?.id || '')
+  const hasInput = pasting ? Boolean(text.trim()) : Boolean(url.trim())
 
   const replace = (updated) => vacancies.setData((current) => current.map((item) => (item.id === updated.id ? updated : item)))
   const act = async (vacancy, action, success) => {
@@ -252,12 +384,15 @@ export function VacanciesView({ notify, onGo }) {
   const submit = async (event) => {
     event.preventDefault()
     if (pasting ? !text.trim() : !url.trim()) { notify(pasting ? t('Paste the vacancy text first.') : t('Paste the link to the vacancy first.'), 'error'); return }
+    // Nothing is read or generated until a campaign template is chosen.
+    if (!templates.length) { setAskTemplate(true); notify(t('Create a campaign template in the Knowledge Base first.'), 'error'); return }
+    if (!chosenTemplate) { setAskTemplate(true); notify(t('Choose a campaign template first.'), 'error'); return }
     setImportStep(0)
     setImporting(true)
     try {
-      const created = await importVacancy({ url: url.trim(), source, ...(pasting ? { text } : {}) })
+      const created = await importVacancy({ url: url.trim(), source, template_id: chosenTemplate, ...(pasting ? { text } : {}) })
       vacancies.setData((current) => [created, ...(current || [])])
-      setUrl(''); setText(''); setPasting(false)
+      setUrl(''); setText(''); setPasting(false); setAskTemplate(false)
       notify(created.anonymised
         ? t('Imported “{title}” — the employer was anonymised. {next}', { title: created.title, next: automationMessage(created.automation) })
         : t('Imported “{title}”. {next}', { title: created.title, next: automationMessage(created.automation) }))
@@ -273,12 +408,12 @@ export function VacanciesView({ notify, onGo }) {
     if (vacancy.status === 'drafting') return <span className="db-ai-working small"><i /> {t('AI working')}</span>
     if (LIVE.includes(vacancy.status)) return <Button variant="secondary" icon="edit" onClick={() => onGo('campaigns', { campaignId: vacancy.campaign_id, name: vacancy.campaign })}>{t('Edit campaign')}</Button>
     if (vacancy.draft?.waiting_for_meta) return <Button variant="soft" icon="link" onClick={() => onGo('connections')}>{t('Connect Meta')}</Button>
-    if (vacancy.launch_failed || vacancy.status === 'in review') return <Button icon="refresh" disabled={busy === vacancy.id} onClick={() => act(vacancy, relaunchVacancy, t('Launching the campaign for {title} again.', { title: vacancy.title }))}>{busy === vacancy.id ? t('Starting…') : vacancy.launch_failed ? t('Retry launch') : t('Launch')}</Button>
+    if (vacancy.launch_failed || vacancy.status === 'in review') return <Button icon="refresh" disabled={busy === vacancy.id} onClick={() => act(vacancy, relaunchVacancy, t('Creating the campaign for {title} again (paused).', { title: vacancy.title }))}>{busy === vacancy.id ? t('Starting…') : vacancy.launch_failed ? t('Retry') : t('Create paused')}</Button>
     return <Button variant="soft" icon="spark" disabled={busy === vacancy.id} onClick={() => act(vacancy, redraftVacancy, t('The AI is building the campaign for {title}.', { title: vacancy.title }))}>{busy === vacancy.id ? t('Starting…') : t('Generate campaign')}</Button>
   }
 
   return <div className="db-page db-srs-page">
-    <PageIntro eyebrow={t('Vacancy input')} icon="file" title={t('Paste a vacancy link. The AI does the rest.')} description={t('Import a vacancy from your own website or straight from a client. Client vacancies are anonymised and rewritten in your style, then the complete Meta campaign is generated and launched automatically.')} />
+    <PageIntro eyebrow={t('Vacancy input')} icon="file" title={t('Paste a vacancy link. The AI does the rest.')} description={t('Import a vacancy from your own website or straight from a client, and choose a campaign template. The complete Meta campaign is generated to that template and created paused — nothing spends until you activate it.')} />
     <form className="db-card db-vacancy-import" onSubmit={submit}>
       <div className="db-import-row">
         <label className="db-import-url"><Icon name="link" size={18} /><input type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder={t('https://… link to the vacancy')} disabled={importing} aria-label={t('Vacancy link')} /></label>
@@ -290,16 +425,18 @@ export function VacanciesView({ notify, onGo }) {
         <button type="button" className="db-text-link" onClick={() => setPasting((value) => !value)} disabled={importing}>{pasting ? t('Use only the link') : t('Page won’t load? Paste the text')}</button>
       </div>
       {pasting && <Field label={t('Vacancy text')} hint={t('Copy everything from the job ad — title, tasks, profile and benefits.')}><textarea rows="7" value={text} onChange={(event) => setText(event.target.value)} disabled={importing} /></Field>}
+      {(hasInput || askTemplate) && knowledge.data && <TemplateChoice templates={templates} value={chosenTemplate} onChange={(id) => { setTemplateId(id); setAskTemplate(false) }} disabled={importing} highlight={askTemplate} onGo={onGo} />}
+      {(hasInput || askTemplate) && knowledge.data && !logo && <p className="db-helper"><Icon name="image" size={13} /> {t('No logo saved yet — the images are generated without one. Add it in the Knowledge Base or in brand settings.')}</p>}
       {importing && <p className="db-ai-working"><i /> {t(IMPORT_STEPS[importStep])}</p>}
-      <footer><Icon name="spark" size={14} /> {t('From the link: vacancy text, branded creatives, ad copy, Employment audience, a lead form with screening questions, budget — launched in Meta. Edit the live campaign any time.')}</footer>
+      <footer><Icon name="spark" size={14} /> {t('From the link: vacancy text, ad copy written to your template, images with your logo, Employment audience, a lead form with screening questions, budget — all created paused in Meta. You activate it under Campaigns.')}</footer>
     </form>
     <section className="db-card db-vacancy-table"><header><div><h2>{t('Vacancy pipeline')}</h2><p>{t('Each vacancy stays linked to its generated campaign and results.')}</p></div><Badge tone="blue">{list.length === 1 ? t('1 role') : t('{n} roles', { n: list.length })}</Badge></header>
       {vacancies.loading && !vacancies.data ? <LoadingState label={t('Loading vacancies…')} /> : vacancies.error && !vacancies.data ? <ErrorState error={vacancies.error} onRetry={vacancies.reload} /> : list.length ? <div className="db-table-wrap"><table className="db-table"><thead><tr><th>{t('Vacancy')}</th><th>{t('Status')}</th><th>{t('Campaign')}</th><th>{t('Applicants')}</th><th>{t('CPL')}</th><th>{t('Updated')}</th><th aria-label={t('Actions')} /></tr></thead><tbody>{list.map((vacancy) => <tr key={vacancy.id}>
-        <td><button className="db-vacancy-title" onClick={() => setOpen(vacancy)}><span>{vacancy.title.split(/[\s/]+/).filter((word) => /^\p{L}/u.test(word)).slice(0, 2).map((word) => word[0].toUpperCase()).join('')}</span><p><b>{vacancy.title}</b><small>{vacancy.location} · {t(vacancy.type)}</small><SourceBadge vacancy={vacancy} /></p></button></td>
+        <td><button className="db-vacancy-title" onClick={() => setOpen(vacancy)}><span>{vacancy.title.split(/[\s/]+/).filter((word) => /^\p{L}/u.test(word)).slice(0, 2).map((word) => word[0].toUpperCase()).join('')}</span><p><b>{vacancy.title}</b><small>{vacancy.location} · {t(vacancy.type)}</small><SourceBadge vacancy={vacancy} />{vacancy.template_name && <span className="db-source-tag" title={t('Campaign template')}><Icon name="file" size={12} /> {vacancy.template_name}</span>}</p></button></td>
         <td><Badge tone={vacancy.launch_failed && !vacancy.launch_needs_person ? 'blue' : vacancyTone(vacancy.status)}>{t(vacancy.launch_failed ? (vacancy.launch_needs_person ? 'needs you' : 'AI working') : vacancy.status)}</Badge></td>
         <td><b>{t(vacancy.campaign)}</b>{vacancy.status === 'drafting' && <small>{t(vacancy.draft?.step_label || 'Starting')}{vacancy.draft?.percent ? ` · ${vacancy.draft.percent}%` : ''}</small>}{vacancy.status === 'ready' && vacancy.draft?.error && <small className="db-warning">{vacancy.draft.error}</small>}{vacancy.launch_failed && vacancy.launch_retry_at && <small className="db-ai-fixed"><Icon name="refresh" size={12} /> {t(vacancy.launch_needs_person ? 'Only this step needs you; the AI launches by itself once it is done (next check {when}).' : 'The AI is still fixing what Meta refused — next try {when}.', { when: formatDateTime(vacancy.launch_retry_at) })}</small>}{vacancy.launch_repairs?.length > 0 && !vacancy.launch_failed && <small className="db-ai-fixed" title={vacancy.launch_repairs.join('\n')}><Icon name="spark" size={12} /> {t('The AI fixed what Meta refused: {list}', { list: vacancy.launch_repairs.join('; ') })}</small>}</td>
         <td>{vacancy.applicants || '—'}</td><td>{vacancy.cpl ? money(vacancy.cpl, currency) : '—'}</td><td>{relativeTime(vacancy.updated_at)}</td>
-        <td>{action(vacancy)}</td></tr>)}</tbody></table></div> : <EmptyState icon="file" title={t('No vacancies yet')} body={t('Paste a vacancy link above — the campaign is built and launched from it.')} />}
+        <td>{action(vacancy)}</td></tr>)}</tbody></table></div> : <EmptyState icon="file" title={t('No vacancies yet')} body={t('Paste a vacancy link above — the campaign is built from it and created paused.')} />}
     </section>
     {open && <VacancyDetail vacancy={open} onClose={() => setOpen(null)} />}
   </div>

@@ -37,8 +37,8 @@ function RecruitmentLane({ status, onGo }) {
     {recruitment.drafting > 0
       ? <p className="db-ai-working"><i /> {t('Building and launching {n} campaigns…', { n: recruitment.drafting })}</p>
       : <dl className="db-ai-facts"><div><dt>{t('In progress')}</dt><dd>{recruitment.drafting}</dd></div><div><dt>{t('Needs attention')}</dt><dd>{recruitment.needs_attention}</dd></div><div><dt>{t('Live')}</dt><dd>{recruitment.live}</dd></div></dl>}
-    <p className="db-helper">{t('Paste a vacancy link: it is read, anonymised if it is a client’s, and launched in Meta. Edit live campaigns any time.')}</p>
-    {!recruitment.meta_connected && <p className="db-warning">{t('Connect Meta Ads and every imported vacancy is launched automatically.')}</p>}
+    <p className="db-helper">{t('Paste a vacancy link and choose a campaign template: it is read, anonymised if it is a client’s, and created paused in Meta. You activate it under Campaigns.')}</p>
+    {!recruitment.meta_connected && <p className="db-warning">{t('Connect Meta Ads and every imported vacancy gets its campaign created (paused) automatically.')}</p>}
     <footer><span>{t('Campaign, ad set, ads, creatives, lead form and budget.')}</span>{recruitment.meta_connected ? <Button variant="secondary" icon="link" onClick={() => onGo('vacancies')}>{t('Import vacancy')}</Button> : <Button variant="secondary" icon="link" onClick={() => onGo('connections')}>{t('Connect Meta')}</Button>}</footer>
   </article>
 }

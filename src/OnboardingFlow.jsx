@@ -610,7 +610,7 @@ function AutomationStep({ data, setData, onBack, onContinue, busy }) {
           </div>
           <datalist id="ob-country-list">{COUNTRIES.map((country) => <option value={country.name} key={country.code} />)}</datalist>
           {data.metaCity.trim() && <div className="ob-field"><span className="ob-field-label">{t('Reach around the city')}</span><MenuField label={t('Radius')} value={String(data.metaRadius)} options={RADII.map((km) => ({ value: String(km), label: `${km} km` }))} onChange={(metaRadius) => setData({ ...data, metaRadius })} /></div>}
-          <div className="ob-ai-note"><span>✦</span><p>{t('Every imported vacancy is turned into a complete campaign and launched automatically. You can edit it any time afterwards.')}</p></div>
+          <div className="ob-ai-note"><span>✦</span><p>{t('Every imported vacancy is turned into a complete campaign and created paused in Meta. Nothing spends until you activate it.')}</p></div>
           <div className="ob-employment-lock"><span>!</span><p><b>{t('Employment targeting stays compliant.')}</b> {t('Age, gender, and detailed-targeting limitations are locked automatically.')}</p></div>
         </section>
       </div>
@@ -725,7 +725,7 @@ function CompleteStep({ data, onBack, onDashboard, busy, error }) {
           <li><span>{t('Logo')}</span>{data.logo ? <b className="ob-summary-logo"><img src={data.logo} alt="" /> {data.logoOnPosts ? t('on every post · {where}', { where: t(LOGO_POSITIONS.find(([id]) => id === data.logoPosition)?.[1] || 'Top right').toLowerCase() }) : t('not added to posts')}</b> : <b>{t('Add it in the Knowledge Base')}</b>}</li>
           <li><span>{t('Rhythm')}</span><b>{t(data.postingFrequency)}</b></li>
           <li><span>{t('Timezone')}</span><b>{data.timezone.replace('_', ' ')}</b></li>
-          <li><span>{t('Meta ads')}</span><b>{currencySymbol()} {data.metaBudget}{t('/day')} · {t('{n} days', { n: data.metaDuration })} · {t('launches automatically')}</b></li>
+          <li><span>{t('Meta ads')}</span><b>{currencySymbol()} {data.metaBudget}{t('/day')} · {t('{n} days', { n: data.metaDuration })} · {t('created paused')}</b></li>
           {data.metaCountry && <li><span>{t('Hiring area')}</span><b>{data.metaCity.trim() ? `${data.metaCity.trim()} + ${data.metaRadius} km, ` : t('All of ')}{data.metaCountry}</b></li>}
           <li><span>{t('Channels')}</span>{channels.length > 0 ? <div className="ob-summary-logos">{channels.map((channel) => <img key={channel.name} src={channel.src} alt={channel.name} />)}</div> : <b>{t('Add these in Settings')}</b>}</li>
           {(data.role === 'Agency' || data.role === 'Freelancer') && <li><span>{t('Workspace')}</span><b>{data.workspaceName || t('Personal workspace')} · {data.invites.length ? t('{n} members', { n: data.invites.length + 1 }) : t('1 member')}</b></li>}
