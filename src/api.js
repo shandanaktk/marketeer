@@ -171,6 +171,10 @@ export const deleteVacancy = (id) => del(`/api/v1/vacancies/${id}`)
 
 // ── Content Studio ──────────────────────────────────────────────────────────
 export const fixPrompt = (prompt) => post('/api/v1/content/prompt/fix', { prompt }).then((result) => result.prompt)
+// Rough idea → clear production brief (spelling included), for the given format.
+export const refinePrompt = (prompt, format = 'Post') => post('/api/v1/content/prompt/refine', { prompt, format }).then((result) => result.prompt)
+// What the studio can make on this server: AI reels are on only when the Higgsfield key is set.
+export const getContentCapabilities = () => get('/api/v1/content/capabilities')
 export const rewriteCaption = (caption, tone, format) => post('/api/v1/content/caption/rewrite', { caption, tone, format }).then((result) => result.caption)
 export const suggestHashtags = (caption) => post('/api/v1/content/hashtags', { caption }).then((result) => result.hashtags || [])
 export const renderCreative = (body) => post('/api/v1/content/creative/render', body)
@@ -195,7 +199,8 @@ async function pollJob(path, onProgress, { interval = 2000, attempts = 300 } = {
 
 export async function generateContent(body, onProgress) {
   const { job_id: jobId } = await post('/api/v1/content/generate', body)
-  return pollJob(`/api/v1/content/jobs/${jobId}`, onProgress)
+  // A video render can take several minutes: reels are followed for up to 20 minutes.
+  return pollJob(`/api/v1/content/jobs/${jobId}`, onProgress, body.format === 'Reel' ? { interval: 3000, attempts: 400 } : undefined)
 }
 
 // ── Publishing channels ─────────────────────────────────────────────────────

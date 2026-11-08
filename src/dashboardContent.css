@@ -141,3 +141,17 @@ html[data-theme='dark'] .db-content-create .db-format-picker > button > i { colo
 .db-calendar-popover > div { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .db-calendar-popover > div > span { display: flex; align-items: center; gap: 6px; color: var(--app-ink, var(--db-copy)); font-size: 13px; }
 .db-calendar-popover > div img { width: 18px; height: 18px; border-radius: 5px; object-fit: cover; }
+
+/* Prompt field: the textarea with the refinement action in its footer (every Content Studio prompt). */
+.db-prompt-field > small { display: block; margin-top: 7px; color: var(--db-copy-faint); font-size: 12px; }
+.db-prompt-box { border: 1px solid var(--db-stroke); border-radius: 10px; background: rgba(var(--app-contrast-rgb),.035); transition: .2s ease; }
+.db-prompt-box:focus-within { border-color: rgba(62,146,204,.5); box-shadow: 0 0 0 3px rgba(62,146,204,.1); }
+.db-prompt-box textarea { display: block; width: 100%; padding: 11px 12px 6px; border: 0; outline: 0; color: var(--app-ink); font: inherit; font-size: 14px; line-height: 1.55; background: transparent; resize: vertical; }
+.db-prompt-box textarea:disabled { opacity: .6; }
+.db-prompt-box > footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 6px 8px 8px; border-top: 1px solid var(--db-stroke); }
+.db-prompt-box > footer .db-text-link { display: inline-flex; align-items: center; gap: 5px; color: var(--db-blue); font-size: 12.5px; }
+html[data-theme='light'] .db-prompt-box textarea { color: #1e1b18; }
+/* A generated reel in the result grid and the refine step. */
+.db-variant-card.reel { max-width: 380px; margin-inline: auto; }
+.db-variant-video { height: 460px; object-fit: contain; background: #0d0c0b; }
+video.db-edit-shot { height: 260px; background: #0d0c0b; }

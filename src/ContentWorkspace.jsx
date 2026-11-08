@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { formatDate, stepLabel, t, weekdayShort } from './i18n.js'
 import {
-  approvePost, deletePost, fixPrompt, generateContent, getCampaignTable, getChannels, getKnowledge, getSettings, isoDay, listPosts,
-  money, newBackground, publishPost, renderCreative, rewriteCaption, savePost, suggestHashtags, toPostRecord, uploadMedia, useResource,
+  approvePost, deletePost, generateContent, getCampaignTable, getChannels, getContentCapabilities, getKnowledge, getSettings, isoDay, listPosts,
+  money, newBackground, publishPost, refinePrompt, renderCreative, rewriteCaption, savePost, suggestHashtags, toPostRecord, uploadMedia, useResource,
 } from './api.js'
 import { useBrand } from './brandContext.js'
 import { Badge, Button, ChannelLogo, CreativeArt, EmptyState, ErrorState, Field, Icon, LoadingState, Modal, PageIntro, SocialPreview, Spinner } from './dashboardUI.jsx'
@@ -102,7 +102,39 @@ function DesignEditor({ variant, format, onClose, onSave }) {
   )
 }
 
-function BriefStep({ prompt, setPrompt, format, setFormat, platforms, setPlatforms, channels, assets, setAssets, onGenerate, fixing, setFixing, notify }) {
+// Every Content Studio prompt: the field, and at its end the refinement that turns a rough idea into a clear brief.
+// The refined text replaces the field; one undo brings the previous text back. Generation always uses what is in the field.
+function PromptField({ label, hint, value, onChange, placeholder, format, notify, rows = 6 }) {
+  const [refining, setRefining] = useState(false)
+  const [before, setBefore] = useState(null)
+  const refine = async () => {
+    const original = value
+    setRefining(true)
+    try {
+      const refined = await refinePrompt(original, format)
+      setBefore(original)
+      onChange(refined)
+    } catch (failure) {
+      notify(failure.message, 'error')
+    } finally {
+      setRefining(false)
+    }
+  }
+  const undo = () => { onChange(before); setBefore(null) }
+  return <div className="db-field db-prompt-field">
+    <span>{label}</span>
+    <div className="db-prompt-box">
+      <textarea rows={rows} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} disabled={refining} aria-label={label} />
+      <footer>
+        {before !== null && <button type="button" className="db-text-link" onClick={undo} disabled={refining}><Icon name="undo" size={13} /> {t('Undo refinement')}</button>}
+        <Button variant="soft" icon={refining ? 'refresh' : 'spark'} disabled={!value.trim() || refining} onClick={refine}>{refining ? t('Refining…') : t('Refine prompt')}</Button>
+      </footer>
+    </div>
+    {hint && <small>{hint}</small>}
+  </div>
+}
+
+function BriefStep({ prompt, setPrompt, format, setFormat, platforms, setPlatforms, channels, assets, setAssets, onGenerate, reelsEnabled, notify }) {
   const fileInput = useRef(null)
   const upload = (files) => {
     Array.from(files || []).forEach((file, index) => {
@@ -113,17 +145,18 @@ function BriefStep({ prompt, setPrompt, format, setFormat, platforms, setPlatfor
         .catch((failure) => setAssets((current) => current.map((item) => item.localId === localId ? { ...item, uploading: false, error: failure.message } : item)))
     })
   }
-  const fixPromptText = async () => {
-    setFixing(true)
-    try { setPrompt(await fixPrompt(prompt)) } catch (failure) { notify(failure.message, 'error') } finally { setFixing(false) }
-  }
   const busyAssets = assets.some((asset) => asset.uploading)
+  const reel = format === 'Reel'
+  const ownVideo = assets.some((asset) => asset.role === 'as-is' && String(asset.type).startsWith('video'))
+  // A Reel without your own finished video is generated with Higgsfield — only when the server has its key.
+  const reelBlocked = reel && !ownVideo && !reelsEnabled
   return (
     <div className="db-create-brief-layout">
       <section className="db-card db-brief-main">
         <div className="db-section-heading"><span><Icon name="spark" size={18} /></span><div><h2>{t('Start with the idea')}</h2><p>{t('Describe the post in your own words. Marketeer will build the visual, caption, and hashtags around it.')}</p></div></div>
-        <Field label={t('What should this post communicate?')} hint={t('The clearer the goal, offer, and audience, the stronger the first draft.')}><textarea rows="6" value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder={t('Example: Announce our autumn collection with a calm, editorial feel. Focus on considered materials and invite people to explore the full edit.')} /></Field>
-        <Button variant="soft" icon={fixing ? 'refresh' : 'spark'} disabled={!prompt.trim() || fixing} onClick={fixPromptText}>{fixing ? t('Cleaning it up…') : t('Fix spelling & clarity')}</Button>
+        {reel
+          ? <PromptField label={t('What should happen in this reel?')} hint={t('A short motion brief in plain words: who or what is on screen, what happens, and where. Refine prompt fills in the camera, light and pace.')} value={prompt} onChange={setPrompt} format={format} notify={notify} placeholder={t('Example: A young carpenter planes a wooden board in a sunny workshop, sawdust in the air, then looks up and smiles.')} />
+          : <PromptField label={t('What should this post communicate?')} hint={t('The clearer the goal, offer, and audience, the stronger the first draft.')} value={prompt} onChange={setPrompt} format={format} notify={notify} placeholder={t('Example: Announce our autumn collection with a calm, editorial feel. Focus on considered materials and invite people to explore the full edit.')} />}
         <div className="db-divider" />
         <div className="db-section-heading compact"><span><Icon name="upload" size={18} /></span><div><h2>{t('Add optional assets')}</h2><p>{t('Tell the designer what each upload represents.')}</p></div></div>
         <button className="db-dropzone" onClick={() => fileInput.current?.click()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); upload(event.dataTransfer.files) }}><Icon name="upload" size={23} /><b>{t('Drop brand or product media here')}</b><small>{t('JPG, PNG, MP4 or MOV · multiple files supported')}</small></button>
@@ -131,9 +164,9 @@ function BriefStep({ prompt, setPrompt, format, setFormat, platforms, setPlatfor
         {!!assets.length && <div className="db-upload-list">{assets.map((asset) => <AssetRow key={asset.localId} asset={asset} onChange={(patch) => setAssets((current) => current.map((item) => item.localId === asset.localId ? { ...item, ...patch } : item))} onRemove={() => setAssets((current) => current.filter((item) => item.localId !== asset.localId))} />)}</div>}
       </section>
       <aside className="db-create-settings">
-        <section className="db-card"><h3>{t('Format')}</h3><div className="db-format-picker">{FORMATS.map(([name, body, icon]) => <button className={format === name ? 'active' : ''} onClick={() => setFormat(name)} key={name}><span><Icon name={icon} size={18} /></span><b>{t(name)}</b><small>{t(body)}</small>{format === name && <i><Icon name="check" size={12} /></i>}</button>)}</div></section>
+        <section className="db-card"><h3>{t('Format')}</h3><div className="db-format-picker">{FORMATS.map(([name, body, icon]) => <button className={format === name ? 'active' : ''} onClick={() => setFormat(name)} key={name}><span><Icon name={icon} size={18} /></span><b>{t(name)}</b><small>{name === 'Reel' && !reelsEnabled ? t('Needs the Higgsfield key') : t(body)}</small>{format === name && <i><Icon name="check" size={12} /></i>}</button>)}</div>{reel && <p className={reelBlocked ? 'db-warning' : 'db-helper'}><Icon name="info" size={14} /> {reelsEnabled ? t('One 9:16 video is generated from your prompt with Higgsfield. A person, product or scene photo you upload becomes its first frame.') : t('AI reels switch on automatically once a Higgsfield API key is set on the server. Until then you can post your own video: upload it and mark it “Finished creative — use as is”.')}</p>}</section>
         <section className="db-card"><h3>{t('Publish to')}</h3><div className="db-channel-picker">{channels.map((channel) => <button disabled={!channel.connected} className={platforms.includes(channel.name) ? 'active' : ''} onClick={() => setPlatforms((current) => current.includes(channel.name) ? current.filter((item) => item !== channel.name) : [...current, channel.name])} key={channel.id}><ChannelLogo platform={channel.name} /><span><b>{channel.name}</b><small>{channel.connected ? channel.handle : t('Connect first')}</small></span>{platforms.includes(channel.name) && <i className="db-channel-check"><Icon name="check" size={12} /></i>}</button>)}</div></section>
-        <Button className="full" icon="spark" disabled={!prompt.trim() || !platforms.length || busyAssets} onClick={onGenerate}>{busyAssets ? t('Uploading assets…') : t('Generate content')}</Button>
+        <Button className="full" icon="spark" disabled={!prompt.trim() || !platforms.length || busyAssets || reelBlocked} onClick={onGenerate}>{busyAssets ? t('Uploading assets…') : reel && !ownVideo ? t('Generate reel') : t('Generate content')}</Button>
         <p className="db-safe-note"><Icon name="info" size={14} /> {channels.some((channel) => channel.connected) ? t('Nothing publishes without your approval.') : t('Connect Instagram or Facebook in Connections to choose a channel.')}</p>
       </aside>
     </div>
@@ -163,7 +196,6 @@ export function ContentCreate({ notify, onGo, draft = null }) {
   const [tone, setTone] = useState('Bold & warm')
   const [generating, setGenerating] = useState(false)
   const [rewriting, setRewriting] = useState(false)
-  const [fixing, setFixing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [editingDesign, setEditingDesign] = useState(false)
   const [scheduleMode, setScheduleMode] = useState('schedule')
@@ -173,6 +205,8 @@ export function ContentCreate({ notify, onGo, draft = null }) {
   const channels = useResource(getChannels)
   const preferences = useResource(getSettings)
   const knowledge = useResource(getKnowledge)
+  const capabilities = useResource(getContentCapabilities)
+  const reelsEnabled = Boolean(capabilities.data?.reels?.enabled)
   const channelList = channels.data || []
   const autoHashtags = Boolean(preferences.data?.ai?.autoHashtags)
   const bestTimes = knowledge.data?.data?.posting?.bestTimes
@@ -185,8 +219,10 @@ export function ContentCreate({ notify, onGo, draft = null }) {
     suggestHashtags(draft.caption).then((tags) => setSuggestions((current) => [...new Set([...current, ...tags])])).catch(() => {})
   }, [editing, draft])
 
+  const ownVideo = assets.some((asset) => asset.role === 'as-is' && String(asset.type).startsWith('video'))
+  const aiReel = format === 'Reel' && !ownVideo
   const generate = async () => {
-    setStep(1); setGenerating(true); setVariants([]); setProgress({ percent: 6, label: t('Reading your brief…') })
+    setStep(1); setGenerating(true); setVariants([]); setProgress({ percent: 6, label: aiReel ? t('Sending your prompt to Higgsfield…') : t('Reading your brief…') })
     try {
       const result = await generateContent(
         { prompt, format, platforms, assets: assets.filter((asset) => asset.id).map(({ id, role, note }) => ({ id, role, note })) },
@@ -196,6 +232,7 @@ export function ContentCreate({ notify, onGo, draft = null }) {
       setSuggestions(result.suggested_hashtags || [])
       result.warnings?.forEach((warning) => notify(warning, 'error'))
     } catch (failure) {
+      // Back on the brief with the prompt kept; a failed reel never turns into a still image.
       notify(failure.message, 'error')
       setStep(0)
     } finally {
@@ -246,19 +283,22 @@ export function ContentCreate({ notify, onGo, draft = null }) {
   const mediaType = selected?.media?.[0]?.type || ''
   const previewProps = { caption, hashtags, platforms, palette: previewVariant.palette, theme: previewVariant.theme, format, imageUrl: mediaType.startsWith('video') ? selected.media[0].url : previewImage, mediaType }
   const tagChoices = [...new Set([...suggestions, ...hashtags])]
+  const isReelResult = variants[0]?.kind === 'reel'
 
   return (
     <div className="db-page db-content-create">
       <PageIntro eyebrow={editing ? t('Edit post') : t('Content studio')} icon="create" title={editing ? t('Edit “{title}”.', { title: draft.title }) : step === 0 ? t('Create something worth stopping for.') : t('Create, refine, and share.')} description={editing ? t('Update the caption, creative, and schedule, then send it back to the library.') : t('From a loose brief to channel-ready creative, without losing your point of view.')} actions={step > 1 && !done ? <Button variant="secondary" icon="file" disabled={saving} onClick={saveDraft}>{saving ? t('Saving…') : t('Save draft')}</Button> : null} />
       <ContentStepper step={step} />
 
-      {step === 0 && <BriefStep prompt={prompt} setPrompt={setPrompt} format={format} setFormat={setFormat} platforms={platforms} setPlatforms={setPlatforms} channels={channelList} assets={assets} setAssets={setAssets} onGenerate={generate} fixing={fixing} setFixing={setFixing} notify={notify} />}
+      {step === 0 && <BriefStep prompt={prompt} setPrompt={setPrompt} format={format} setFormat={setFormat} platforms={platforms} setPlatforms={setPlatforms} channels={channelList} assets={assets} setAssets={setAssets} onGenerate={generate} reelsEnabled={reelsEnabled} notify={notify} />}
 
       {step === 1 && <section className="db-generation-stage">
-        {generating ? <Spinner label={progress.label} progress={progress.percent} detail={t('Writing from your Knowledge Base and designing a visual for each direction.')} /> : <>
-          <div className="db-center-heading"><Badge tone="blue">{variants.length} {t('distinct direction')}{variants.length === 1 ? '' : 's'}</Badge><h2>{t('Choose an idea to refine.')}</h2><p>{t('Each route uses the same brief with a different visual and editorial angle.')}</p></div>
-          <div className="db-variant-grid">{variants.map((variant) => <article className="db-card db-variant-card" key={variant.id}>{variant.image ? <img className="db-variant-photo" src={variant.image} alt="" /> : <CreativeArt palette={variant.palette} theme={variant.theme} compact />}<div><Badge tone="blue">{variant.angle}</Badge><p>{variant.caption}</p><div className="db-inline-tags">{variant.hashtags.map((tag) => <span key={tag}>#{tag}</span>)}</div><div className="db-library-logos">{platforms.map((platform) => <ChannelLogo platform={platform} key={platform} />)}</div><Button className="full" icon="arrow" onClick={() => choose(variant)}>{t('Refine this direction')}</Button></div></article>)}</div>
-          <div className="db-flow-actions"><Button variant="ghost" icon="back" onClick={() => setStep(0)}>{t('Back to brief')}</Button><Button variant="secondary" icon="refresh" onClick={generate}>{t('Regenerate all')}</Button></div>
+        {generating ? <Spinner label={progress.label} progress={progress.percent} detail={aiReel ? t('Higgsfield is rendering one 9:16 reel from your prompt. This can take a few minutes; you can stay on this page.') : t('Writing from your Knowledge Base and designing a visual for each direction.')} /> : <>
+          {isReelResult
+            ? <div className="db-center-heading"><Badge tone="blue">{t('1 reel')}</Badge><h2>{t('Your reel is ready.')}</h2><p>{t('Made from your prompt with Higgsfield. Keep it, or make another one from the same prompt.')}</p></div>
+            : <div className="db-center-heading"><Badge tone="blue">{variants.length} {t('distinct direction')}{variants.length === 1 ? '' : 's'}</Badge><h2>{t('Choose an idea to refine.')}</h2><p>{t('Each route uses the same brief with a different visual and editorial angle.')}</p></div>}
+          <div className="db-variant-grid">{variants.map((variant) => <article className={`db-card db-variant-card ${variant.kind === 'reel' ? 'reel' : ''}`} key={variant.id}>{variant.kind === 'reel' && variant.media?.[0]?.url ? <video className="db-variant-photo db-variant-video" src={variant.media[0].url} poster={variant.image || undefined} controls muted loop playsInline /> : variant.image ? <img className="db-variant-photo" src={variant.image} alt="" /> : <CreativeArt palette={variant.palette} theme={variant.theme} compact />}<div><Badge tone="blue">{variant.angle}</Badge><p>{variant.caption}</p><div className="db-inline-tags">{variant.hashtags.map((tag) => <span key={tag}>#{tag}</span>)}</div><div className="db-library-logos">{platforms.map((platform) => <ChannelLogo platform={platform} key={platform} />)}</div><Button className="full" icon="arrow" onClick={() => choose(variant)}>{t('Refine this direction')}</Button></div></article>)}</div>
+          <div className="db-flow-actions"><Button variant="ghost" icon="back" onClick={() => setStep(0)}>{t('Back to brief')}</Button><Button variant="secondary" icon="refresh" onClick={generate}>{isReelResult ? t('Make another reel') : t('Regenerate all')}</Button></div>
         </>}
       </section>}
 
@@ -268,7 +308,9 @@ export function ContentCreate({ notify, onGo, draft = null }) {
           <Field label={t('Caption')}><textarea rows="7" value={caption} maxLength="2200" onChange={(event) => setCaption(event.target.value)} /><small className="db-count">{caption.length} / 2,200</small></Field>
           <div className="db-tone-row"><Field label={t('Tone')}><select value={tone} onChange={(event) => setTone(event.target.value)}>{TONES.map((item) => <option key={item} value={item}>{t(item)}</option>)}</select></Field><Button variant="soft" icon="spark" disabled={rewriting || !caption.trim()} onClick={rewrite}>{rewriting ? t('Rewriting…') : t('Rewrite with AI')}</Button></div>
           <Field label={t('Hashtag suggestions')}><div className="db-hashtag-editor">{tagChoices.length ? tagChoices.map((tag) => <button className={hashtags.includes(tag) ? 'active' : ''} onClick={() => setHashtags((current) => current.includes(tag) ? current.filter((item) => item !== tag) : [...current, tag])} key={tag}>#{tag}{hashtags.includes(tag) && ' ×'}</button>) : <small>{t('Suggestions appear after generation.')}</small>}</div></Field>
-          <div className="db-creative-edit-row">{previewImage ? <img className="db-edit-shot" src={previewImage} alt="" /> : <CreativeArt palette={previewVariant.palette} theme={previewVariant.theme} compact />}<div><h3>{t('Post creative')}</h3><p>{t('The image stays with this post. Open the editor if you want a new direction.')}</p><Button variant="secondary" icon="edit" disabled={!selected} onClick={() => setEditingDesign(true)}>{t('Open creative editor')}</Button></div></div>
+          {selected?.kind === 'reel'
+            ? <div className="db-creative-edit-row"><video className="db-edit-shot" src={selected.media[0].url} poster={selected.image || undefined} controls muted loop playsInline /><div><h3>{t('Reel')}</h3><p>{t('The video stays with this post. For a different one, go back and make another reel from the same prompt.')}</p></div></div>
+            : <div className="db-creative-edit-row">{previewImage ? <img className="db-edit-shot" src={previewImage} alt="" /> : <CreativeArt palette={previewVariant.palette} theme={previewVariant.theme} compact />}<div><h3>{t('Post creative')}</h3><p>{t('The image stays with this post. Open the editor if you want a new direction.')}</p><Button variant="secondary" icon="edit" disabled={!selected} onClick={() => setEditingDesign(true)}>{t('Open creative editor')}</Button></div></div>}
           <div className="db-flow-actions"><Button variant="ghost" icon="back" onClick={() => setStep(editing ? 0 : 1)}>{t('Back')}</Button><Button icon="arrow" disabled={!caption.trim() && format !== 'Story'} onClick={() => setStep(3)}>{t('Preview & schedule')}</Button></div>
         </section>
         <aside className="db-sticky-preview"><span className="db-eyebrow">{t('Live preview ·')} {format}</span><SocialPreview {...previewProps} /><p><Icon name="spark" size={14} /> {t('Crops and safe areas adapt per channel.')}</p></aside>
