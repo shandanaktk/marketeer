@@ -3,6 +3,9 @@ import { DEFAULT_COUNTRY, LanguageButton, TIMEZONE, t } from './i18n.js'
 import { currencySymbol } from './api.js'
 import Dashboard from './Dashboard.jsx'
 import { ThemeButton } from './theme.jsx'
+import { AppBrand, CLAIM, MacherLogo, PoweredBy } from './MacherBrand.jsx'
+import { WHITE_LABEL } from './brandConfig.js'
+import { clientTokens, pickClientColor } from './clientColors.js'
 import { COUNTRIES, RADII, isCountry } from './countries.js'
 import {
   completeOnboarding, connectChannel, disconnectChannel, getChannels, getMe, getOnboarding, initialsOf,
@@ -38,12 +41,12 @@ const goals = [
 const voices = ['Professional', 'Playful', 'Bold', 'Friendly', 'Luxury']
 
 const palette = [
-  '#B3DC1F', '#A1C631', '#E1FF74', '#00B2FF', '#1269CF', '#0A2463',
-  '#000000', '#2E2E2E', '#585858', '#999999', '#F8F8F8', '#FFFFFF',
+  '#b9dc20', '#A1C631', '#d8ee7c', '#00B2FF', '#1269CF', '#0A2463',
+  '#000000', '#33322e', '#585858', '#999999', '#F8F8F8', '#FFFFFF',
   '#D8315B', '#E47E3D', '#F0B429', '#0F766E', '#7C3AED', '#C8A791',
 ]
 
-const DEFAULT_COLORS = ['#B3DC1F', '#000000', '#FFFFFF', '#00B2FF']
+const DEFAULT_COLORS = ['#b9dc20', '#000000', '#FFFFFF', '#00B2FF']
 const TIMEZONES = [TIMEZONE, 'Europe/Berlin', 'Europe/Vienna', 'Europe/Paris', 'Europe/Rome', 'Europe/London', 'America/New_York']
 
 const platforms = [
@@ -129,8 +132,8 @@ function AppleLogo() {
 
 function Wordmark({ onHome }) {
   return (
-    <button className="ob-wordmark" type="button" onClick={onHome} aria-label={t('Back to Marketeer home')}>
-      Marketeer<span>.</span>
+    <button className="ob-wordmark macher-home-link" type="button" onClick={onHome} aria-label={t('Back to macher.ki home')}>
+      <AppBrand size={24} />
     </button>
   )
 }
@@ -197,7 +200,7 @@ function AuthScreen({ mode, onNavigate, onSignedIn }) {
       <nav className="ob-auth-nav">
         <Wordmark onHome={() => onNavigate('home')} />
         <p>
-          {isSignIn ? t('New to Marketeer?') : t('Already have an account?')}
+          {isSignIn ? t('New to macher.ki?') : t('Already have an account?')}
           <button type="button" onClick={() => onNavigate(isSignIn ? 'signup' : 'signin')}>
             {isSignIn ? t('Create account') : t('Sign in')}
           </button>
@@ -205,14 +208,14 @@ function AuthScreen({ mode, onNavigate, onSignedIn }) {
       </nav>
 
       <div className="ob-auth-layout">
-        <section className="ob-auth-story" aria-label={t('Marketeer introduction')}>
+        <section className="ob-auth-story" aria-label={t('macher.ki introduction')}>
           <div className="ob-kicker"><span>✦</span> {t('AI-powered campaign studio')}</div>
           <h1>{isSignIn ? <>{t('Welcome')}<br /><em>{t('back.')}</em></> : <>{t('Your ideas.')}<br /><em>{t('Everywhere.')}</em></>}</h1>
           <p>{isSignIn ? t('Your next campaign is closer than you think.') : t('Build campaigns, create on-brand content, and publish across every feed—all in one place.')}</p>
           <div className="ob-story-preview">
             <div className="ob-preview-card preview-one"><span>{t('NEW CAMPAIGN')}</span><b>{t('Less setup.')}<br />{t('More impact.')}</b><i>↗</i></div>
             <div className="ob-preview-card preview-two"><span>{t('READY TO POST')}</span><b>{t('Meet your')}<br /><em>{t('new routine.')}</em></b><i>✦</i></div>
-            <div className="ob-preview-card preview-three"><span>{t('MARKETEER AI')}</span><b>{t('12 ideas')}</b><small>{t('generated in 8 sec')}</small></div>
+            <div className="ob-preview-card preview-three"><span>{t('MACHER.KI')}</span><b>{t('12 ideas')}</b><small>{t('generated in 8 sec')}</small></div>
           </div>
           <div className="ob-auth-proof"><span>4.8</span><div>★★★★★<small>{t('Trusted across Central Switzerland')}</small></div></div>
         </section>
@@ -221,7 +224,7 @@ function AuthScreen({ mode, onNavigate, onSignedIn }) {
           <div className="ob-card-glint" />
           <div className="ob-auth-heading">
             <span className="ob-mini-index">{isSignIn ? t('WELCOME BACK') : t('START FOR FREE')}</span>
-            <h2>{isSignIn ? t('Sign in to Marketeer') : t('Create your account')}</h2>
+            <h2>{isSignIn ? t('Sign in to macher.ki') : t('Create your account')}</h2>
             <p>{isSignIn ? t('Pick up right where you left off.') : t('No credit card. Just better marketing.')}</p>
           </div>
 
@@ -251,7 +254,9 @@ function AuthScreen({ mode, onNavigate, onSignedIn }) {
               <span>{busy === 'email' ? (isSignIn ? t('Signing in…') : t('Creating your account…')) : isSignIn ? t('Sign in') : t('Create free account')}</span><i><ArrowIcon /></i>
             </button>
           </form>
+          <p className="macher-auth-claim" lang="de">{CLAIM}</p>
           <p className="ob-legal">{t('By continuing, you agree to our')} <button type="button" className="ob-legal-link" onClick={() => onNavigate('terms')}>{t('Terms')}</button> {t('and')} <button type="button" className="ob-legal-link" onClick={() => onNavigate('privacy')}>{t('Privacy Policy')}</button>.</p>
+          {WHITE_LABEL && <PoweredBy className="ob-powered" />}
         </section>
       </div>
     </main>
@@ -311,7 +316,7 @@ function BasicsStep({ data, setData, onBack, onContinue, busy }) {
 
   return (
     <form className="ob-step" onSubmit={submit}>
-      <ScreenHeading index={1} eyebrow={t('Account basics')} title={<>{t('Welcome to')} <em>{t('Marketeer.')}</em></>} subtitle={t('Let’s get your account set up in under 2 minutes.')} />
+      <ScreenHeading index={1} eyebrow={t('Account basics')} title={<>{t('Welcome to')} <em>{t('macher.ki.')}</em></>} subtitle={t('Let’s get your account set up in under 2 minutes.')} />
       <div className="ob-two-fields">
         <Field label={t('Email')}>
           <input type="email" value={data.email} onChange={(event) => setData({ ...data, email: event.target.value })} autoComplete="email" />
@@ -381,7 +386,7 @@ function BusinessStep({ data, setData, onBack, onContinue, busy }) {
   }
   return (
     <form className="ob-step" onSubmit={submit}>
-      <ScreenHeading index={2} eyebrow={t('Your business')} title={<>{t('Tell us about')}<br /><em>{t('your business.')}</em></>} subtitle={t('This helps Marketeer understand what you do and who you’re talking to.')} />
+      <ScreenHeading index={2} eyebrow={t('Your business')} title={<>{t('Tell us about')}<br /><em>{t('your business.')}</em></>} subtitle={t('This helps macher.ki understand what you do and who you’re talking to.')} />
       <div className="ob-business-fields">
         <Field label={t('Business name')}>
           <input value={data.businessName} onChange={(event) => setData({ ...data, businessName: event.target.value })} placeholder={t('e.g. Personal Sigma Schwyz AG')} autoFocus />
@@ -423,6 +428,27 @@ function GoalsStep({ data, setData, onBack, onContinue, busy }) {
   )
 }
 
+// How the brand colour shows up in the app — client-colour rules, Brand Guidelines v2 · 03.
+function ClientColorPreview({ colors, name }) {
+  const tokens = clientTokens(pickClientColor(colors))
+  const vars = { '--client-logo': tokens.logo, '--client-ui': tokens.ui, '--client-dark': tokens.dark, '--client-on': tokens.on, '--client-on-dark': tokens.onDark }
+  return (
+    <div className="ob-client-preview" style={vars}>
+      <div className="ob-field-label">{t('Your brand in the app')}</div>
+      <div className="ob-client-preview-row">
+        <MacherLogo size={22} tone="light" client={name || t('your company')} clientColor />
+        <span className="ob-client-chip">{t('Text')}</span>
+      </div>
+      <dl>
+        <div><dt>{t('Logo')}</dt><dd><i style={{ background: tokens.logo }} />{tokens.logo}</dd></div>
+        <div><dt>{t('UI accent')}</dt><dd><i style={{ background: tokens.ui }} />{tokens.ui}</dd></div>
+        <div><dt>{t('Dark mode')}</dt><dd><i style={{ background: tokens.dark }} />{tokens.dark}</dd></div>
+      </dl>
+      {tokens.fallback && <small>{t('Too neutral for the logo — macher Lime is used instead.')}</small>}
+    </div>
+  )
+}
+
 function BrandStep({ data, setData, onBack, onContinue, busy }) {
   const paletteRef = useRef(null)
   const [error, setError] = useState('')
@@ -452,12 +478,12 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
   }
   const submit = (event) => {
     event.preventDefault()
-    if (data.colors.some((color) => !/^#[0-9a-fA-F]{6}$/.test(color))) { setError(t('Use six-digit hex colors, like #B3DC1F.')); return }
+    if (data.colors.some((color) => !/^#[0-9a-fA-F]{6}$/.test(color))) { setError(t('Use six-digit hex colors, like #B9DC20.')); return }
     onContinue()
   }
   return (
     <form className="ob-step" onSubmit={submit}>
-      <ScreenHeading index={4} eyebrow={t('Brand identity')} title={<>{t('Let’s set up')}<br /><em>{t('your brand.')}</em></>} subtitle={data.scanned ? t('We pulled a starting point from your website—feel free to adjust anything.') : t('Give Marketeer a feel for your look, sound, and story.')} />
+      <ScreenHeading index={4} eyebrow={t('Brand identity')} title={<>{t('Let’s set up')}<br /><em>{t('your brand.')}</em></>} subtitle={data.scanned ? t('We pulled a starting point from your website—feel free to adjust anything.') : t('Give macher.ki a feel for your look, sound, and story.')} />
       <div className="ob-brand-layout">
         <div className="ob-brand-left">
           <div className="ob-color-block">
@@ -484,11 +510,12 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
                 </div>
                 <label className="ob-palette-any">
                   {t('Any color')}
-                  <input type="color" aria-label={t('Pick any color')} value={/^#[0-9a-fA-F]{6}$/.test(paletteFor === 'add' ? '#b3dc1f' : data.colors[paletteFor] || '') ? (paletteFor === 'add' ? '#b3dc1f' : data.colors[paletteFor]) : '#b3dc1f'} onChange={(event) => choosePaletteColor(event.target.value)} />
+                  <input type="color" aria-label={t('Pick any color')} value={/^#[0-9a-fA-F]{6}$/.test(paletteFor === 'add' ? '#b9dc20' : data.colors[paletteFor] || '') ? (paletteFor === 'add' ? '#b9dc20' : data.colors[paletteFor]) : '#b9dc20'} onChange={(event) => choosePaletteColor(event.target.value)} />
                 </label>
               </div>
             )}
           </div>
+          <ClientColorPreview colors={data.colors} name={data.businessName} />
         </div>
         <div className="ob-brand-right">
           <div className="ob-voice-block">
@@ -501,7 +528,7 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
           <Field label={t('Short business description')}>
             <span className="ob-textarea-wrap"><textarea maxLength="240" value={data.description} onChange={(event) => setData({ ...data, description: event.target.value })} placeholder={t('In a sentence or two, what does your business do?')} /><small>{data.description.length}/240</small></span>
           </Field>
-          <div className="ob-ai-note"><span>✦</span><p>{t('This is what Marketeer’s AI will use to write and design everything on your behalf.')}</p></div>
+          <div className="ob-ai-note"><span>✦</span><p>{t('This is what macher.ki’s AI will use to write and design everything on your behalf.')}</p></div>
         </div>
       </div>
       {error && <p className="ob-form-error" role="alert">{error}</p>}
@@ -537,7 +564,7 @@ function LogoStep({ data, setData, onBack, onContinue, busy }) {
   const [primary = '#0A2463', accent = '#3E92CC'] = data.colors
   return (
     <form className="ob-step" onSubmit={(event) => { event.preventDefault(); onContinue() }}>
-      <ScreenHeading index={5} eyebrow={t('Your logo')} title={<>{t('Sign every post')}<br /><em>{t('with your logo.')}</em></>} subtitle={t('Upload it once. Marketeer places it on every post, story, reel and ad image it creates.')} />
+      <ScreenHeading index={5} eyebrow={t('Your logo')} title={<>{t('Sign every post')}<br /><em>{t('with your logo.')}</em></>} subtitle={t('Upload it once. macher.ki places it on every post, story, reel and ad image it creates.')} />
       <div className="ob-logo-layout">
         <div className="ob-logo-controls">
           <div className="ob-field-label">{t('Logo')} <small>{t('PNG with a transparent background works best')}</small></div>
@@ -585,10 +612,10 @@ function AutomationStep({ data, setData, onBack, onContinue, busy }) {
 
   return (
     <form className="ob-step" onSubmit={submit}>
-      <ScreenHeading index={6} eyebrow={t('Automation rules')} title={<>{t('Set the rhythm.')}<br /><em>{t('We’ll run it.')}</em></>} subtitle={t('Choose the publishing cadence and recruitment ad defaults Marketeer should apply automatically.')} />
+      <ScreenHeading index={6} eyebrow={t('Automation rules')} title={<>{t('Set the rhythm.')}<br /><em>{t('We’ll run it.')}</em></>} subtitle={t('Choose the publishing cadence and recruitment ad defaults macher.ki should apply automatically.')} />
       <div className="ob-automation-layout">
         <section>
-          <header className="ob-rule-head"><b>{t('Organic publishing')}</b><small>{t('Select every channel Marketeer should post to')}</small></header>
+          <header className="ob-rule-head"><b>{t('Organic publishing')}</b><small>{t('Select every channel macher.ki should post to')}</small></header>
           <div className="ob-rule-platforms">
             {[{ name: 'Instagram', detail: t('Feed, stories, and reels') }, { name: 'Facebook', detail: t('Pages, feed, and lead ads') }].map((platform) => <button type="button" className={data.postingPlatforms.includes(platform.name) ? 'selected' : ''} onClick={() => togglePlatform(platform.name)} key={platform.name}><img src={`/social_logos/${platform.name.toLowerCase()}.png`} alt="" /><span><b>{platform.name}</b><small>{platform.detail}</small></span><i><CheckIcon /></i></button>)}
           </div>
@@ -650,7 +677,7 @@ function ConnectStep({ data, setData, onBack, onContinue, busy, notice }) {
   }
   return (
     <form className="ob-step" onSubmit={(event) => { event.preventDefault(); onContinue() }}>
-      <ScreenHeading index={7} eyebrow={t('Your platforms')} title={<>{t('Connect your')}<br /><em>{t('accounts.')}</em></>} subtitle={t('Link your platforms so Marketeer can publish on your behalf. You can always do this later.')} />
+      <ScreenHeading index={7} eyebrow={t('Your platforms')} title={<>{t('Connect your')}<br /><em>{t('accounts.')}</em></>} subtitle={t('Link your platforms so macher.ki can publish on your behalf. You can always do this later.')} />
       <div className="ob-connect-list">
         {platforms.map((platform) => {
           const channel = channels.find((item) => item.id === platform.id)
@@ -894,7 +921,7 @@ function OnboardingFlow({ initialView, account, setAccount, onNavigate, theme, o
       </nav>
       <div className="ob-onboarding-wrap">
         <aside className="ob-side-note">
-          <span>{t('MARKETEER / SETUP')}</span>
+          <span>{t('MACHER.KI / SETUP')}</span>
           <p>{step === 9 ? t('Ready when you are.') : t('A better campaign starts with a little context.')}</p>
           <div><i>✦</i><small>{step === 4 ? t('Your brand settings guide every AI-generated ad and post.') : step === 5 ? t('Your logo goes on every post the AI creates.') : step === 6 ? t('These defaults power both automatic pipelines.') : step === 7 ? t('Connect once, then publish everywhere from one place.') : t('About 2 minutes to your first AI-powered workspace.')}</small></div>
         </aside>

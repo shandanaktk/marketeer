@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 
 const showcaseTabs = [
-  { id: 'plan', label: 'Plan', kicker: 'AI content calendar', title: 'Turn your brand context into a month of ideas.', copy: 'Marketeer reads your Knowledge Base, balances content pillars, and maps the right format to every channel.', stat: '30 days', statLabel: 'planned in one pass', tone: 'olive' },
+  { id: 'plan', label: 'Plan', kicker: 'AI content calendar', title: 'Turn your brand context into a month of ideas.', copy: 'macher.ki reads your Knowledge Base, balances content pillars, and maps the right format to every channel.', stat: '30 days', statLabel: 'planned in one pass', tone: 'olive' },
   { id: 'create', label: 'Create', kicker: 'Platform-native creative', title: 'One brief becomes captions, images, video, and hashtags.', copy: 'Every output is adapted to each platform while your voice, products, services, and rules stay consistent.', stat: '4 formats', statLabel: 'from one idea', tone: 'orange' },
-  { id: 'schedule', label: 'Schedule', kicker: 'Always-on publishing', title: 'Approve once. Let the calendar keep moving.', copy: 'Choose the cadence and Marketeer handles platform formatting, scheduling, and automatic publishing.', stat: '5 hrs', statLabel: 'saved each week', tone: 'sand' },
+  { id: 'schedule', label: 'Schedule', kicker: 'Always-on publishing', title: 'Approve once. Let the calendar keep moving.', copy: 'Choose the cadence and macher.ki handles platform formatting, scheduling, and automatic publishing.', stat: '5 hrs', statLabel: 'saved each week', tone: 'sand' },
   { id: 'campaign', label: 'Campaign', kicker: 'Vacancy to Meta campaign', title: 'A new vacancy becomes a launch-ready recruitment campaign.', copy: 'Campaign, ad sets, creatives, copy, Employment category, lead form, budget, and review mode are assembled together.', stat: '< 10 min', statLabel: 'from role to review', tone: 'blue' },
   { id: 'measure', label: 'Measure', kicker: 'Vacancy-linked reporting', title: 'See every result without opening Ads Manager.', copy: 'Spend, impressions, clicks, CTR, CPC, leads, and CPL refresh automatically by vacancy, campaign, and ad.', stat: '7 metrics', statLabel: 'in one clear view', tone: 'rose' },
 ]
@@ -22,7 +22,7 @@ export function BrandLoader({ onDone }) {
     return () => { window.clearTimeout(exitTimer); window.clearTimeout(doneTimer) }
   }, [onDone])
 
-  return <div className={`brand-loader ${leaving ? 'is-leaving' : ''}`} role="status" aria-label="Loading Marketeer">
+  return <div className={`brand-loader ${leaving ? 'is-leaving' : ''}`} role="status" aria-label="Loading macher.ki">
     <div className="loader-orbit"><i /><i /><i /></div>
     <p><span>Market</span><em>eer</em><b>.</b></p>
     <small>Ideas in motion</small>
@@ -64,10 +64,10 @@ export function InteractivePipeline() {
       </div>
       <article className={`pipeline-stage tone-${active.tone}`} key={active.id}>
         <div className="pipeline-stage-copy">
-          <span>{active.kicker}</span><h3>{active.title}</h3><p>{active.copy}</p><a href="?view=signup">Explore in Marketeer <b>↗</b></a>
+          <span>{active.kicker}</span><h3>{active.title}</h3><p>{active.copy}</p><a href="?view=signup">Explore in macher.ki <b>↗</b></a>
         </div>
         <div className="pipeline-stage-ui" aria-label={`${active.label} product preview`}>
-          <div className="mini-app-chrome"><i /><i /><i /><span>marketeer / {active.id}</span></div>
+          <div className="mini-app-chrome"><i /><i /><i /><span>macher.ki / {active.id}</span></div>
           <div className="mini-app-body">
             <aside><b>M.</b><i /><i /><i /><i /></aside>
             <main><header><div><small>{active.kicker}</small><strong>{active.label} workspace</strong></div><button>AI active</button></header><div className="mini-layout"><MiniCalendar active={active.id} /><MiniCreative active={active.id} /></div></main>
@@ -83,7 +83,7 @@ export function KineticPromise() {
   const phrase = 'YOUR BRAND · EVERY FEED · ALWAYS IN MOTION · '
   return <section className="kinetic-promise" aria-label="Your brand, every feed, always in motion">
     <div className="kinetic-line" aria-hidden="true"><span>{phrase}{phrase}</span><span>{phrase}{phrase}</span></div>
-    <div className="shell kinetic-copy" data-reveal><span className="kinetic-index">02 / SOCIAL ENGINE</span><h2>A social presence that<br /><em>doesn’t wait on you.</em></h2><p>Marketeer plans, creates, formats, schedules, and publishes from one shared source of truth—so your brand keeps showing up even when your calendar fills up.</p></div>
+    <div className="shell kinetic-copy" data-reveal><span className="kinetic-index">02 / SOCIAL ENGINE</span><h2>A social presence that<br /><em>doesn’t wait on you.</em></h2><p>macher.ki plans, creates, formats, schedules, and publishes from one shared source of truth—so your brand keeps showing up even when your calendar fills up.</p></div>
     <div className="kinetic-line reverse" aria-hidden="true"><span>{phrase}{phrase}</span><span>{phrase}{phrase}</span></div>
   </section>
 }
@@ -91,7 +91,7 @@ export function KineticPromise() {
 export function PlatformWall() {
   const doubled = [...socialMarks, ...socialMarks]
   return <section className="platform-wall section-light"><div className="shell platform-wall-grid">
-    <div className="platform-wall-copy" data-reveal><div className="eyebrow dark"><span>05</span> Bring every channel</div><h2>One brand brain.<br /><em>Everywhere it matters.</em></h2><p>Connect your official accounts once. Marketeer gives every network the native format it needs without losing what makes your brand recognizable.</p><a className="wall-link" href="?view=signup">Connect your channels <span>↗</span></a></div>
+    <div className="platform-wall-copy" data-reveal><div className="eyebrow dark"><span>05</span> Bring every channel</div><h2>One brand brain.<br /><em>Everywhere it matters.</em></h2><p>Connect your official accounts once. macher.ki gives every network the native format it needs without losing what makes your brand recognizable.</p><a className="wall-link" href="?view=signup">Connect your channels <span>↗</span></a></div>
     <div className="platform-columns" aria-label="Supported social platforms">
       <div className="platform-column up"><div>{doubled.map((item, index) => <article key={`${item.name}-a-${index}`}><span>{item.mark}</span><p><b>{item.name}</b><small>{item.detail}</small></p></article>)}</div></div>
       <div className="platform-column down"><div>{[...doubled].reverse().map((item, index) => <article key={`${item.name}-b-${index}`}><span>{item.mark}</span><p><b>{item.name}</b><small>{item.detail}</small></p></article>)}</div></div>

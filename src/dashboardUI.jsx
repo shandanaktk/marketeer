@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { t } from './i18n.js'
 import { useBrand } from './brandContext.js'
+import { MacherLoader } from './MacherBrand.jsx'
 
 function BrandAvatar({ brand }) {
   return brand.logo ? <span className="db-preview-avatar" style={{ backgroundImage: `url(${brand.logo})`, backgroundSize: 'cover', backgroundPosition: 'center', color: 'transparent' }}>{brand.initials}</span> : <span className="db-preview-avatar">{brand.initials}</span>
@@ -157,11 +158,11 @@ export function Modal({ title, onClose, children, wide = false, footer }) {
 }
 
 export function Spinner({ label, progress, detail }) {
-  return <div className="db-spinner-state"><img className="db-mascot db-loader-mark" src="/brand/mark.svg" alt="" /><h2>{label || t('Working on it…')}</h2><p>{detail || t('Marketeer is using your brand context and selections.')}</p><div className="db-progress"><i style={{ width: `${progress || 68}%` }} /></div></div>
+  return <div className="db-spinner-state"><MacherLoader size={64} className="db-loader-mark" /><h2>{label || t('Working on it…')}</h2><p>{detail || t('macher.ki is using your brand context and selections.')}</p><div className="db-progress"><i style={{ width: `${progress || 68}%` }} /></div></div>
 }
 
 export function LoadingState({ label }) {
-  return <div className="db-empty" aria-busy="true"><span><img className="db-mascot db-loader-mark" src="/brand/mark.svg" alt="" style={{ width: 34, height: 34 }} /></span><h3>{label || t('Loading…')}</h3><p>{t('Fetching the latest from your workspace.')}</p></div>
+  return <div className="db-empty" aria-busy="true"><span className="db-empty-loader"><MacherLoader size={30} /></span><h3>{label || t('Loading…')}</h3><p>{t('Fetching the latest from your workspace.')}</p></div>
 }
 
 export function ErrorState({ error, onRetry }) {

@@ -1,5 +1,5 @@
 // The AI employee: what the autopilot is doing, and the queue of finished work
-// waiting for the user's approval. This is the main way of operating Marketeer;
+// waiting for the user's approval. This is the main way of operating macher.ki;
 // the manual studios are the override layer.
 import { useEffect, useRef, useState } from 'react'
 import { formatDate, formatDateTime, stepLabel, t } from './i18n.js'
@@ -142,7 +142,7 @@ export function AiEmployee({ onGo, notify }) {
 
   return <>
     <section className="db-card db-ai-employee">
-      <header><div><span className="db-eyebrow"><Icon name="spark" size={14} /> {t('Your AI employee')}</span><h2>{t('Set up once. The work runs in the background.')}</h2><p>{t('Marketeer plans the calendar, creates and schedules posts, and turns every imported vacancy into a live Meta campaign. You approve posts and handle exceptions.')}</p></div></header>
+      <header><div><span className="db-eyebrow"><Icon name="spark" size={14} /> {t('Your AI employee')}</span><h2>{t('Set up once. The work runs in the background.')}</h2><p>{t('macher.ki plans the calendar, creates and schedules posts, and turns every imported vacancy into a live Meta campaign. You approve posts and handle exceptions.')}</p></div></header>
       <div className="db-ai-lanes"><ContentLane status={autopilot.data} onToggle={toggle} onRun={run} busy={busy} /><RecruitmentLane status={autopilot.data} onGo={onGo} /></div>
     </section>
     <section className="db-card db-review-queue">

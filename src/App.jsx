@@ -5,6 +5,7 @@ import LegalPage from './LegalPage.jsx'
 import { getMe, session } from './api.js'
 import { useTheme } from './theme.jsx'
 import { t, useLanguage } from './i18n.js'
+import { MacherIntro } from './MacherBrand.jsx'
 
 const VIEWS = ['signin', 'signup', 'onboarding', 'dashboard', 'auth-callback', 'privacy', 'terms']
 const PRIVATE = ['onboarding', 'dashboard']
@@ -48,9 +49,8 @@ export default function App() {
   const { language } = useLanguage()
 
   useEffect(() => {
-    document.title = language === 'de'
-      ? 'Marketeer — Content und Kampagnen für Personal Sigma Schwyz'
-      : 'Marketeer — Content and campaigns for Personal Sigma Schwyz'
+    // The claim stays German in every language (Brand Guidelines v2 · 02).
+    document.title = 'macher.ki — Weil es einer machen muss.'
   }, [language])
 
   useEffect(() => {
@@ -101,7 +101,7 @@ export default function App() {
 
   const checking = view === 'auth-callback' || (PRIVATE.includes(view) && verified !== view)
   if (checking) {
-    return <main className="app-boot" aria-busy="true"><img className="db-mascot db-loader-mark" src="/brand/mark.svg" alt="" /><p>{t('Opening your workspace…')}</p></main>
+    return <main className="app-boot" aria-busy="true"><MacherIntro short label={t('Opening your workspace…')} /><p>{t('Opening your workspace…')}</p></main>
   }
   const go = (next) => navigate(next === 'signin' && session.active() ? 'dashboard' : next)
   if (LEGAL.includes(view)) {

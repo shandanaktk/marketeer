@@ -1,0 +1,449 @@
+/* macher.ki — Brand Guidelines v2 (Nov 2026). Loaded last: logo system, motion,
+   website hero, client colours in the app, and Sora typography rules. */
+
+/* ── Typography: Sora · 600 logo & headings · 500 claim · 400 body ─────────── */
+body { font-family: var(--mk-font); font-weight: 400; }
+::selection { background: var(--macher-lime); color: var(--macher-ink); }
+:is(.mk-site, .db-dashboard, .ob-auth-page, .ob-onboarding-page, .mk-legal-page) :is(h1, h2, h3) {
+  font-family: var(--mk-font);
+  font-weight: 600;
+  letter-spacing: -.035em;
+}
+:is(.mk-site, .db-dashboard, .ob-auth-page, .ob-onboarding-page) :is(h1, h2, h3, h4) em { font-style: normal; }
+
+/* ── Symbol «three dots, then one» ─────────────────────────────────────────── */
+.macher-logo,
+.macher-loader,
+.macher-hero-mark {
+  --m-dot: var(--macher-dot, var(--macher-stone));
+  --m-body: var(--macher-body, var(--macher-ink));
+  --m-head: var(--macher-lime);
+  --m-text: var(--m-body);
+  --m-muted: #8b877e;
+}
+.macher-symbol { display: block; flex: none; height: 1em; width: auto; overflow: visible; }
+.macher-symbol .m-dot { fill: var(--m-dot); }
+.macher-symbol .m-body { fill: var(--m-body); }
+.macher-symbol .m-head { fill: var(--m-head); }
+
+/* tones — auto follows the theme; the rest are fixed backgrounds */
+.macher-tone-dark { --m-dot: var(--macher-graphite); --m-body: var(--macher-paper); --m-text: var(--macher-paper); --m-muted: #a39f95; }
+.macher-tone-light { --m-dot: var(--macher-stone); --m-body: var(--macher-ink); --m-text: var(--macher-ink); --m-muted: #77736b; }
+.macher-tone-lime { --m-dot: #8fae0e; --m-body: var(--macher-ink); --m-head: var(--macher-ink) !important; --m-text: var(--macher-ink); --m-muted: #3d4a06; }
+html[data-theme='dark'] .macher-tone-auto { --m-muted: #a39f95; }
+
+/* head + dot carry the client colour (co-branding level 1) */
+.macher-client { --m-head: var(--client-logo); }
+html[data-theme='dark'] .macher-client:not(.macher-tone-light):not(.macher-tone-lime),
+.macher-client.macher-tone-dark { --m-head: var(--client-dark); }
+
+/* ── Wordmark & lockups ────────────────────────────────────────────────────── */
+.macher-logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .48em;
+  font-size: var(--logo-size, 28px);
+  line-height: 1;
+  color: var(--m-text);
+  text-decoration: none;
+}
+.macher-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--m-text, currentColor);
+  font-family: var(--mk-font);
+  font-size: 1em;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: -.035em;
+  line-height: 1;
+  text-transform: none;
+  white-space: nowrap;
+}
+.macher-wordmark > span { color: inherit; letter-spacing: inherit; }
+/* The dot in «macher.ki» is a circle, not a period glyph, in the head colour. */
+.macher-wordmark-dot {
+  display: inline-block;
+  flex: none;
+  width: .2em;
+  height: .2em;
+  margin: 0 .05em 0 .07em;
+  border-radius: 50%;
+  background: var(--m-head, var(--macher-lime));
+}
+.macher-logo-text { display: inline-flex; flex-direction: column; align-items: flex-start; gap: .3em; }
+.macher-logo-claim { color: var(--m-muted); font-size: .3em; font-weight: 500; letter-spacing: -.005em; white-space: nowrap; }
+/* «für [client]» — Sora 500, 30 % of the logo size, grey */
+.macher-logo-for { max-width: 16em; overflow: hidden; color: var(--m-muted); font-size: .3em; font-weight: 500; letter-spacing: 0; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Level 2: client logo right of a 1 px line · max height = symbol · spacing = 2 × head Ø */
+.macher-cobrand {
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  height: 1em;
+  margin-left: .2em;
+  padding-left: .69em;
+  border-left: 1px solid color-mix(in srgb, var(--m-text) 22%, transparent);
+}
+.macher-cobrand img { display: block; max-height: 1em; max-width: 5em; object-fit: contain; }
+.macher-cobrand-name { max-width: 7em; font-size: .36em; font-weight: 600; line-height: 1.1; letter-spacing: -.01em; }
+
+/* Level 3 / 4: «powered by», 10–12 px, grey */
+.macher-powered {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .45em;
+  color: #8b877e;
+  font-family: var(--mk-font);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.macher-powered .macher-symbol { height: 1.15em; --m-dot: #b3aea3; --m-body: #8b877e; --m-head: var(--macher-lime); }
+.macher-powered > span:last-child { font-weight: 600; letter-spacing: -.02em; }
+
+/* White label partner mark */
+.macher-partner { display: inline-flex; align-items: center; gap: .45em; font-size: var(--logo-size, 26px); color: var(--app-ink); }
+.macher-partner img { display: block; height: 1.1em; width: auto; }
+.macher-partner i { display: grid; width: 1.75em; height: 1.75em; place-items: center; border-radius: .42em; background: var(--partner-color, var(--macher-ink)); color: #fff; font-size: .62em; font-style: normal; font-weight: 600; }
+.macher-partner b { font-size: .62em; font-weight: 600; letter-spacing: -.02em; white-space: nowrap; }
+
+/* ── Motion: the brand mechanic (3.5 s; app start 1.2 s) ────────────────────
+   0.0–0.5 dots appear (ease-out-back) · 0.5–1.0 they bob like a typing indicator ·
+   1.0–1.6 the doer rises, head pops · 1.6–2.0 tips forward ~10°, pivot at the foot ·
+   1.6–2.2 wordmark slides in, dot pops · 2.2–3.5 claim fades in. End frame = static logo. */
+.is-motion { --intro-dur: 3.5s; }
+.macher-intro.is-short .is-motion,
+.macher-intro.is-short { --intro-dur: 1.2s; }
+.is-motion :is(.m-dot, .m-body, .m-head, .m-doer) { transform-box: fill-box; animation-duration: var(--intro-dur); animation-fill-mode: both; animation-iteration-count: 1; }
+.is-motion .m-dot { transform-origin: 50% 50%; }
+.is-motion .m-dot-1 { animation-name: macher-dot-1; }
+.is-motion .m-dot-2 { animation-name: macher-dot-2; }
+.is-motion .m-dot-3 { animation-name: macher-dot-3; }
+.is-motion .m-body { transform-origin: 50% 100%; animation-name: macher-rise; }
+.is-motion .m-head { transform-origin: 50% 50%; animation-name: macher-head; }
+.is-motion .m-doer { transform-origin: 50% 100%; animation-name: macher-tip; }
+.macher-logo.is-motion .macher-wordmark { animation: macher-word var(--intro-dur) both; }
+.macher-logo.is-motion .macher-wordmark-dot { animation: macher-dot-pop var(--intro-dur) both; }
+.macher-logo.is-motion :is(.macher-logo-claim, .macher-logo-for) { animation: macher-claim var(--intro-dur) both; }
+
+@keyframes macher-dot-1 {
+  0% { transform: scale(0); animation-timing-function: cubic-bezier(.34, 1.56, .64, 1); }
+  5.7% { transform: scale(1); }
+  16% { transform: translateY(0); animation-timing-function: ease-out; }
+  19% { transform: translateY(-38%); animation-timing-function: ease-in; }
+  22% { transform: translateY(0); }
+  100% { transform: none; }
+}
+@keyframes macher-dot-2 {
+  0%, 4.3% { transform: scale(0); animation-timing-function: cubic-bezier(.34, 1.56, .64, 1); }
+  10% { transform: scale(1); }
+  19% { transform: translateY(0); animation-timing-function: ease-out; }
+  22% { transform: translateY(-38%); animation-timing-function: ease-in; }
+  25% { transform: translateY(0); }
+  100% { transform: none; }
+}
+@keyframes macher-dot-3 {
+  0%, 8.6% { transform: scale(0); animation-timing-function: cubic-bezier(.34, 1.56, .64, 1); }
+  14.3% { transform: scale(1); }
+  22% { transform: translateY(0); animation-timing-function: ease-out; }
+  25% { transform: translateY(-38%); animation-timing-function: ease-in; }
+  28.6% { transform: translateY(0); }
+  100% { transform: none; }
+}
+@keyframes macher-rise {
+  0%, 28.6% { transform: scaleY(0); animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
+  40% { transform: scaleY(1); }
+  100% { transform: none; }
+}
+@keyframes macher-head {
+  0%, 38% { transform: scale(0); animation-timing-function: cubic-bezier(.34, 1.56, .64, 1); }
+  45.7% { transform: scale(1); }
+  100% { transform: none; }
+}
+@keyframes macher-tip {
+  0%, 45.7% { transform: rotate(0); animation-timing-function: cubic-bezier(.4, 0, .2, 1); }
+  51.4% { transform: rotate(10deg); animation-timing-function: cubic-bezier(.34, 1.4, .64, 1); }
+  57.1% { transform: rotate(0); }
+  100% { transform: none; }
+}
+@keyframes macher-word {
+  0%, 45.7% { opacity: 0; transform: translateX(-.35em); }
+  62.9% { opacity: 1; transform: none; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes macher-dot-pop {
+  0%, 54% { transform: scale(0); }
+  59% { transform: scale(1.45); }
+  62.9%, 100% { transform: scale(1); }
+}
+@keyframes macher-claim {
+  0%, 62.9% { opacity: 0; transform: translateY(.4em); }
+  80%, 100% { opacity: 1; transform: none; }
+}
+
+/* Loader: the dots bob like a typing indicator — waiting. The doer stays upright. */
+.macher-loader { display: inline-flex; font-size: var(--logo-size, 40px); line-height: 1; }
+.macher-loader .m-dot { transform-box: fill-box; transform-origin: 50% 50%; animation: macher-wait 1.1s ease-in-out infinite; }
+.macher-loader .m-dot-2 { animation-delay: .14s; }
+.macher-loader .m-dot-3 { animation-delay: .28s; }
+@keyframes macher-wait { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-40%); } }
+
+.macher-intro { display: grid; place-items: center; }
+.app-boot { gap: 22px; background: var(--app-bg); color: var(--app-muted); }
+.app-boot > p { margin: 0; font-size: 13px; font-weight: 500; letter-spacing: 0; }
+
+/* The static mark never moves — only the motion branding does. */
+.db-mascot, .db-walker, .db-success-mascot { animation: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .is-motion, .is-motion *, .macher-loader .m-dot, .macher-hero.is-intro * { animation: none !important; }
+}
+
+/* ── Buttons (website) ─────────────────────────────────────────────────────── */
+.macher-btn {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: 600 15px/1 var(--mk-font);
+  letter-spacing: -.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, color .2s;
+}
+.macher-btn-lime { background: var(--macher-lime); color: var(--macher-ink); }
+.macher-btn-lime:hover { background: #c8e83a; }
+.macher-btn-ghost { border-color: #f4f2ec40; background: transparent; color: var(--macher-paper); }
+.macher-btn-ghost:hover { border-color: #f4f2ec99; }
+.macher-btn:focus-visible { outline: 2px solid var(--macher-lime); outline-offset: 3px; }
+
+.mk-button { border-radius: 8px; font-weight: 600; }
+.mk-button-orange, .mk-button-orange:hover { background: var(--macher-lime); color: var(--macher-ink); }
+.mk-button-orange:hover { background: #c8e83a; }
+
+/* ── Website navigation ────────────────────────────────────────────────────── */
+.mk-nav { border-bottom: 1px solid transparent; }
+.mk-nav-brand { display: inline-flex; align-items: center; color: inherit; text-decoration: none; }
+.mk-site:not(.mk-scrolled) .mk-nav .macher-logo,
+html[data-theme='dark'] .mk-nav .macher-logo,
+.mk-legal-hero .macher-logo { --m-dot: var(--macher-graphite); --m-body: var(--macher-paper); --m-text: var(--macher-paper); }
+.mk-nav-links a { color: inherit; font-size: 14px; font-weight: 500; opacity: .72; }
+.mk-nav-links a:hover { color: inherit; opacity: 1; }
+.mk-login { font-weight: 500 !important; }
+.mk-nav .mk-nav-signup, .mk-scrolled .mk-nav-signup { min-height: 36px; padding: 0 16px; background: var(--macher-lime); color: var(--macher-ink); font-size: 13px; font-weight: 600; }
+.mk-site:not(.mk-scrolled) .mk-nav { border-bottom-color: #f4f2ec14; }
+.mk-scrolled .mk-nav { background: var(--macher-paper); color: var(--macher-ink); box-shadow: 0 1px 0 #15151414; }
+html[data-theme='dark'] .mk-scrolled .mk-nav { background: var(--macher-ink); color: var(--macher-paper); box-shadow: 0 1px 0 #f4f2ec14; }
+.mk-site .mk-nav .lang-switch button.active,
+.db-top-actions .lang-switch button.active,
+.lang-switch button.active { background: var(--macher-lime); color: var(--macher-ink); }
+@media (max-width: 700px) {
+  .mk-nav-links { background: var(--macher-paper); color: var(--macher-ink); }
+  html[data-theme='dark'] .mk-nav-links { background: #1d1d1b; color: var(--macher-paper); }
+  .mk-nav .macher-logo { font-size: 20px !important; }
+}
+
+/* ── Website hero (06 · Website hero) ──────────────────────────────────────── */
+.macher-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: min(100svh, 900px);
+  padding: 112px 0 88px;
+  background: var(--macher-ink);
+  color: var(--macher-paper);
+  overflow: hidden;
+}
+.macher-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr);
+  align-items: center;
+  gap: clamp(32px, 6vw, 96px);
+  width: min(1240px, 100%);
+  margin: 0 auto;
+  padding: 0 clamp(20px, 6vw, 88px);
+  box-sizing: border-box;
+}
+.macher-hero-copy { max-width: 680px; }
+.macher-hero h1 {
+  margin: 0 !important;
+  color: var(--macher-paper);
+  font-size: clamp(44px, 6.6vw, 96px);
+  font-weight: 600;
+  letter-spacing: -.04em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.macher-hero h1 span { display: inline-block; }
+.macher-hero .macher-hero-sales {
+  max-width: 540px;
+  margin: 28px 0 0;
+  color: #b5b1a7;
+  font-size: clamp(17px, 1.45vw, 20px);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.macher-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+.macher-hero-mark {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 360px);
+  margin: 0;
+  padding-bottom: 46px;
+  --m-dot: var(--macher-graphite);
+  --m-body: var(--macher-paper);
+  --m-head: var(--macher-lime);
+}
+.macher-hero-mark .macher-symbol { width: 100%; height: auto; }
+.macher-hero-mark figcaption {
+  position: absolute;
+  inset: auto 0 0;
+  height: 22px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -.01em;
+}
+.macher-hero-mark figcaption span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.macher-hero-mark figcaption span:first-child { left: 30%; color: #77736b; }
+.macher-hero-mark figcaption span:last-child { left: 91.2%; color: var(--macher-paper); }
+
+/* Hero intro — once per session: the symbol plays the mechanic, the claim follows the doer. */
+.macher-hero.is-intro h1 { animation: macher-hero-in .8s cubic-bezier(.16, 1, .3, 1) 1.55s both; }
+.macher-hero.is-intro .macher-hero-sales { animation: macher-hero-in .8s cubic-bezier(.16, 1, .3, 1) 1.9s both; }
+.macher-hero.is-intro .macher-hero-actions { animation: macher-hero-in .8s cubic-bezier(.16, 1, .3, 1) 2.1s both; }
+.macher-hero.is-intro figcaption span:first-child { animation: macher-fade .6s ease .55s both; }
+.macher-hero.is-intro figcaption span:last-child { animation: macher-fade .6s ease 1.7s both; }
+.macher-intro-run .mk-nav { animation: macher-fade .6s ease 2.2s both; }
+@keyframes macher-hero-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes macher-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* The marquee no longer overlaps the hero; it reads the launch focus. */
+.mk-marquee { margin-top: 0 !important; background: var(--macher-lime); color: var(--macher-ink); }
+.mk-marquee-group > span { font-weight: 600; letter-spacing: -.03em; }
+.macher-marquee-dot { display: inline-block; width: .28em; height: .28em; border-radius: 50%; background: var(--macher-ink); font-size: inherit !important; }
+
+@media (max-width: 900px) {
+  .macher-hero { min-height: 0; padding: 120px 0 72px; }
+  .macher-hero-inner { grid-template-columns: 1fr; gap: 56px; }
+  .macher-hero-mark { width: min(64%, 230px); justify-self: start; }
+}
+@media (max-width: 480px) {
+  .macher-hero-actions .macher-btn { flex: 1 1 100%; }
+  .macher-hero-mark figcaption { font-size: 12px; }
+}
+
+/* ── Rest of the website ───────────────────────────────────────────────────── */
+.mk-split article.lime { background: var(--macher-lime); color: var(--macher-ink); }
+.mk-giant-word .macher-wordmark, .mk-footer-display .macher-wordmark { --m-head: var(--macher-lime); color: inherit; letter-spacing: -.05em; }
+.mk-giant-word .macher-wordmark-dot, .mk-footer-display .macher-wordmark-dot { opacity: .5; }
+.mk-footer-display { text-transform: none; }
+.macher-final-claim { margin: 26px 0 0; color: #a39f95; font-size: clamp(16px, 1.5vw, 19px); font-weight: 500; text-align: inherit; }
+.mk-final .macher-final-claim { position: relative; z-index: 1; }
+.mk-footer-brand-link { display: inline-flex; color: inherit; text-decoration: none; }
+.mk-footer .macher-logo-claim { font-size: .42em; }
+.mk-demo-brand .macher-logo { vertical-align: middle; }
+.mk-legal-brand .macher-logo, .mk-legal-nav .macher-logo { font-size: 22px; }
+
+/* ── Product: login & onboarding ───────────────────────────────────────────── */
+.macher-home-link,
+.ob-wordmark.macher-home-link,
+.db-sidebar-brand > button.macher-home-link {
+  display: inline-flex !important;
+  align-items: center;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  transform: none !important;
+  cursor: pointer;
+}
+.ob-wordmark.macher-home-link span,
+.db-sidebar-brand > button.macher-home-link span {
+  margin-left: 0 !important;
+  color: inherit !important;
+  letter-spacing: inherit !important;
+  font-family: var(--mk-font) !important;
+}
+.db-sidebar-brand > button.macher-home-link .macher-logo-for { color: var(--m-muted) !important; letter-spacing: 0 !important; }
+.ob-wordmark.macher-home-link .macher-logo-for { color: var(--m-muted) !important; }
+.macher-auth-claim { margin: 16px 0 0; color: var(--app-muted); font-size: 13px; font-weight: 500; text-align: center; }
+.ob-powered { display: flex; justify-content: center; margin-top: 14px; }
+
+/* Login button per reference: Ink, the head-colour dot in front. */
+html[data-theme='light'] .ob-primary.ob-auth-submit { background: var(--macher-ink) !important; color: var(--macher-paper) !important; }
+html[data-theme='light'] .ob-primary.ob-auth-submit:hover { background: #2a2a27 !important; }
+.ob-auth-submit > span::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: var(--client-logo);
+  vertical-align: .08em;
+}
+html[data-theme='dark'] .ob-auth-submit > span::before { background: var(--macher-ink); }
+
+.ob-client-preview { margin-top: 22px; padding: 16px; border: 1px solid var(--app-line); border-radius: 12px; background: #fff; color: var(--macher-ink); }
+.ob-client-preview .ob-field-label { color: #6e6a62; }
+.ob-client-preview-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0 14px; }
+.ob-client-chip { padding: 5px 10px; border-radius: 6px; background: var(--client-ui); color: var(--client-on); font-size: 12px; font-weight: 600; }
+.ob-client-preview dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.ob-client-preview dl > div { min-width: 0; }
+.ob-client-preview dt { color: #77736b; font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+.ob-client-preview dd { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.ob-client-preview dd i { width: 14px; height: 14px; flex: none; border-radius: 4px; box-shadow: inset 0 0 0 1px #0000001a; }
+.ob-client-preview small { display: block; margin-top: 10px; color: #77736b; font-size: 12px; }
+
+/* ── Product: dashboard (co-branding level 1, client colour as UI accent) ──── */
+html[data-theme] .db-dashboard { --db-lime: var(--client-dark); --db-on: var(--client-on-dark); }
+html[data-theme='light'] .db-dashboard { --db-lime: var(--client-ui); --db-on: var(--client-on); }
+.db-sidebar-brand { align-items: center; height: 46px; }
+.db-sidebar-brand .db-brand-full { display: inline-flex; min-width: 0; }
+.db-brand-mark { display: none; }
+.db-dashboard.sidebar-closed .db-sidebar-brand > button:first-child > .db-brand-mark { display: inline-flex; }
+.db-dashboard.sidebar-closed .db-sidebar-brand > button:first-child > .db-brand-full { display: none; }
+.db-greeting-mark { display: flex; align-items: flex-end; justify-content: center; width: 250px; height: 220px; flex: 0 0 auto; }
+.db-greeting-mark .macher-logo { font-size: 150px; }
+.db-loader-mark { margin: 0 auto 10px; }
+.db-empty-loader { display: grid; place-items: center; background: transparent !important; }
+
+html[data-theme] .db-button:not(.secondary):not(.ghost):not(.soft):not(.danger),
+html[data-theme] .db-button.primary,
+html[data-theme] .ob-primary {
+  color: var(--db-on, var(--macher-ink)) !important;
+  background: var(--db-lime, var(--macher-lime)) !important;
+}
+html[data-theme] .db-button:not(.secondary):not(.ghost):not(.soft):not(.danger):hover,
+html[data-theme] .ob-primary:hover { background: color-mix(in srgb, var(--db-lime, var(--macher-lime)) 86%, #000) !important; }
+html[data-theme] .ob-primary { --db-lime: var(--macher-lime); --db-on: var(--macher-ink); }
+html[data-theme] .db-nav-group > button.active { background: color-mix(in srgb, var(--db-lime) 14%, transparent); }
+html[data-theme] .db-nav-group > button.active::before,
+html[data-theme] .db-progress i,
+html[data-theme] .db-nav-group > button.active > span { background: var(--db-lime); box-shadow: none; }
+html[data-theme] .db-nav-group > button.active > span { color: var(--db-on); }
+html[data-theme] .db-workspace > span,
+html[data-theme] .db-top-avatar,
+html[data-theme] .db-profile > span { background: var(--db-lime); color: var(--db-on); }
+.db-optimize-page .db-mode-switch button.active,
+.db-optimize-page .db-scope-bar > button.active,
+.db-lead-tabs button.active { color: var(--db-on) !important; background: var(--db-lime) !important; border-color: transparent !important; }
+html[data-theme='light'] .db-dashboard :is(.db-date-tile,.db-nav-group>button>i,.db-mode-switch button.active,.db-folder-pills button.active,.db-card-title>div>span,.db-toast>span,.db-preview-avatar,.db-spinner-state>span,.db-flow-stepper li.active>span,.db-action-card span.lime,.db-creative-variants article>button>i,.db-format-picker>button>i,.db-copy-variants article.selected .db-select-check,.db-recommendation-list article.selected .db-select-check) { color: var(--db-on); }
+.db-dashboard { --db-sidebar-brand-ink: var(--app-ink); }
+html[data-theme] .db-sidebar-brand > button:first-child { color: var(--app-ink); }
+
+/* Lime text never sits on light backgrounds — Lime dark is the UI accent there. */
+html[data-theme='light'] :is(.ob-auth-story h1 em, .ob-screen-heading h1 em, .ob-auth-heading .ob-mini-index, .ob-kicker > span) { color: var(--macher-lime-dark) !important; }
+.ob-auth-submit { text-transform: none !important; letter-spacing: -.01em !important; font-size: 15px !important; font-weight: 600 !important; }
+.global-controls .theme-button { background: var(--app-panel); color: var(--app-ink); border: 1px solid var(--app-line); }
+html[data-theme] .db-dashboard .db-nav-group > button > i { background: var(--db-lime); color: var(--db-on); }
+html[data-theme] .db-dashboard .db-top-actions .lang-switch button.active { background: var(--db-lime); color: var(--db-on); }

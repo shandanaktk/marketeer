@@ -4,70 +4,76 @@ import { ThemeButton } from './theme.jsx'
 import { Arrow, SocialMark } from './landingIcons.jsx'
 import { workflowSteps } from './landingMockData.js'
 import ProductShowcase from './ProductShowcase.jsx'
+import { MECHANIC, MacherLogo, MacherSymbol, MacherWordmark } from './MacherBrand.jsx'
 
-function Wordmark() {
-  return <span className="mk-wordmark">marketeer<span>.</span></span>
+// Brand mechanic plays as the hero intro once per session (Brand Guidelines v2 · 07 Motion).
+const INTRO_KEY = 'macher-intro-seen'
+function shouldPlayIntro() {
+  try {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+    return !window.sessionStorage.getItem(INTRO_KEY)
+  } catch { return false }
 }
 
 function Nav({ navigate, theme, onToggleTheme }) {
   const [open, setOpen] = useState(false)
   const links = [
-    [t('Platform'), 'platform'],
-    [t('Content'), 'content'],
+    [t('What macher does'), 'platform'],
     [t('Meta ads'), 'meta'],
     [t('How it works'), 'how'],
     [t('Quality'), 'quality'],
   ]
   return (
     <header className="mk-nav">
-      <a href="#top" aria-label={t('Marketeer home')} onClick={() => setOpen(false)}><Wordmark /></a>
+      <a className="mk-nav-brand" href="#top" aria-label={t('macher.ki home')} onClick={() => setOpen(false)}><MacherLogo size={22} /></a>
       <nav className={open ? 'mk-nav-links open' : 'mk-nav-links'} aria-label={t('Main navigation')}>
         {links.map(([label, id]) => <a key={id} href={`#${id}`} onClick={() => setOpen(false)}>{label}</a>)}
       </nav>
       <div className="mk-nav-actions">
         <LanguageButton />
         <ThemeButton theme={theme} onToggle={onToggleTheme} />
-        <button className="mk-button mk-nav-signup" onClick={() => navigate('signup')}>{t('Sign up')} <Arrow /></button>
         <button className="mk-login" onClick={() => navigate('signin')}>{t('Login')}</button>
+        <button className="mk-button mk-button-orange mk-nav-signup" onClick={() => navigate('signup')}>{t('Get started')}</button>
         <button className="mk-menu-toggle" aria-label={open ? t('Close menu') : t('Open menu')} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? '×' : '☰'}</button>
       </div>
     </header>
   )
 }
 
-function Hero({ navigate }) {
+// Website hero — Brand Guidelines v2 · 06. Claim always German; the symbol stands on the right.
+function Hero({ navigate, intro }) {
   return (
-    <section className="mk-hero" id="top">
-      <div className="mk-hero-photo" aria-hidden="true">
-        <img src="/brand/walk-sunrise.jpg" alt="" fetchPriority="high" />
-      </div>
-      <div className="mk-hero-copy">
-        <p className="mk-hero-eyebrow">{t('Built for Personal Sigma Schwyz')}</p>
-        <h1>
-          <span><b>{t('Competent. Regional.')}</b></span>
-          <span className="mk-headline-highlight"><b>{t('Personal — now digital.')}</b></span>
-        </h1>
-        <p className="mk-hero-description">{t('Content and Meta campaigns that sound like your team: close to the market, clear with people, and at home in Central Switzerland.')}</p>
-        <div className="mk-hero-facts">
-          <span>{t('German first')}</span>
-          <span>CHF</span>
-          <span>Europe/Zurich</span>
-          <span>{t('Schwyz')}</span>
+    <section className={`macher-hero ${intro ? 'is-intro' : ''}`} id="top">
+      <div className="macher-hero-inner">
+        <div className="macher-hero-copy">
+          <h1 lang="de">Weil es einer <span>machen muss.</span></h1>
+          <p className="macher-hero-sales">
+            {t('The digital AI employee for automated business processes.')}{' '}
+            {t('Starts with recruiting: job ads, campaigns, applications – done.')}
+          </p>
+          <div className="macher-hero-actions">
+            <button className="macher-btn macher-btn-lime" type="button" onClick={() => navigate('signup')}>{t('Get started')}</button>
+            <a className="macher-btn macher-btn-ghost" href="#how">{t('How it works')}</a>
+          </div>
         </div>
-        <button className="mk-button mk-button-orange" onClick={() => navigate('signup')}>{t('Open your workspace')} <Arrow /></button>
+        <figure className="macher-hero-mark" aria-hidden="true">
+          <MacherSymbol motion={intro} />
+          <figcaption lang="de"><span>{MECHANIC[0]}</span><span>{MECHANIC[1]}</span></figcaption>
+        </figure>
       </div>
     </section>
   )
 }
 
+// Launch focus, as verbs: «Schreibt Inserate, schaltet Kampagnen, sortiert und bewertet Bewerbungen».
 function Marquee() {
-  const words = [t('Competent'), t('Regional'), t('Personal'), t('Individual'), t('Smart'), t('Passionate')]
+  const words = [t('Writes job ads'), t('Runs campaigns'), t('Sorts applications'), t('Scores applications'), t('Plans content'), t('Reports results')]
   return (
-    <div className="mk-marquee" aria-label={t('Personal Sigma in six words')}>
+    <div className="mk-marquee" aria-label={t('What macher does')}>
       <div className="mk-marquee-track" aria-hidden="true">
         {[0, 1, 2, 3].map((copy) => (
           <div className="mk-marquee-group" key={copy}>
-            {words.map((word) => <span key={word}>{word}<i>+</i></span>)}
+            {words.map((word) => <span key={word}>{word}<i className="macher-marquee-dot" /></span>)}
           </div>
         ))}
       </div>
@@ -144,7 +150,7 @@ function Statement({ navigate }) {
           ))}
         </div>
       </div>
-      <div className="mk-giant-word" aria-hidden="true"><span>MARKETEER</span><span>MARKETEER</span></div>
+      <div className="mk-giant-word" aria-hidden="true"><span><MacherWordmark /></span><span><MacherWordmark /></span></div>
     </section>
   )
 }
@@ -222,7 +228,7 @@ function Quality() {
       <img src="/brand/swissstaffing-label.png" alt={t('swissstaffing quality label')} />
       <div>
         <h2>{t('We live quality.')}</h2>
-        <p>{t('Personal Sigma is a swissstaffing member. Marketeer follows that same standard: clear, careful, and made for the Swiss staffing market.')}</p>
+        <p>{t('Personal Sigma is a swissstaffing member. macher.ki follows that same standard: clear, careful, and made for the Swiss staffing market.')}</p>
       </div>
     </section>
   )
@@ -265,7 +271,7 @@ function Region() {
       <div>
         <span className="mk-overline">{t('Central Switzerland')}</span>
         <h2>{t('Close to the people we work with.')}</h2>
-        <p>{t('Personal Sigma Schwyz AG, Rickenbachstrasse 1, 6430 Schwyz. Marketeer uses CHF, German, and Europe/Zurich so the product matches the office — not a generic test market.')}</p>
+        <p>{t('Personal Sigma Schwyz AG, Rickenbachstrasse 1, 6430 Schwyz. macher.ki uses CHF, German, and Europe/Zurich so the product matches the office — not a generic test market.')}</p>
         <ul>{places.map((place) => <li key={place}>{place}</li>)}</ul>
       </div>
     </section>
@@ -342,18 +348,13 @@ function HowItWorks() {
 
 export default function LandingPage({ navigate, theme, onToggleTheme }) {
   const root = useRef(null)
-  const [loading, setLoading] = useState(true)
+  const [intro] = useState(shouldPlayIntro)
   const [paused, setPaused] = useState(false)
   useEffect(() => {
-    let live = true
-    const timer = setTimeout(() => { if (live) setLoading(false) }, 900)
-    return () => { live = false; clearTimeout(timer) }
-  }, [])
-  useEffect(() => {
-    if (loading) return
+    try { window.sessionStorage.setItem(INTRO_KEY, '1') } catch { /* storage unavailable */ }
     const target = document.getElementById(window.location.hash.slice(1))
     if (target) target.scrollIntoView({ behavior: 'instant' })
-  }, [loading])
+  }, [])
   useEffect(() => {
     const element = root.current
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -366,7 +367,7 @@ export default function LandingPage({ navigate, theme, onToggleTheme }) {
       current += (target - current) * .095
       if (Math.abs(target - current) < .1) current = target
       const motion = !reduce.matches && !paused
-      const heroHeight = element.querySelector('.mk-hero').offsetHeight
+      const heroHeight = element.querySelector('.macher-hero').offsetHeight
       const progress = motion ? Math.min(current / (heroHeight * .8), 1) : 0
       element.style.setProperty('--hero-progress', progress.toFixed(4))
       const gallery = element.querySelector('.mk-gallery-window')
@@ -386,18 +387,11 @@ export default function LandingPage({ navigate, theme, onToggleTheme }) {
     return () => { observer.disconnect(); cancelAnimationFrame(frame); window.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule); reduce.removeEventListener('change', schedule) }
   }, [paused])
   return (
-    <div ref={root} className={`mk-site ${loading ? 'mk-loading' : 'mk-loaded'} ${paused ? 'mk-paused' : ''}`}>
-      {loading && (
-        <div className="mk-loader" role="status" aria-label={t('Loading Marketeer')}>
-          <Wordmark />
-          <div><i /></div>
-          <small>{t('PERSONAL SIGMA SCHWYZ')}</small>
-        </div>
-      )}
+    <div ref={root} className={`mk-site mk-loaded ${intro ? 'macher-intro-run' : ''} ${paused ? 'mk-paused' : ''}`}>
       <a className="mk-skip-link" href="#main">{t('Skip to content')}</a>
       <Nav navigate={navigate} theme={theme} onToggleTheme={onToggleTheme} />
       <main id="main">
-        <Hero navigate={navigate} />
+        <Hero navigate={navigate} intro={intro} />
         <Marquee />
         <Statement navigate={navigate} />
         <Split navigate={navigate} />
@@ -414,16 +408,16 @@ export default function LandingPage({ navigate, theme, onToggleTheme }) {
             <h2>{t('You’ve got the market.')}<br /><span>{t('Let’s get the stories out.')}</span></h2>
             <button className="mk-button mk-button-orange" onClick={() => navigate('signup')}>{t('Let’s make things happen')} <Arrow /></button>
           </div>
-          <div className="mk-footer-display" aria-hidden="true">MARKETEER</div>
+          <div className="mk-footer-display" aria-hidden="true"><MacherWordmark /></div>
         </section>
       </main>
       <footer className="mk-footer">
-        <a href="#top"><Wordmark /></a>
+        <a className="mk-footer-brand-link" href="#top" aria-label={t('Back to top ↑')}><MacherLogo size={24} tone="dark" tagline /></a>
         <nav className="mk-footer-links" aria-label={t('Legal')}>
           <button type="button" onClick={() => navigate('privacy')}>{t('Privacy')}</button>
           <button type="button" onClick={() => navigate('terms')}>{t('Terms')}</button>
         </nav>
-        <span>{t('© 2026 Marketeer · Personal Sigma Schwyz AG')}</span>
+        <span>{t('© 2026 macher.ki · Personal Sigma Schwyz AG')}</span>
         <button type="button" onClick={() => setPaused(!paused)} aria-pressed={paused}>{paused ? t('▶ Resume motion') : t('Ⅱ Pause motion')}</button>
         <a href="#top">{t('Back to top ↑')}</a>
       </footer>

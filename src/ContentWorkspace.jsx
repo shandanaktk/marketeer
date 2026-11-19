@@ -153,7 +153,7 @@ function BriefStep({ prompt, setPrompt, format, setFormat, platforms, setPlatfor
   return (
     <div className="db-create-brief-layout">
       <section className="db-card db-brief-main">
-        <div className="db-section-heading"><span><Icon name="spark" size={18} /></span><div><h2>{t('Start with the idea')}</h2><p>{t('Describe the post in your own words. Marketeer will build the visual, caption, and hashtags around it.')}</p></div></div>
+        <div className="db-section-heading"><span><Icon name="spark" size={18} /></span><div><h2>{t('Start with the idea')}</h2><p>{t('Describe the post in your own words. macher.ki will build the visual, caption, and hashtags around it.')}</p></div></div>
         {reel
           ? <PromptField label={t('What should happen in this reel?')} hint={t('A short motion brief in plain words: who or what is on screen, what happens, and where. Refine prompt fills in the camera, light and pace.')} value={prompt} onChange={setPrompt} format={format} notify={notify} placeholder={t('Example: A young carpenter planes a wooden board in a sunny workshop, sawdust in the air, then looks up and smiles.')} />
           : <PromptField label={t('What should this post communicate?')} hint={t('The clearer the goal, offer, and audience, the stronger the first draft.')} value={prompt} onChange={setPrompt} format={format} notify={notify} placeholder={t('Example: Announce our autumn collection with a calm, editorial feel. Focus on considered materials and invite people to explore the full edit.')} />}

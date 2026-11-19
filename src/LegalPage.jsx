@@ -2,16 +2,13 @@ import { useEffect } from 'react'
 import { LanguageButton, t } from './i18n.js'
 import { ThemeButton } from './theme.jsx'
 import { Arrow } from './landingIcons.jsx'
-
-function Wordmark() {
-  return <span className="mk-wordmark">marketeer<span>.</span></span>
-}
+import { MacherLogo } from './MacherBrand.jsx'
 
 const privacySections = [
   {
     title: 'Who we are',
     body: [
-      'Marketeer (“we”, “us”, or “our”) provides an AI-powered platform for creating social content, planning campaigns, and launching Meta ads. This Privacy Policy explains how we collect, use, store, and share information when you visit our website or use our product.',
+      'macher.ki (“we”, “us”, or “our”) provides an AI-powered platform for creating social content, planning campaigns, and launching Meta ads. This Privacy Policy explains how we collect, use, store, and share information when you visit our website or use our product.',
       'If you have questions about this policy, contact us at privacy@marketeer.app.',
     ],
   },
@@ -28,7 +25,7 @@ const privacySections = [
   {
     title: 'How we use your information',
     body: [
-      'Provide, personalize, and improve Marketeer — including AI content generation, scheduling, collaboration, and Meta campaign tools.',
+      'Provide, personalize, and improve macher.ki — including AI content generation, scheduling, collaboration, and Meta campaign tools.',
       'Authenticate your account, secure the service, prevent abuse, and troubleshoot issues.',
       'Communicate with you about product updates, security notices, and (with your consent where required) marketing messages you can opt out of at any time.',
       'Comply with legal obligations and enforce our Terms of Service.',
@@ -37,16 +34,16 @@ const privacySections = [
   {
     title: 'AI processing',
     body: [
-      'Marketeer uses AI models to generate captions, creatives, campaign suggestions, and related outputs from the brand and campaign inputs you provide. We process that content to deliver the features you request.',
+      'macher.ki uses AI models to generate captions, creatives, campaign suggestions, and related outputs from the brand and campaign inputs you provide. We process that content to deliver the features you request.',
       'We do not sell your content. Where we use third-party model providers, we do so under contracts that restrict use of your data to providing the service to us and you.',
     ],
   },
   {
     title: 'How we share information',
     body: [
-      'Service providers that help us host, authenticate, process payments, send email, store media, or run AI features — only as needed to operate Marketeer.',
+      'Service providers that help us host, authenticate, process payments, send email, store media, or run AI features — only as needed to operate macher.ki.',
       'Connected platforms (such as Meta) when you choose to publish content or run ads through those integrations.',
-      'Professional advisors or authorities when required by law, or to protect the rights, safety, and security of Marketeer, our users, or the public.',
+      'Professional advisors or authorities when required by law, or to protect the rights, safety, and security of macher.ki, our users, or the public.',
       'A successor entity if we are involved in a merger, acquisition, or asset sale, subject to appropriate confidentiality and notice where required.',
       'We do not sell your personal information.',
     ],
@@ -54,7 +51,7 @@ const privacySections = [
   {
     title: 'Cookies and similar technologies',
     body: [
-      'We use cookies and similar technologies for authentication, preferences (such as theme), analytics, and security. You can control cookies through your browser settings. Disabling some cookies may limit how Marketeer works.',
+      'We use cookies and similar technologies for authentication, preferences (such as theme), analytics, and security. You can control cookies through your browser settings. Disabling some cookies may limit how macher.ki works.',
     ],
   },
   {
@@ -86,7 +83,7 @@ const privacySections = [
   {
     title: 'Children',
     body: [
-      'Marketeer is not directed to children under 16, and we do not knowingly collect personal information from them. If you believe a child has provided us data, contact us and we will take appropriate steps to delete it.',
+      'macher.ki is not directed to children under 16, and we do not knowingly collect personal information from them. If you believe a child has provided us data, contact us and we will take appropriate steps to delete it.',
     ],
   },
   {
@@ -101,14 +98,14 @@ const termsSections = [
   {
     title: 'Agreement to these terms',
     body: [
-      'These Terms of Service (“Terms”) govern your access to and use of Marketeer’s website, product, and related services (the “Service”). By creating an account or using Marketeer, you agree to these Terms and our Privacy Policy.',
-      'If you use Marketeer on behalf of a company or other entity, you represent that you have authority to bind that entity, and “you” refers to that entity.',
+      'These Terms of Service (“Terms”) govern your access to and use of macher.ki’s website, product, and related services (the “Service”). By creating an account or using macher.ki, you agree to these Terms and our Privacy Policy.',
+      'If you use macher.ki on behalf of a company or other entity, you represent that you have authority to bind that entity, and “you” refers to that entity.',
     ],
   },
   {
     title: 'The service',
     body: [
-      'Marketeer helps you create social content, manage brand workspaces, collaborate with teammates, and launch and monitor Meta advertising campaigns. Features may change as we improve the product.',
+      'macher.ki helps you create social content, manage brand workspaces, collaborate with teammates, and launch and monitor Meta advertising campaigns. Features may change as we improve the product.',
       'Some capabilities depend on third-party platforms (for example Meta, Facebook, and Instagram). Their availability, policies, and APIs are outside our control.',
     ],
   },
@@ -116,20 +113,20 @@ const termsSections = [
     title: 'Accounts and eligibility',
     body: [
       'You must provide accurate account information and keep it up to date. You are responsible for safeguarding your credentials and for activity under your account.',
-      'You must be at least 16 years old (or the minimum age of digital consent in your country) to use Marketeer. The Service is intended for business and professional use.',
+      'You must be at least 16 years old (or the minimum age of digital consent in your country) to use macher.ki. The Service is intended for business and professional use.',
     ],
   },
   {
     title: 'Acceptable use',
     body: [
-      'You agree not to misuse the Service. That includes not: violating laws or platform policies; uploading unlawful, harmful, or infringing content; attempting to access systems or data without authorization; interfering with the Service; reverse engineering except where allowed by law; or using Marketeer to send spam or deceptive advertising.',
-      'You are solely responsible for the content, ads, targeting, and claims you publish through Marketeer, including compliance with advertising, consumer protection, and platform rules.',
+      'You agree not to misuse the Service. That includes not: violating laws or platform policies; uploading unlawful, harmful, or infringing content; attempting to access systems or data without authorization; interfering with the Service; reverse engineering except where allowed by law; or using macher.ki to send spam or deceptive advertising.',
+      'You are solely responsible for the content, ads, targeting, and claims you publish through macher.ki, including compliance with advertising, consumer protection, and platform rules.',
     ],
   },
   {
     title: 'Your content and licenses',
     body: [
-      'You retain ownership of the content, brand assets, and materials you submit to Marketeer (“Customer Content”).',
+      'You retain ownership of the content, brand assets, and materials you submit to macher.ki (“Customer Content”).',
       'You grant us a worldwide, non-exclusive license to host, process, transmit, and display Customer Content solely to provide and improve the Service, including generating AI outputs you request.',
       'You represent that you have the rights needed to submit Customer Content and to grant the license above.',
     ],
@@ -159,14 +156,14 @@ const termsSections = [
   {
     title: 'Intellectual property',
     body: [
-      'Marketeer, including its software, design, trademarks, and documentation, is owned by us or our licensors. These Terms do not grant you any right to our branding except as needed to use the Service.',
+      'macher.ki, including its software, design, trademarks, and documentation, is owned by us or our licensors. These Terms do not grant you any right to our branding except as needed to use the Service.',
       'Feedback you share may be used by us without obligation to you.',
     ],
   },
   {
     title: 'Suspension and termination',
     body: [
-      'You may stop using Marketeer at any time and may request account closure by contacting us.',
+      'You may stop using macher.ki at any time and may request account closure by contacting us.',
       'We may suspend or terminate access if you breach these Terms, create risk or legal exposure, or if we discontinue the Service. We will try to provide notice when reasonable.',
       'Upon termination, your right to use the Service ends. Provisions that by nature should survive (including ownership, disclaimers, and limitations of liability) will survive.',
     ],
@@ -181,14 +178,14 @@ const termsSections = [
   {
     title: 'Limitation of liability',
     body: [
-      'TO THE MAXIMUM EXTENT PERMITTED BY LAW, MARKETEER AND ITS AFFILIATES WILL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR FOR LOST PROFITS, REVENUE, DATA, OR GOODWILL.',
+      'TO THE MAXIMUM EXTENT PERMITTED BY LAW, MACHER.KI AND ITS AFFILIATES WILL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR FOR LOST PROFITS, REVENUE, DATA, OR GOODWILL.',
       'OUR TOTAL LIABILITY FOR ANY CLAIM ARISING OUT OF OR RELATED TO THE SERVICE WILL NOT EXCEED THE AMOUNTS YOU PAID US FOR THE SERVICE IN THE TWELVE MONTHS BEFORE THE CLAIM, OR ONE HUNDRED US DOLLARS IF YOU HAVE NOT HAD A PAID PLAN.',
     ],
   },
   {
     title: 'Indemnity',
     body: [
-      'You will defend and indemnify Marketeer and its affiliates against claims, damages, and expenses arising from your Customer Content, your use of the Service, your ads or publications, or your breach of these Terms or applicable law.',
+      'You will defend and indemnify macher.ki and its affiliates against claims, damages, and expenses arising from your Customer Content, your use of the Service, your ads or publications, or your breach of these Terms or applicable law.',
     ],
   },
   {
@@ -208,8 +205,8 @@ const termsSections = [
 function LegalNav({ page, navigate, theme, onToggleTheme }) {
   return (
     <header className="mk-nav mk-legal-nav">
-      <button type="button" className="mk-legal-brand" aria-label={t('Marketeer home')} onClick={() => navigate('home')}>
-        <Wordmark />
+      <button type="button" className="mk-legal-brand" aria-label={t('macher.ki home')} onClick={() => navigate('home')}>
+        <MacherLogo size={22} />
       </button>
       <nav className="mk-legal-nav-links" aria-label={t('Legal pages')}>
         <button type="button" className={page === 'privacy' ? 'is-active' : ''} onClick={() => navigate('privacy')}>{t('Privacy')}</button>
@@ -230,16 +227,16 @@ export default function LegalPage({ page, navigate, theme, onToggleTheme }) {
   const title = isPrivacy ? t('Privacy Policy') : t('Terms of Service')
   const eyebrow = isPrivacy ? t('YOUR DATA, YOUR CONTROL') : t('THE FINE PRINT, MADE CLEAR')
   const intro = isPrivacy
-    ? t('How Marketeer collects, uses, and protects information when you use our product and website.')
-    : t('The rules for using Marketeer — your account, content, AI features, and what we both agree to.')
+    ? t('How macher.ki collects, uses, and protects information when you use our product and website.')
+    : t('The rules for using macher.ki — your account, content, AI features, and what we both agree to.')
   const sections = isPrivacy ? privacySections : termsSections
   const other = isPrivacy
     ? { label: 'Terms of Service', view: 'terms' }
     : { label: 'Privacy Policy', view: 'privacy' }
 
   useEffect(() => {
-    document.title = `${title} · Marketeer`
-    return () => { document.title = 'Marketeer' }
+    document.title = `${title} · macher.ki`
+    return () => { document.title = 'macher.ki' }
   }, [title])
 
   return (
@@ -282,14 +279,14 @@ export default function LegalPage({ page, navigate, theme, onToggleTheme }) {
         </div>
       </main>
       <footer className="mk-footer">
-        <button type="button" className="mk-footer-brand" onClick={() => navigate('home')} aria-label={t('Marketeer home')}>
-          <Wordmark />
+        <button type="button" className="mk-footer-brand" onClick={() => navigate('home')} aria-label={t('macher.ki home')}>
+          <MacherLogo size={24} tone="dark" tagline />
         </button>
         <nav className="mk-footer-links" aria-label={t('Legal')}>
           <button type="button" className={isPrivacy ? 'is-active' : ''} onClick={() => navigate('privacy')}>{t('Privacy')}</button>
           <button type="button" className={!isPrivacy ? 'is-active' : ''} onClick={() => navigate('terms')}>{t('Terms')}</button>
         </nav>
-        <span>{t('© 2026 Marketeer. Made for your next move.')}</span>
+        <span>{t('© 2026 macher.ki. Made for your next move.')}</span>
         <button type="button" className="mk-footer-top" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           {t('Back to top ↑')}
         </button>

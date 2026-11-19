@@ -1,4 +1,4 @@
-// The one network layer for the app. Every screen talks to the Marketeer API
+// The one network layer for the app. Every screen talks to the macher.ki API
 // through these functions; nothing renders placeholder records.
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DEFAULT_CURRENCY, TIMEZONE, formatDate, locale, t } from './i18n.js'
@@ -79,7 +79,7 @@ export async function request(path, { method = 'GET', body, query, auth = true, 
   try {
     response = await fetch(url, { method, headers, body: body === undefined ? undefined : isForm ? body : JSON.stringify(body) })
   } catch {
-    throw new ApiError('Could not reach Marketeer. Check your connection and try again.', 0)
+    throw new ApiError('Could not reach macher.ki. Check your connection and try again.', 0)
   }
   if (response.status === 401 && auth && retry && session.refresh()) {
     if (await refreshSession()) return request(path, { method, body, query, auth, retry: false, raw })
