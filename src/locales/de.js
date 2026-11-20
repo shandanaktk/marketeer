@@ -1662,4 +1662,5 @@ export default {
   'UI accent': 'UI-Akzent',
   'Dark mode': 'Dark Mode',
   'Too neutral for the logo — macher Lime is used instead.': 'Zu neutral für das Logo – stattdessen wird macher Lime verwendet.',
+  'Brand colour taken from your logo: {color}. You can change it in the Knowledge Base.': 'Markenfarbe aus Ihrem Logo übernommen: {color}. Sie können sie in der Wissensbasis ändern.',
 }

@@ -515,7 +515,7 @@ html[data-theme] .ob-primary {
 }
 html[data-theme] .db-button:not(.secondary):not(.ghost):not(.soft):not(.danger):hover,
 html[data-theme] .ob-primary:hover { background: var(--mk-lime-deep) !important; }
-html[data-theme] .db-nav-group > button.active { background: #b9dc201f; }
+html[data-theme] .db-nav-group > button.active { background: color-mix(in srgb,var(--db-lime) 12.2%,transparent); }
 html[data-theme] .db-nav-group > button.active::before { background: var(--mk-lime); }
 html[data-theme] .db-progress i,
 html[data-theme] .db-nav-group > button.active > span { background: var(--mk-lime); }
@@ -556,9 +556,9 @@ html[data-theme='light'] .ob-onboarding-page :is(.ob-choice-card.selected>em,.ob
   color: #151514;
   background: var(--mk-lime);
 }
-.db-creative-art::before { background: linear-gradient(155deg, #b9dc20 0%, #151514 78%); }
+.db-creative-art::before { background: linear-gradient(155deg, var(--db-lime) 0%, #151514 78%); }
 .db-creative-art.blue::before { background: linear-gradient(155deg, #00b2ff, #151514 82%); }
-.db-creative-art.violet::before { background: linear-gradient(155deg, #b9dc20, #151514 72%); }
+.db-creative-art.violet::before { background: linear-gradient(155deg, var(--db-lime), #151514 72%); }
 /* A generated image is shown, not covered: no colour plate when the creative has a photo. */
 .db-creative-art.has-image::before { content: none; display: none; background: none; }
 .db-optimize-page { --db-lime: #b9dc20; --db-blue: #00b2ff; }

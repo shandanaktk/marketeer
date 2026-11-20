@@ -16,21 +16,21 @@
 .db-connect-list b { font-size: 14px; }
 .db-connect-list small { margin-top: 3px; color: var(--db-copy-faint); font-size: 12px; }
 .db-permission-note { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 16px 18px; }
-.db-permission-note > span { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; border-radius: 10px; color: #b9dc20; background: rgba(185, 220, 32,.12); }
+.db-permission-note > span { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; border-radius: 10px; color: var(--db-lime); background: color-mix(in srgb,var(--db-lime) 12%,transparent); }
 .db-permission-note h3 { margin: 0 0 3px; font-size: 14px; }
 .db-permission-note p { margin: 0; color: var(--db-copy-faint); font-size: 13px; }
 .db-settings-layout { display: grid; grid-template-columns: 220px minmax(0,1fr); gap: 14px; align-items: start; }
 .db-settings-layout > nav { position: sticky; top: 86px; display: grid; gap: 4px; padding: 8px; }
 .db-settings-layout > nav button { display: flex; min-height: 42px; align-items: center; gap: 8px; padding: 0 12px; border: 0; border-radius: 10px; color: var(--db-copy-faint); font-size: 13px; font-weight:600; text-align: left; background: transparent; }
-.db-settings-layout > nav button.active { color: #f4f2ec; background: #b9dc20; }
+.db-settings-layout > nav button.active { color: #f4f2ec; background: var(--db-lime); }
 .db-settings-layout > .db-card { padding: 22px; }
 .db-settings .db-pref-list { display: grid; }
 .db-settings .db-pref-list .db-toggle-row { min-height: 74px; padding: 14px 0; border: 0; border-bottom: 1px solid var(--db-stroke); border-radius: 0; background: transparent; }
 .db-settings .db-pref-list .db-toggle-row:last-child { border-bottom: 0; }
 .db-settings .db-pref-list .db-toggle-row.on { background: transparent; }
-html[data-theme] .db-settings .db-toggle-row.on .db-toggle { background: #b9dc20; }
+html[data-theme] .db-settings .db-toggle-row.on .db-toggle { background: var(--db-lime); }
 html[data-theme] .db-settings .db-toggle-row.on .db-toggle i { background: #f4f2ec; }
-html[data-theme] .db-settings .db-section-heading > span { color: #b9dc20; background: rgba(185, 220, 32,.12); }
+html[data-theme] .db-settings .db-section-heading > span { color: var(--db-lime); background: color-mix(in srgb,var(--db-lime) 12%,transparent); }
 .db-invite-row { display: grid; grid-template-columns: minmax(0,1.4fr) 160px auto; gap: 10px; align-items: end; margin-bottom: 8px; }
 .db-invite-row .db-button { margin-bottom: 2px; }
 .db-member-list { display: grid; }
@@ -45,7 +45,7 @@ html[data-theme] .db-settings .db-section-heading > span { color: #b9dc20; backg
   .db-connect-meta,.db-connect-facts,.db-invite-row { grid-template-columns: 1fr; }
   .db-connect-actions { flex-wrap: wrap; }
 }
-.db-toast { position: fixed; z-index: 150; right: 22px; bottom: 22px; display: flex; width: min(370px,calc(100vw - 30px)); min-height: 54px; align-items: center; gap: 10px; padding: 10px 11px; border: 1px solid rgba(185, 220, 32,.2); border-radius: 13px; color: #fff; background: rgba(22,24,20,.96); box-shadow: 0 20px 50px rgba(0,0,0,.45); backdrop-filter: blur(18px); animation: db-toast-in .35s ease both; }.db-toast > span { display: grid; width: 31px; height: 31px; place-items: center; border-radius: 8px; color:var(--db-on,#151514); background: var(--db-lime); }.db-toast p { flex: 1; margin: 0; color: #fff; font-size: 12.5px; line-height: 1.4; }.db-toast > button { display: grid; width: 27px; height: 27px; place-items: center; border: 0; color: #fff; background: transparent; }.db-toast.error { border-color: rgba(216,49,91,.24); }.db-toast.error > span { color: var(--app-ink); background: var(--db-orange); }
+.db-toast { position: fixed; z-index: 150; right: 22px; bottom: 22px; display: flex; width: min(370px,calc(100vw - 30px)); min-height: 54px; align-items: center; gap: 10px; padding: 10px 11px; border: 1px solid color-mix(in srgb,var(--db-lime) 20%,transparent); border-radius: 13px; color: #fff; background: rgba(22,24,20,.96); box-shadow: 0 20px 50px rgba(0,0,0,.45); backdrop-filter: blur(18px); animation: db-toast-in .35s ease both; }.db-toast > span { display: grid; width: 31px; height: 31px; place-items: center; border-radius: 8px; color:var(--db-on,#151514); background: var(--db-lime); }.db-toast p { flex: 1; margin: 0; color: #fff; font-size: 12.5px; line-height: 1.4; }.db-toast > button { display: grid; width: 27px; height: 27px; place-items: center; border: 0; color: #fff; background: transparent; }.db-toast.error { border-color: rgba(216,49,91,.24); }.db-toast.error > span { color: var(--app-ink); background: var(--db-orange); }
 @keyframes db-toast-in { from { opacity: 0; transform: translateY(15px); } }
 
 /* Inline selectors for multi-account Meta and publishing connections. */

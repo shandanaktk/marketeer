@@ -143,6 +143,54 @@ export function pickClientColor(colors = []) {
   return (Array.isArray(colors) ? colors : [colors]).find((color) => parseHex(color) && !isNeutral(color)) || null
 }
 
+/**
+ * The client colour taken from the logo itself (File/Blob or same-origin URL).
+ * Pixels that are transparent, near-white, near-black or neutral are ignored; the hue family
+ * that covers most of the logo wins. Resolves null for a neutral (black/white/grey) logo, so
+ * the brand rules fall back to Lime.
+ */
+export async function colorFromImage(source) {
+  if (typeof document === 'undefined' || !source) return null
+  const url = typeof source === 'string' ? source : URL.createObjectURL(source)
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => resolve(img)
+      img.onerror = reject
+      img.src = url
+    })
+    const natural = [image.naturalWidth || 96, image.naturalHeight || 96]
+    const scale = Math.min(1, 96 / Math.max(...natural))
+    const [width, height] = natural.map((side) => Math.max(1, Math.round(side * scale)))
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    context.drawImage(image, 0, 0, width, height)
+    const { data } = context.getImageData(0, 0, width, height)
+    const families = new Map()
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 200) continue
+      const rgb = [data[i] / 255, data[i + 1] / 255, data[i + 2] / 255]
+      const { L, C, H } = rgbToOklch(rgb)
+      if (C < NEUTRAL_CHROMA || L > 0.96 || L < 0.12) continue
+      const key = Math.round(((H * 180) / Math.PI + 360) % 360 / 20) % 18
+      const family = families.get(key) || { weight: 0, sum: [0, 0, 0] }
+      family.weight += C
+      rgb.forEach((c, index) => { family.sum[index] += c * C })
+      families.set(key, family)
+    }
+    let best = null
+    families.forEach((family) => { if (!best || family.weight > best.weight) best = family })
+    return best ? toHex(best.sum.map((c) => c / best.weight)) : null
+  } catch {
+    return null
+  } finally {
+    if (typeof source !== 'string') URL.revokeObjectURL(url)
+  }
+}
+
 const TOKEN_VARS = { logo: '--client-logo', ui: '--client-ui', dark: '--client-dark', on: '--client-on', onDark: '--client-on-dark' }
 
 /** Write the tokens as CSS custom properties (default: on <html>). Pass null to reset to Lime. */

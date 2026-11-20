@@ -447,3 +447,23 @@ html[data-theme='light'] :is(.ob-auth-story h1 em, .ob-screen-heading h1 em, .ob
 .global-controls .theme-button { background: var(--app-panel); color: var(--app-ink); border: 1px solid var(--app-line); }
 html[data-theme] .db-dashboard .db-nav-group > button > i { background: var(--db-lime); color: var(--db-on); }
 html[data-theme] .db-dashboard .db-top-actions .lang-switch button.active { background: var(--db-lime); color: var(--db-on); }
+
+/* ── Colour logic clean-up (client-colour rules) ─────────────────────────────────────────────
+   Public site + onboarding = macher Lime. Dashboard accents = var(--db-lime), which carries the
+   client colour (or Lime as fallback). Red is reserved for real states only: errors, failed,
+   delete, disconnected, «required». No decorative or accent red anywhere. */
+:is(.ob-auth-story h1 em, .ob-screen-heading h1 em) { color: var(--macher-lime); }
+.loader-orbit i:nth-child(3) { border-color: rgba(185, 220, 32, .35); }
+.mk-feed-pills > i:nth-child(2) { background: var(--macher-graphite); }
+.ob-goal-card.orange { --goal-tone: 125, 150, 2; }
+.ob-confetti i:nth-child(2), .ob-confetti i:nth-child(7) { background: var(--macher-stone); }
+.db-icon-button > i { background: var(--db-lime); }
+.db-metric-grid.overview article:is(.orange, .pink) .db-metric-icon { color: var(--db-lime); background: color-mix(in srgb, var(--db-lime) 10%, transparent); }
+html[data-theme='light'] .db-metric-grid.overview article:is(.orange, .pink) .db-metric-icon { color: #151514; background: #eef1f4; }
+.db-source-tag.client { color: var(--db-lime); background: color-mix(in srgb, var(--db-lime) 12%, transparent); }
+.db-template-choice.highlight { border-color: color-mix(in srgb, var(--db-lime) 60%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--db-lime) 14%, transparent); }
+.db-spark-fill-stop { stop-color: var(--db-lime); }
+.ob-logo-color { display: flex; align-items: center; gap: 9px; margin-top: 14px; color: var(--app-muted); font-size: 13px; }
+.ob-logo-color > i { width: 16px; height: 16px; flex: 0 0 auto; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); }
+/* Headlines stay in the neutral text colour — the client colour is for accents, not copy. */
+html[data-theme] .db-dashboard .db-overview-hero h1 em { color: var(--app-muted); }

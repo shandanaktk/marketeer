@@ -23,6 +23,8 @@ export const session = {
   clear() {
     window.localStorage.removeItem(ACCESS)
     window.localStorage.removeItem(REFRESH)
+    // The cached workspace colour belongs to this account; the next sign-in starts from Lime.
+    window.localStorage.removeItem('macher-client-color')
   },
   active: () => Boolean(window.localStorage.getItem(ACCESS) || window.localStorage.getItem(REFRESH)),
 }

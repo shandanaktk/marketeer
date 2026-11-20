@@ -5,7 +5,7 @@ import Dashboard from './Dashboard.jsx'
 import { ThemeButton } from './theme.jsx'
 import { AppBrand, CLAIM, MacherLogo, PoweredBy } from './MacherBrand.jsx'
 import { WHITE_LABEL } from './brandConfig.js'
-import { clientTokens, pickClientColor } from './clientColors.js'
+import { clientTokens, colorFromImage, pickClientColor } from './clientColors.js'
 import { COUNTRIES, RADII, isCountry } from './countries.js'
 import {
   completeOnboarding, connectChannel, disconnectChannel, getChannels, getMe, getOnboarding, initialsOf,
@@ -545,6 +545,7 @@ function LogoStep({ data, setData, onBack, onContinue, busy }) {
   const [logoName, setLogoName] = useState('')
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+  const [logoColor, setLogoColor] = useState('')
   const handleLogo = async (event) => {
     const file = event.target.files?.[0]
     if (!file) return
@@ -552,8 +553,13 @@ function LogoStep({ data, setData, onBack, onContinue, busy }) {
     setUploading(true)
     setError('')
     try {
-      const stored = await uploadMedia(file)
-      setData({ ...data, logo: stored.url, logoOnPosts: true })
+      const [stored, found] = await Promise.all([uploadMedia(file), colorFromImage(file)])
+      // Client-colour rules: without a saturated brand colour yet (default/Lime or only neutrals),
+      // the logo's own colour becomes the client colour. A colour the client picked is kept.
+      const adopt = found && clientTokens(pickClientColor(data.colors)).fallback
+      const colors = adopt ? [found, ...data.colors.filter((color) => color.toUpperCase() !== found && color.toUpperCase() !== '#B9DC20')].slice(0, 6) : data.colors
+      setLogoColor(adopt ? found : '')
+      setData({ ...data, logo: stored.url, logoOnPosts: true, colors })
     } catch (failure) {
       setError(failure.message)
       setLogoName('')
@@ -587,6 +593,7 @@ function LogoStep({ data, setData, onBack, onContinue, busy }) {
           <small>{t('Preview of a generated feed post')}</small>
         </div>
       </div>
+      {logoColor && <p className="ob-logo-color"><i style={{ background: logoColor }} />{t('Brand colour taken from your logo: {color}. You can change it in the Knowledge Base.', { color: logoColor })}</p>}
       {error && <p className="ob-form-error" role="alert">{error}</p>}
       <FooterActions onBack={onBack} skipLabel={data.logo ? '' : t('I’ll add it later')} onSkip={onContinue} busy={busy || uploading} />
     </form>

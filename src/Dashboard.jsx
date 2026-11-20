@@ -57,7 +57,7 @@ function sparkGeometry(raw) {
 
 function Sparkline({ id, values }) {
   const { width, height, line, area, end } = sparkGeometry(values)
-  return <div className="db-sparkline"><svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#b9dc20" stopOpacity="0.22" /><stop offset="100%" stopColor="#b9dc20" stopOpacity="0" /></linearGradient></defs><path className="db-spark-fill" d={area} fill={`url(#${id})`} /><path className="db-spark-line" d={line} /></svg><i style={{ top: `${(end[1] / height) * 100}%` }} /></div>
+  return <div className="db-sparkline"><svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop className="db-spark-fill-stop" offset="0%" stopOpacity="0.22" /><stop className="db-spark-fill-stop" offset="100%" stopOpacity="0" /></linearGradient></defs><path className="db-spark-fill" d={area} fill={`url(#${id})`} /><path className="db-spark-line" d={line} /></svg><i style={{ top: `${(end[1] / height) * 100}%` }} /></div>
 }
 
 const CLIENT_COLOR_KEY = 'macher-client-color'
