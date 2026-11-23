@@ -467,3 +467,30 @@ html[data-theme='light'] .db-metric-grid.overview article:is(.orange, .pink) .db
 .ob-logo-color > i { width: 16px; height: 16px; flex: 0 0 auto; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); }
 /* Headlines stay in the neutral text colour — the client colour is for accents, not copy. */
 html[data-theme] .db-dashboard .db-overview-hero h1 em { color: var(--app-muted); }
+
+/* ── States: red only for real problems ───────────────────────────────────────────────────
+   Workflow states (paused, ready, in review, required, needs attention) and notices are
+   neutral stone/graphite — part of the macher.ki system, independent of the client colour.
+   Red stays for failures, errors, destructive hover and a broken connection. */
+html[data-theme] .db-dashboard .db-badge.orange { color: #e4e0d6; background: rgba(207, 203, 193, .1); border-color: rgba(207, 203, 193, .3); }
+html[data-theme='light'] .db-dashboard .db-badge.orange { color: #4a4843; background: #ece9e1; border-color: #d3cec2; }
+html[data-theme='light'] .db-dashboard .db-badge.red { color: #b3263f; background: rgba(216, 49, 91, .08); border-color: rgba(216, 49, 91, .25); }
+html[data-theme] .db-dashboard .db-status-menu i:is(.paused) { background: #a39f95; }
+html[data-theme] .db-dashboard .db-status-menu i:is(.contacted) { background: var(--db-lime); }
+html[data-theme] .db-dashboard .db-rec-icon.pause { color: var(--app-muted); background: rgba(var(--app-contrast-rgb), .06); }
+
+html[data-theme] .db-dashboard .db-warning { border-color: var(--app-line); color: var(--app-muted); background: rgba(var(--app-contrast-rgb), .035); }
+html[data-theme] .db-dashboard .db-warning.is-error { border-color: rgba(216, 49, 91, .25); color: #f3b3c4; background: rgba(216, 49, 91, .07); }
+html[data-theme='light'] .db-dashboard .db-warning.is-error { color: #b3263f; }
+html[data-theme] .db-dashboard .db-employment-note { border-color: var(--app-line); color: var(--app-muted); background: rgba(var(--app-contrast-rgb), .035); }
+html[data-theme] .db-dashboard .db-employment-note b { color: var(--app-ink); }
+html[data-theme] .ob-employment-lock { border-color: var(--app-line); background: rgba(var(--app-contrast-rgb), .035); }
+
+/* Delete / remove icons: quiet at rest, red only on hover. */
+html[data-theme] .db-dashboard :is(.db-uploaded-asset > button, .db-question-list > div button, .db-template-grid footer > button:last-child, .db-asset-grid > article > div > button) { color: var(--app-muted); }
+html[data-theme] .db-dashboard :is(.db-uploaded-asset > button, .db-question-list > div button) { background: rgba(var(--app-contrast-rgb), .05); }
+html[data-theme] .db-dashboard :is(.db-uploaded-asset > button, .db-question-list > div button, .db-template-grid footer > button:last-child, .db-asset-grid > article > div > button):hover { color: #d8315b; }
+/* The old palette's second accent (sky blue) follows the client colour too: links, AI markers,
+   progress. Only the creative colour picker keeps a real blue swatch — that is a content choice. */
+html[data-theme] .db-dashboard, html[data-theme] .db-dashboard .db-optimize-page { --db-blue: var(--db-lime); }
+html[data-theme] .db-dashboard .db-color-options button.blue { background: #00b2ff; }

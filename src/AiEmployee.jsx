@@ -24,7 +24,7 @@ function ContentLane({ status, onToggle, onRun, busy }) {
     <p className="db-helper">{content.state.last_run_at
       ? t('Last cycle {when}: {created} new posts. Next cycle {next}.', { when: relativeTime(content.state.last_run_at), created: last?.created ?? 0, next: content.enabled && content.state.next_run_at ? formatDateTime(content.state.next_run_at) : t('paused') })
       : t('The first cycle runs as soon as setup is complete.')}</p>
-    {last?.errors?.length > 0 && <p className="db-warning">{last.errors.slice(0, 2).join(' · ')}</p>}
+    {last?.errors?.length > 0 && <p className="db-warning is-error">{last.errors.slice(0, 2).join(' · ')}</p>}
     {missing.length > 0 && <p className="db-warning">{t('Connect {channels} in Connections so approved posts can publish.', { channels: missing.join(', ') })}</p>}
     <footer><span>{content.requires_approval ? t('Every post waits for your approval.') : t('Posts publish automatically at their slot.')}</span><Button variant="secondary" icon="refresh" disabled={running || busy === 'run' || !content.enabled} onClick={onRun}>{running ? t('Working…') : t('Run now')}</Button></footer>
   </article>
@@ -52,7 +52,7 @@ function PostRow({ post, onApprove, onEdit, onRegenerate, busy }) {
       <span className="db-review-meta"><Badge tone="blue">{t(record.format)}</Badge>{record.scheduled_at ? formatDateTime(record.scheduled_at) : t('No slot')}{record.platforms.map((platform) => <ChannelLogo platform={platform} key={platform} />)}</span>
       <b>{record.title}</b>
       <p>{post.regenerating ? t('Writing a fresh version…') : excerpt(record.caption)}</p>
-      {record.error && <small className="db-warning">{record.error}</small>}
+      {record.error && <small className="db-warning is-error">{record.error}</small>}
     </div>
     <div className="db-review-actions">
       <Button icon="check" disabled={Boolean(busy) || post.regenerating} onClick={onApprove}>{busy === 'approve' ? t('Approving…') : t('Approve')}</Button>
@@ -149,7 +149,7 @@ export function AiEmployee({ onGo, notify }) {
       <header><div><span className="db-eyebrow">{t('Review queue')}</span><h2>{t('Needs your approval')}</h2></div><div>{waiting > 0 && <Badge tone="blue">{t('{n} waiting', { n: waiting })}</Badge>}{posts.length > 1 && <Button icon="check" disabled={Boolean(busy)} onClick={approveAll}>{busy === 'all' ? t('Approving…') : t('Approve all posts')}</Button>}</div></header>
       {campaigns.map((vacancy) => <CampaignRow key={vacancy.id} vacancy={vacancy} onRetry={() => retry(vacancy)} onRelaunch={() => relaunch(vacancy)} busy={busy === `draft-${vacancy.id}`} />)}
       {posts.map((post) => <PostRow key={post.id} post={post} busy={busy === `approve-${post.id}` ? 'approve' : busy === `regen-${post.id}` ? 'regen' : ''} onApprove={() => approve(post)} onEdit={() => onGo('create', toPostRecord(post))} onRegenerate={() => regenerate(post)} />)}
-      {failed.map((post) => <article className="db-review-row" key={post.id}><div className="db-review-thumb">{post.image ? <img src={post.image} alt="" /> : <CreativeArt compact palette={post.palette} theme={post.title.toUpperCase()} />}</div><div className="db-review-body"><span className="db-review-meta"><Badge tone="orange">{t('Publishing failed')}</Badge>{formatDate(post.updated_at)}</span><b>{post.title}</b><small className="db-warning">{post.error}</small></div><div className="db-review-actions"><Button variant="secondary" icon="edit" onClick={() => onGo('create', toPostRecord(post))}>{t('Fix & publish')}</Button></div></article>)}
+      {failed.map((post) => <article className="db-review-row" key={post.id}><div className="db-review-thumb">{post.image ? <img src={post.image} alt="" /> : <CreativeArt compact palette={post.palette} theme={post.title.toUpperCase()} />}</div><div className="db-review-body"><span className="db-review-meta"><Badge tone="red">{t('Publishing failed')}</Badge>{formatDate(post.updated_at)}</span><b>{post.title}</b><small className="db-warning">{post.error}</small></div><div className="db-review-actions"><Button variant="secondary" icon="edit" onClick={() => onGo('create', toPostRecord(post))}>{t('Fix & publish')}</Button></div></article>)}
       {!campaigns.length && !posts.length && !failed.length && <p className="db-helper db-review-empty"><Icon name="check" size={15} /> {t('All caught up. New posts for approval and campaigns that need you appear here.')}</p>}
     </section>
   </>

@@ -483,7 +483,7 @@ export function ContentCalendar({ notify, onGo, adsConnected = false }) {
       {selected && <Modal title={selected.title || selected.name} onClose={() => setSelected(null)} footer={<><Button variant="ghost" onClick={() => setSelected(null)}>{t('Close')}</Button>{campaignOpen ? <Button icon="arrow" onClick={() => { setSelected(null); onGo('campaigns') }}>{t('View campaign')}</Button> : <Button icon="edit" onClick={() => { setSelected(null); onGo('create', selected) }}>{t('Edit post')}</Button>}</>}>
         <div className="db-calendar-popover">
           {selected.image ? <img className="db-cal-modal-shot" src={selected.image} alt="" /> : <CreativeArt palette={selected.palette} theme={(selected.title || selected.name).toUpperCase().replace(' ', ' / ')} compact />}
-          <Badge tone={campaignOpen ? 'blue' : selected.status === 'published' ? 'lime' : selected.status === 'failed' ? 'orange' : 'blue'}>{campaignOpen ? t(selected.delivery) : statusLabel(selected.status)}</Badge>
+          <Badge tone={campaignOpen ? 'blue' : selected.status === 'published' ? 'lime' : selected.status === 'failed' ? 'red' : 'blue'}>{campaignOpen ? t(selected.delivery) : statusLabel(selected.status)}</Badge>
           {campaignOpen ? <p>{prettyDay(selected.start)} – {selected.end ? prettyDay(selected.end) : t('ongoing')} · {money(selected.budget, currency, 0)}{t('/day')} · {selected.leads} {t('leads')}</p> : <p>{prettyDay(selected.date)} {t('at')} {selected.time}{selected.format ? ` · ${t(selected.format)}` : ''}</p>}
           {!campaignOpen && <div>{selected.platforms.map((platform) => <span key={platform}><img src={channelLogo(platform)} alt="" /> {platform}</span>)}</div>}
         </div>
