@@ -494,3 +494,18 @@ html[data-theme] .db-dashboard :is(.db-uploaded-asset > button, .db-question-lis
    progress. Only the creative colour picker keeps a real blue swatch — that is a content choice. */
 html[data-theme] .db-dashboard, html[data-theme] .db-dashboard .db-optimize-page { --db-blue: var(--db-lime); }
 html[data-theme] .db-dashboard .db-color-options button.blue { background: #00b2ff; }
+
+/* Knowledge Base · workspace colour */
+.db-kb-workspace-color { display: grid; gap: 12px; margin: 4px 0 22px; padding: 16px; border: 1px solid var(--db-stroke); border-radius: 14px; background: var(--db-panel-soft); }
+.db-kb-workspace-color > header { display: grid; gap: 3px; }
+.db-kb-workspace-color > header b { font-size: 14px; font-weight: 600; }
+.db-kb-workspace-color > header small { color: var(--app-muted); font-size: 12.5px; line-height: 1.45; }
+.db-kb-workspace-color > div { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.db-kb-workspace-color > div > span { display: grid; gap: 2px; margin-right: auto; }
+.db-kb-workspace-color > div > span b { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.db-kb-workspace-color > div > span small { color: var(--app-muted); font-size: 12px; }
+.db-kb-workspace-swatch { position: relative; width: 42px; height: 42px; flex: 0 0 auto; overflow: hidden; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); cursor: pointer; }
+.db-kb-workspace-swatch input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.db-kb-workspace-line { display: flex; align-items: center; gap: 7px; margin: 10px 0 0; color: var(--app-muted); font-size: 12.5px; }
+.db-kb-workspace-line > i { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); }
+.db-kb-workspace-line > b { color: var(--app-ink); font-weight: 600; }

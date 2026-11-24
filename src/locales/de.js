@@ -1663,4 +1663,11 @@ export default {
   'Dark mode': 'Dark Mode',
   'Too neutral for the logo — macher Lime is used instead.': 'Zu neutral für das Logo – stattdessen wird macher Lime verwendet.',
   'Brand colour taken from your logo: {color}. You can change it in the Knowledge Base.': 'Markenfarbe aus Ihrem Logo übernommen: {color}. Sie können sie in der Wissensbasis ändern.',
+  'Workspace colour': 'Arbeitsbereich-Farbe',
+  'Set manually.': 'Manuell festgelegt.',
+  'Taken from your logo.': 'Aus Ihrem Logo übernommen.',
+  'Taken from your first brand colour.': 'Aus Ihrer ersten Markenfarbe übernommen.',
+  'No saturated brand colour, so macher Lime is used.': 'Keine kräftige Markenfarbe vorhanden, daher wird macher Lime verwendet.',
+  'Used for the logo head and dot, buttons, tabs and active states in macher.ki. Unless you set it here, it follows your logo, or your first brand colour if the logo cannot be read.': 'Wird für Kopf und Punkt im Logo, Buttons, Tabs und aktive Zustände in macher.ki verwendet. Ohne Festlegung hier folgt sie Ihrem Logo – oder Ihrer ersten Markenfarbe, wenn das Logo nicht gelesen werden kann.',
+  'Use logo colour': 'Logofarbe verwenden',
 }

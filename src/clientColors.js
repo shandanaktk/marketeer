@@ -1,12 +1,17 @@
 // Client colours — macher.ki Brand Guidelines v2, section 03.
 //
-// 1. Input: a hex colour from onboarding (or the first saturated colour of the brand palette).
+// 1. Input, in this order (resolveClientColor):
+//    a. the workspace colour set explicitly in the Knowledge Base (visual.clientColor),
+//    b. the dominant colour of the client's logo,
+//    c. the first saturated colour of the brand palette (onboarding / website scan).
 // 2. Convert to OKLCH. Only L is ever changed — the hue stays untouched.
 // 3. Neutral check: C < 0.045 (grey, black, white, pastel) → fall back to macher Lime.
 // 4. WCAG contrast against the background: logo head ≥ 1.5 : 1 · UI accent ≥ 3 : 1.
 // 5. Adjust: lower L in steps of 0.015 (light mode) or raise it (dark mode) until the ratio
 //    is met. Out of sRGB gamut → reduce chroma.
 // 6. Store 4 tokens: client.logo · client.ui · client.dark · client.on.
+
+import { useEffect, useState } from 'react'
 
 export const BRAND = {
   lime: '#B9DC20', // own head + dot
@@ -207,3 +212,48 @@ export function clearClientColors(element = typeof document !== 'undefined' ? do
   Object.values(TOKEN_VARS).forEach((name) => element.style.removeProperty(name))
   delete element.dataset.clientColor
 }
+
+/**
+ * Which colour drives the workspace, and why. An explicit choice always wins; then the logo
+ * (the client's own mark); then the first saturated palette colour. Website-scan colours sit in
+ * that palette, so a minor accent from a website can no longer outrank the logo.
+ * `source`: 'manual' | 'logo' | 'colors' | 'lime'.
+ */
+export function resolveClientColor({ explicit = '', logo = '', colors = [] } = {}) {
+  const manual = parseHex(explicit)
+  if (manual) return { color: toHex(manual), source: 'manual' }
+  if (parseHex(logo) && !isNeutral(logo)) return { color: toHex(parseHex(logo)), source: 'logo' }
+  const first = pickClientColor(colors)
+  return first ? { color: toHex(parseHex(first)), source: 'colors' } : { color: null, source: 'lime' }
+}
+
+// The logo colour is read in the browser (canvas). The result is cached per logo URL so the
+// first paint already carries it. '' = the logo was read but is neutral or not readable (CORS).
+export const LOGO_COLOR_KEY = 'macher-logo-color'
+function readLogoCache(url) {
+  try {
+    const cached = JSON.parse(window.localStorage.getItem(LOGO_COLOR_KEY) || 'null')
+    return cached && cached.url === url ? cached.color : null
+  } catch { return null }
+}
+function writeLogoCache(url, color) {
+  try { window.localStorage.setItem(LOGO_COLOR_KEY, JSON.stringify({ url, color: color || '' })) } catch { /* storage unavailable */ }
+}
+
+/** The dominant colour of the logo at `url` (null while unknown, '' when there is none). */
+export function useLogoColor(url) {
+  const [state, setState] = useState(() => ({ url, color: url ? readLogoCache(url) : '' }))
+  useEffect(() => {
+    if (!url) return undefined
+    let alive = true
+    colorFromImage(url).then((color) => {
+      if (!alive) return
+      writeLogoCache(url, color)
+      setState({ url, color: color || '' })
+    })
+    return () => { alive = false }
+  }, [url])
+  if (!url) return ''
+  return state.url === url ? state.color : readLogoCache(url)
+}
+

@@ -9,7 +9,7 @@ import {
   relativeTime, saveSettings, selectChannel, setAdsSelection, toPostRecord, useResource,
 } from './api.js'
 import { BrandContext } from './brandContext.js'
-import { applyClientColors, clearClientColors, pickClientColor } from './clientColors.js'
+import { applyClientColors, clearClientColors, resolveClientColor, useLogoColor } from './clientColors.js'
 import { AppBrand, MacherLogo } from './MacherBrand.jsx'
 import { Badge, Button, ChannelLogo, CreativeArt, ErrorState, Field, Icon, LoadingState, PageIntro, Toggle } from './dashboardUI.jsx'
 import { KnowledgeBaseView, LogoUpload, ReportingView, VacanciesView } from './SrsWorkspace.jsx'
@@ -248,7 +248,10 @@ function Dashboard({ account, onNavigate, theme, onToggleTheme }) {
 
   // Co-branding level 1: the workspace colour becomes the head, dot and UI accent (client-colour rules).
   // The last colour is cached so the first paint already carries it (no Lime flash while loading).
-  const loadedColor = knowledge.data ? pickClientColor(knowledge.data?.data?.visual?.colors || knowledge.data?.data?.brand?.colors || []) || '' : null
+  // Order: explicit workspace colour → the logo's own colour → first saturated brand colour → Lime.
+  const kb = knowledge.data?.data
+  const logoColor = useLogoColor(kb?.brand?.logo || '')
+  const loadedColor = knowledge.data && logoColor !== null ? resolveClientColor({ explicit: kb?.visual?.clientColor, logo: logoColor, colors: kb?.visual?.colors || kb?.brand?.colors || [] }).color || '' : null
   const clientColor = loadedColor ?? readCachedClientColor()
   useEffect(() => {
     applyClientColors(clientColor || null)

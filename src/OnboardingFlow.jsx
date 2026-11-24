@@ -55,7 +55,7 @@ const platforms = [
 ]
 
 // Answers saved to the server between steps (credentials never are).
-const SAVED_KEYS = ['role', 'provider', 'businessName', 'industry', 'website', 'goals', 'logo', 'colors', 'voice', 'customVoice', 'description', 'postingPlatforms', 'postingFrequency', 'timezone', 'metaBudget', 'metaDuration', 'metaCountry', 'metaCity', 'metaRadius', 'connected', 'workspaceName', 'invites', 'logoPosition', 'logoSize', 'logoOnPosts']
+const SAVED_KEYS = ['role', 'provider', 'businessName', 'industry', 'website', 'goals', 'logo', 'colors', 'colorsSource', 'voice', 'customVoice', 'description', 'postingPlatforms', 'postingFrequency', 'timezone', 'metaBudget', 'metaDuration', 'metaCountry', 'metaCity', 'metaRadius', 'connected', 'workspaceName', 'invites', 'logoPosition', 'logoSize', 'logoOnPosts']
 const savable = (data) => Object.fromEntries(SAVED_KEYS.filter((key) => data[key] !== undefined).map((key) => [key, data[key]]))
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
 
@@ -362,6 +362,7 @@ function BusinessStep({ data, setData, onBack, onContinue, busy }) {
         scannedWebsite: data.website,
         description: data.description || (found.description || '').slice(0, 240),
         colors: (found.colors?.length && data.colors.join() === DEFAULT_COLORS.join()) ? [...found.colors, ...DEFAULT_COLORS].slice(0, Math.max(2, Math.min(4, found.colors.length + 1))) : data.colors,
+        colorsSource: (found.colors?.length && data.colors.join() === DEFAULT_COLORS.join()) ? 'scan' : data.colorsSource,
         logo: data.logo || found.logo_url || '',
         scanned: true,
       }
@@ -456,7 +457,7 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
   const updateColor = (index, value) => {
     const colors = [...data.colors]
     colors[index] = value
-    setData({ ...data, colors })
+    setData({ ...data, colors, colorsSource: 'user' })
   }
   useEffect(() => {
     if (paletteFor === null) return undefined
@@ -471,7 +472,7 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
     const next = color.toUpperCase()
     if (paletteFor === 'add') {
       if (data.colors.length >= 6 || data.colors.some((item) => item.toUpperCase() === next)) return
-      setData({ ...data, colors: [...data.colors, next] })
+      setData({ ...data, colors: [...data.colors, next], colorsSource: 'user' })
       return
     }
     if (typeof paletteFor === 'number') updateColor(paletteFor, next)
@@ -493,7 +494,7 @@ function BrandStep({ data, setData, onBack, onContinue, busy }) {
                 <div className="ob-color-chip" key={index}>
                   <button type="button" className={`ob-color-swatch ${paletteFor === index ? 'is-editing' : ''}`} style={{ background: color }} aria-label={t('Edit brand color {n}', { n: index + 1 })} onClick={() => setPaletteFor(index)} />
                   <input className="ob-color-hex" aria-label={t('Hex for brand color {n}', { n: index + 1 })} value={color} maxLength={7} onChange={(event) => updateColor(index, event.target.value.startsWith('#') ? event.target.value : `#${event.target.value}`)} />
-                  {data.colors.length > 2 && <button type="button" aria-label={t('Remove color {color}', { color })} onClick={() => setData({ ...data, colors: data.colors.filter((_, item) => item !== index) })}>×</button>}
+                  {data.colors.length > 2 && <button type="button" aria-label={t('Remove color {color}', { color })} onClick={() => setData({ ...data, colorsSource: 'user', colors: data.colors.filter((_, item) => item !== index) })}>×</button>}
                 </div>
               ))}
               {data.colors.length < 6 && <button className={`ob-color-add ${paletteFor === 'add' ? 'is-open' : ''}`} type="button" onClick={() => setPaletteFor(paletteFor === 'add' ? null : 'add')}><b>+</b><small>{t('Custom')}</small></button>}
@@ -554,12 +555,13 @@ function LogoStep({ data, setData, onBack, onContinue, busy }) {
     setError('')
     try {
       const [stored, found] = await Promise.all([uploadMedia(file), colorFromImage(file)])
-      // Client-colour rules: without a saturated brand colour yet (default/Lime or only neutrals),
-      // the logo's own colour becomes the client colour. A colour the client picked is kept.
-      const adopt = found && clientTokens(pickClientColor(data.colors)).fallback
+      // Client-colour rules: the logo's own colour becomes the client colour unless the client
+      // picked a brand colour themselves. Colours from the website scan do not outrank the logo
+      // (a website can carry minor accents that are not the brand colour).
+      const adopt = found && (data.colorsSource !== 'user' || clientTokens(pickClientColor(data.colors)).fallback)
       const colors = adopt ? [found, ...data.colors.filter((color) => color.toUpperCase() !== found && color.toUpperCase() !== '#B9DC20')].slice(0, 6) : data.colors
       setLogoColor(adopt ? found : '')
-      setData({ ...data, logo: stored.url, logoOnPosts: true, colors })
+      setData({ ...data, logo: stored.url, logoOnPosts: true, colors, ...(adopt ? { colorsSource: 'logo' } : {}) })
     } catch (failure) {
       setError(failure.message)
       setLogoName('')
